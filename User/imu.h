@@ -1,0 +1,121 @@
+/*
+ * imu.h
+ *
+ *  Created on: 2025Äê2ÔÂ25ÈÕ
+ *      Author: Reed
+ */
+
+#ifndef USER_IMU_H_
+#define USER_IMU_H_
+
+#include "i2c.h"
+#include "ns_com.h"
+#define LSM6DS3TRC_CTRL1_XL     0x10
+//Linear acceleration out data rate
+#define LSM6DS3TRC_ACC_RATE_0   0x00
+#define LSM6DS3TRC_ACC_RATE_1HZ6    0xB0
+#define LSM6DS3TRC_ACC_RATE_12HZ5   0x10
+#define LSM6DS3TRC_ACC_RATE_26HZ    0x20
+#define LSM6DS3TRC_ACC_RATE_52HZ    0x30
+#define LSM6DS3TRC_ACC_RATE_104HZ   0x40
+#define LSM6DS3TRC_ACC_RATE_208HZ   0x50
+#define LSM6DS3TRC_ACC_RATE_416HZ   0x60
+#define LSM6DS3TRC_ACC_RATE_833HZ   0x70
+#define LSM6DS3TRC_ACC_RATE_1660HZ  0x80
+#define LSM6DS3TRC_ACC_RATE_3330HZ  0x90
+#define LSM6DS3TRC_ACC_RATE_6660HZ  0xA0
+
+#define LSM6DS3TRC_CTRL2_G      0x11
+//Linear gyroscope out data rate
+#define LSM6DS3TRC_GYR_RATE_0   0x00
+#define LSM6DS3TRC_GYR_RATE_1HZ6    0xB0
+#define LSM6DS3TRC_GYR_RATE_12HZ5   0x10
+#define LSM6DS3TRC_GYR_RATE_26HZ    0x20
+#define LSM6DS3TRC_GYR_RATE_52HZ    0x30
+#define LSM6DS3TRC_GYR_RATE_104HZ   0x40
+#define LSM6DS3TRC_GYR_RATE_208HZ   0x50
+#define LSM6DS3TRC_GYR_RATE_416HZ   0x60
+#define LSM6DS3TRC_GYR_RATE_833HZ   0x70
+#define LSM6DS3TRC_GYR_RATE_1660HZ  0x80
+#define LSM6DS3TRC_GYR_RATE_3330HZ  0x90
+#define LSM6DS3TRC_GYR_RATE_6660HZ  0xA0
+
+#define LSM6DS3TRC_STATUS_REG   0x1E
+#define LSM6DS3TRC_OUTX_L_XL        0x28
+#define LSM6DS3TRC_OUTX_L_G     0x22
+#define LSM6DS3TRC_STATUS_TEMPERATURE   0x04
+#define LSM6DS3TRC_STATUS_GYROSCOPE     0x02
+#define LSM6DS3TRC_STATUS_ACCELEROMETER 0x01
+
+#define LSM6DS3TRC_CTRL8_XL     0x17
+//Accelerometer analog chain bandwidth
+#define LSM6DS3TRC_ACC_BW0XL_1500HZ 0x00
+#define LSM6DS3TRC_ACC_BW0XL_400HZ  0x00
+//Accelerometer bandwidth selection
+#define LSM6DS3TRC_ACC_LOW_PASS_ODR_50  0x88
+#define LSM6DS3TRC_ACC_LOW_PASS_ODR_100 0xA8
+#define LSM6DS3TRC_ACC_LOW_PASS_ODR_9   0xC8
+#define LSM6DS3TRC_ACC_LOW_PASS_ODR_400 0xE8
+
+#define LSM6DS3TRC_CTRL7_G      0x16
+#define LSM6DS3TRC_CTRL7_G_HM_MODE_ENABLE       0x00
+#define LSM6DS3TRC_CTRL7_G_HM_MODE_DISABLE  0x80
+#define LSM6DS3TRC_CTRL7_G_HP_EN_DISABLE        0x00
+#define LSM6DS3TRC_CTRL7_G_HP_EN_ENABLE     0x40
+#define LSM6DS3TRC_CTRL7_G_HPM_16MHZ    0x00
+#define LSM6DS3TRC_CTRL7_G_HPM_65MHZ    0x10
+#define LSM6DS3TRC_CTRL7_G_HPM_260MHZ   0x20
+#define LSM6DS3TRC_CTRL7_G_HPM_1HZ04    0x30
+#define LSM6DS3TRC_CTRL7_G_ROUNDING_STATUS_DISABLE  0x04
+#define LSM6DS3TRC_CTRL7_G_ROUNDING_STATUS_ENABLE   0x00
+
+#define LSM6DS3TRC_CTRL6_C      0x15
+#define LSM6DS3TRC_CTRL6_C_EDGE_TRIGGER 0x80
+#define LSM6DS3TRC_CTRL6_C_LEVEL_TRIGGER    0x40
+#define LSM6DS3TRC_CTRL6_C_LEVEL_LATCHED    0x60
+#define LSM6DS3TRC_CTRL6_C_LEVEL_FIFO   0xC0
+#define LSM6DS3TRC_CTRL6_C_XL_HM_MODE_ENABLE    0x00
+#define LSM6DS3TRC_CTRL6_C_XL_HM_MODE_DISABLE   0x10
+#define LSM6DS3TRC_CTRL6_C_FTYPE_1  0x00
+#define LSM6DS3TRC_CTRL6_C_FTYPE_2  0x01
+#define LSM6DS3TRC_CTRL6_C_FTYPE_3  0x02
+#define LSM6DS3TRC_CTRL6_C_FTYPE_4  0x03
+
+#define LSM6DS3TRC_CTRL4_C      0x13
+#define LSM6DS3TRC_CTRL4_DEN_XL_EN_DISABLE 0x00
+#define LSM6DS3TRC_CTRL4_DEN_XL_EN_ENABLE   0x80
+#define LSM6DS3TRC_CTRL4_SLEEP_ENABLE   0x40
+#define LSM6DS3TRC_CTRL4_SLEEP_DISABLE  0x00
+#define LSM6DS3TRC_CTRL4_DEN_DRDY_INT1_DISBALE  0x00
+#define LSM6DS3TRC_CTRL4_DEN_DRDY_INT1_ENABLE   0x20
+#define LSM6DS3TRC_CTRL4_DRDY_MASK_DISABLE  0x00
+#define LSM6DS3TRC_CTRL4_DRDY_MASK_ENABLE   0x08
+#define LSM6DS3TRC_CTRL4_I2C_DISABLE 0x04
+#define LSM6DS3TRC_CTRL4_I2C_ENABLE 0x00
+#define LSM6DS3TRC_CTRL4_LPF1_SELG_ENABLE   0x02
+#define LSM6DS3TRC_CTRL4_LPF1_SELG_DISABLE  0x00
+
+
+#define IMU_UPD_GAP (2500)
+#define IMU_FLASH_GAP (5000)
+#define IMU_ACC_SIZE (6)
+#define IMU_GYO_SIZE (6)
+#define IMU_RATIO_DIV (128.0f)
+
+extern int16_t imu_raw_buf[6];
+extern int16_t imu_res[6];
+extern uint8_t imu_upd_cnt;
+extern imu_report_pack imu_pack_buf[2];
+extern uint8_t imu_buf_pos;
+extern uint8_t imu_mode,imu_rdy;
+extern imu_pack* gyo_data;
+extern imu_pack* acc_data;
+extern float imu_ratio_xf,imu_ratio_yf,imu_ratio_zf;
+uint8_t imu_set_reg(uint8_t reg,uint8_t rate,uint8_t mask);
+void imu_upd();
+void set_imu_sleep();
+void set_imu_awake();
+uint8_t imu_read();
+void imu_init();
+
+#endif /* USER_IMU_H_ */

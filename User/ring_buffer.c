@@ -1,0 +1,60 @@
+/*
+ * ring_buffer.c
+ *
+ *  Created on: 2024Äê10ÔÂ15ÈÕ
+ *      Author: Reed
+ */
+
+#include "ring_buffer.h"
+#include "debug.h"
+#include <string.h>
+#include "uart_com.h"
+
+uint8_t ring_buffer_init(pring_buffer rb,uint8_t* buf,uint8_t cap,uint8_t pkt_size){
+    if(cap>RING_BUFFER_MAX_PKG_CNT)return -1;
+    if(!rb||!buf)return 1;
+    memset(rb,0,sizeof(ring_buffer));
+    rb->buf=buf;
+    rb->capcity=cap;
+    rb->top=1;
+    rb->end=0;
+    rb->full=0;
+    rb->pkt_size=pkt_size;
+    return 0;
+}
+
+uint8_t ring_buffer_push(pring_buffer rb,uint8_t* ptr,uint8_t len,uint8_t typ){
+    if(!rb||!ptr||!rb->buf)return -1;
+    if(rb->full||rb->capcity<=rb->size)return 1;
+    ck_uart_cap(100);
+    if(len>rb->pkt_size)len=rb->pkt_size;
+    ck_uart_cap(101);
+    ++rb->size;
+    ck_uart_cap(102);
+    ++rb->end;
+    ck_uart_cap(103);
+    if(rb->end>=rb->capcity)rb->end=0;
+    ck_uart_cap(104);
+    memcpy(&rb->buf[rb->pkt_size*rb->end],ptr,len);
+    if(!uart_tx_rb.capcity)
+        printf("ps:%d ed:%d cap:%d len:%d\r\n",rb->pkt_size,rb->end,rb->capcity,len);
+    ck_uart_cap(105);
+    rb->len[rb->end]=len;
+    ck_uart_cap(106);
+    rb->typ[rb->end]=typ;
+    ck_uart_cap(107);
+    if(rb->size>=rb->capcity)
+        rb->full=1;
+    ck_uart_cap(108);
+    return 0;
+}
+
+uint8_t ring_buffer_pop(pring_buffer rb){
+    if(!rb||!rb->buf)return -1;
+    if(rb->size==0)return 0;
+    --rb->size;
+    ++rb->top;
+    if(rb->top>=rb->capcity)rb->top=0;
+    if(rb->full)
+        rb->full=(uint8_t)(rb->capcity<=rb->size);
+}

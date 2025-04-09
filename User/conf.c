@@ -16,6 +16,7 @@
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
 user_config_data user_config;
+uint32_t joystick_snapback_deadzone_sq[2];
 static factory_configuration_flash_pack* fac;
 #define JOYSTICK_RANGE_FACTOR_LEFT (0.6f)
 #define JOYSTICK_RANGE_FACTOR_RIGHT (0.6f)
@@ -30,8 +31,7 @@ void conf_init()
     factory_configuration.FormatVersion=0x1;//use custom color/
 
     flash_read(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
-    if(user_calibration.nonexist)
-    {
+    if(user_calibration.nonexist){
         for(int i=0;i<4;++i)
             user_calibration.internal_center[i]=2048;
     }
@@ -65,7 +65,8 @@ void conf_init()
             user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
             user_config.dead_zone[i]=127;
         }
-        memset(user_config.joystick_offset,0,6);
+        user_config.joystick_snapback_deadzone[0]=1200;
+        user_config.joystick_snapback_deadzone[1]=1200;
         user_config.dead_zone_mode=1;
         user_config.rgb_cnt=27;
         for(int i=0;i<user_config.rgb_cnt;++i){
@@ -259,4 +260,6 @@ void conf_flush(){
     imu_ratio_xf=user_config.imu_ratio_x/127.0f;
     imu_ratio_yf=user_config.imu_ratio_y/127.0f;
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
+    joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
+    joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
 }

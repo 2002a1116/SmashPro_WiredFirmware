@@ -10,7 +10,7 @@
 
 #define IMU_I2C_TIMEOUT_US (500)
 #define IMU_I2C_EXECUTE_FUNC (uint8_t (*)(void*))
-#define IMU_I2C_MAX_RESET_ATTMEPT (3*9+1);
+#define IMU_I2C_MAX_RESET_ATTMEPT (9);
 
 #define IMU_SIZE (6)
 #define imu_raw_buf_SIZE (12)

@@ -68,9 +68,6 @@ void hd_rumble_init(uint8_t force_disable){
     TIM_OC2PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC4PreloadConfig(TIM3,TIM_OCPreload_Enable);
-    //TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Disable);
-    //TIM_OC2PreloadConfig(TIM3, TIM_OCPreload_Disable);
-    //TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Disable);
     TIM_ARRPreloadConfig(TIM3, DISABLE);
     TIM_SetCompare1(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
     TIM_SetCompare2(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);

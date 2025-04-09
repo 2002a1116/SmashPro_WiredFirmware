@@ -62,7 +62,6 @@ extern void encode_uart_pkt(uart_packet* pkt);
 extern void decode_uart_pkt(uart_packet* pkt);
 extern uint8_t check_uart_pkt(uart_packet* pkt);//if ok return false aka 0
 extern uint8_t send_uart_large(uint8_t* buf,uint8_t len,uint8_t typ);
-extern void ck_uart_cap(uint8_t id);
 
 extern uint8_t uart_rx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
 extern uint8_t uart_tx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];

@@ -169,26 +169,12 @@ void UART1_Tx_Service( void )
         //printf("txsd %d\r\n",uart_tx_rb.capcity);
     }
 }
-
-void ck_uart_cap(uint8_t id)
-{
-    return;
-    if(!uart_tx_rb.capcity){
-        printf("error at %d\r\n",id);
-        exit(0);
-        //Delay_Us(5000);
-        /*while(1){
-        }*/
-    }
-}
 int8_t rx_ptr=0;
 uint8_t rx_filter_buf[UART_PKG_SIZE];
 void UART1_Rx_Service( void )
 {
-    ck_uart_cap(20);
     uint16_t u16_temp;
     UART1_RX_CurCnt = DMA_GetCurrDataCounter(DMA1_Channel5);
-    ck_uart_cap(21);
     //printf("rx\r\n");// Get DMA remaining count
     if (UART1_RX_LastCnt != UART1_RX_CurCnt)
     {
@@ -214,25 +200,18 @@ void UART1_Rx_Service( void )
         }
         UART1_TimeOut = 0;
     }
-    ck_uart_cap(22);
     //printf("r2 %d\r\n",UART1_Rx_RemainLen);
     while(UART1_Rx_RemainLen)
     {
-        //printf("recv uart pkt len %d\r\n",UART1_Rx_RemainLen);
-        //printf("value 0x%02x POS %d\r\n",UART1_RxBuffer[UART1_Rx_Deal_Ptr],UART1_Rx_Deal_Ptr);
-        ck_uart_cap(23);
         if(UART1_RxBuffer[UART1_Rx_Deal_Ptr]&UART_PKG_HEADER_MASK)//HEADER
         {
             rx_ptr=1;
             rx_filter_buf[0]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
         }
         else if(rx_ptr>0){//join a packet
-            ck_uart_cap(24);
                 rx_filter_buf[rx_ptr++]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
-                ck_uart_cap(25);
                 while(rx_ptr>=UART_PKG_SIZE){//recive one
                     rx_ptr=0;
-                    ck_uart_cap(26);
                     //printf("uart pkt recved\r\n");
                     //printf("uart pkt cksum %d %d\r\n",((uart_packet*)rx_filter_buf)->cksum,
                     //        ((uart_packet*)rx_filter_buf)->header^UART_PKG_HEADER_MASK);
@@ -241,12 +220,9 @@ void UART1_Rx_Service( void )
                         //rx_ptr=0;
                         break;
                     }
-                    ck_uart_cap(27);
                     decode_uart_pkt((uart_packet*)rx_filter_buf);
-                    ck_uart_cap(28);
                     //printf("uart pkt decode typ %d\r\n",((uart_packet*)rx_filter_buf)->typ);
                     u16_temp=ring_buffer_push(&uart_rx_rb, rx_filter_buf, UART_PKG_SIZE, 0);
-                    ck_uart_cap(29);
                     if(u16_temp)
                         printf("uart push error:%d\r\n",u16_temp);
                     //printf("rb pushed\r\n");
@@ -263,7 +239,6 @@ void UART1_Rx_Service( void )
         }
     }
     //printf("rlen:%d\r\n",UART1_Rx_RemainLen);
-    ck_uart_cap(30);
     //printf("rx end\r\n");
 }
 

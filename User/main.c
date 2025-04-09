@@ -52,13 +52,11 @@
 
 void Var_Init(void)
 {
-    uint16_t i;
     RingBuffer_Comm.LoadPtr = 0;
     RingBuffer_Comm.StopFlag = 0;
     RingBuffer_Comm.DealPtr = 0;
     RingBuffer_Comm.RemainPack = 0;
-    for(i=0; i<DEF_Ring_Buffer_Max_Blks; i++)
-    {
+    for(uint16_t i=0; i<DEF_Ring_Buffer_Max_Blks; ++i){
         RingBuffer_Comm.PackLen[i] = 0;
     }
 }
@@ -73,7 +71,8 @@ uint32_t sts_button;
 void button_upd_all(){
     if(!top_trigger)
         sts_button=gpio_read_all();
-    //printf("sts:%d\r\n",sts_button);
+    else
+        sts_button=0;
 }
 int32_t adc_debounce[4];
 typedef struct{
@@ -89,9 +88,9 @@ int32_t i32_clamp(int32_t v,int32_t min,int32_t max){
     if(v>max)return max;
     return v;
 }
-#define SNAPBACK_DEADZONE_SQUARE (800*800)
 uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     static uint8_t set=0;
+    //deadzone is fixed
     switch(user_config.dead_zone_mode)
     {
     case 1:
@@ -111,6 +110,9 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     default:
         break;
     }
+    //snapback deadzone is influenced by joystick ratio,as its value is set by output x & y
+    x=(x*user_config.joystick_ratio[id*2])>>5;
+    y=(y*user_config.joystick_ratio[id*2+1])>>5;
 #if (PCB_TYPE==PCB_TYPE_MICRO)
     x=-x;
     y=-y;
@@ -118,7 +120,7 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     if(user_config.joystick_snapback_filter_max_delay){
         set=0;
         int32_t len_sq=x*x+y*y;
-        if(len_sq>=SNAPBACK_DEADZONE_SQUARE)
+        if(len_sq>=joystick_snapback_deadzone_sq[id])
             set=1;
         uint32_t timestamp=Get_Systick_US();
         if(!timestamp)++timestamp;
@@ -136,10 +138,12 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
             if(dp_sq>=0)
                 break;
             dp_sq*=dp_sq;
-            int64_t a_sq_b_sq=len_sq*js_snapback_samples[id].len_sq;
+            //int64_t a_sq_b_sq=len_sq*js_snapback_samples[id].len_sq;
             //float cos_sq=dp_sq/a_sq_b_sq;
             //cos_sq<0.8||cos_sq>(1/0.8)
-            if(dp_sq<0.4f*a_sq_b_sq)
+            //if(dp_sq<0.375f*a_sq_b_sq)
+            uint64_t a_sq_b_sq=(len_sq*js_snapback_samples[id].len_sq*3)>>3;
+            if(dp_sq<a_sq_b_sq)
                 break;
             //prob snapback
             //force center
@@ -156,22 +160,6 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
             js_snapback_samples[id].sample_timestamp=timestamp;
         }
     }
-    x=(x*user_config.joystick_ratio[id*2])>>5;
-    y=(y*user_config.joystick_ratio[id*2+1])>>5;
-    //user offset wont be infulenced by ratio
-    x+=user_config.joystick_offset[id].x;
-    y+=user_config.joystick_offset[id].y;
-    //x>>=5;
-    //y>>=5;
-    /*if(id){
-        y+=factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalY0;
-        x+=factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalX0;
-    }
-    else{
-        y+=factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0;
-        x+=factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0;
-    }*/
-    //(x-internal_Center)*ratio+offset-2048-->clamp(0,4095);
     x+=2048;
     y+=2048;
     x=i32_clamp(x, 0, 4095);
@@ -184,59 +172,38 @@ void joystick_debounce_task(){
         adc_debounce[i]=adc_data[i];
     }
     int32_t tmp1=(adc_debounce[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1]);
-            //factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0);
     int32_t tmp2=(adc_debounce[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0]);
-            //factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0);
     sts_ljoy=joystick_snapback_filter(tmp2, tmp1, 0);
-    //data->ljoy_status=((uint16_t)(tmp1)<<12)+tmp2;
     tmp1=(adc_debounce[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3]);
-            //factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalY0);
     tmp2=(adc_debounce[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2]);
-            //factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalX0);
     sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);
 }
 void get_peripheral_data_handler(peripheral_data* data){
     if(!data)return;
     //ananlog_read(adc_data,sizeof(adc_data)); //adc r now set with dma
     button_upd_all();
-    //user_config.joystick_fitting_mode=0;
     data->button_status=sts_button;
     data->ljoy_status=sts_ljoy;
     data->rjoy_status=sts_rjoy;
 }
-/*********************************************************************
- * @fn      main
- *
- * @brief   Main program.
- *
- * @return  none
- */
 static uart_packet pkt;
 static uint32_t input_update_tick;
 #define UART_REPORT_GAP (2)
 void send_input_with_uart(void)
 {
     memset(&pkt,0,UART_PKG_SIZE);
-    //printf("before siz:%d cap:%d full:%d\r\n",uart_tx_rb.size,uart_tx_rb.capcity,uart_tx_rb.full);
     pkt.typ=UART_PKG_INPUT_DATA;
     pkt.id=1;//button status
     pkt.load=global_input_data.button_status;
-    //pkt.load=input_data.button_status;
-    //printf("load:%d bts:%d arr:%d %d %d\r\n",pkt.load,input_data.button_status,pkt.arr[0],pkt.arr[1],pkt.arr[2]);
     send_uart_pkt(&pkt);
     pkt.id=2;//ljoy status
     pkt.load=global_input_data.ljoy_status;
-    //pkt.load=input_data.ljoy_status;
     send_uart_pkt(&pkt);
     pkt.id=3;//rjoy status
     pkt.load=global_input_data.rjoy_status;
-    //pkt.load=input_data.rjoy_status;
     send_uart_pkt(&pkt);
-
-    //printf("after siz:%d cap:%d full:%d\r\n",uart_tx_rb.size,uart_tx_rb.capcity,uart_tx_rb.full);
 }
 static uint32_t top_tick=0;
-//static hd_rumble_frame test_frame;
 static uart_packet test_uart_pkt;
 static uint32_t routine_tick,routine_cnt=0,last_routine_cnt;
 void imu_read_test(){
@@ -252,7 +219,7 @@ void imu_read_test(){
     printf("imu id:0x%02x ,res:%d\r\n",id,res);
 }
 void func_switch_task(){
-    static uint8_t f1=0,f2=0,f3=0,f4=0;
+    static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0;
     static uint8_t save=0,upd=0;
     if(!top_trigger)return;
     upd=save=0;
@@ -281,7 +248,7 @@ void func_switch_task(){
     if(!gpio_read(GPIO_BUTTON_HOME)){
         if(f4){
             //force_esp32_active=!force_esp32_active;
-            pkt.typ=UART_PKG_CONNECT_CONTROL;
+            pkt.typ=UART_PKG_PWR_CONTROL;
             pkt.id=0;
             pkt.arr[0]=!force_esp32_active;
             send_uart_pkt(&pkt);
@@ -289,6 +256,25 @@ void func_switch_task(){
         }
         f4=0;
     }else   f4=1;
+    if(!connection_state.usb_paired&&!gpio_read(GPIO_BUTTON_LS)){
+        if(f5){
+            pkt.typ=UART_PKG_CONNECT_CONTROL;
+            pkt.id=0;
+            pkt.arr[0]=1;
+            send_uart_pkt(&pkt);
+            upd=1;
+        }
+        f5=0;
+    }else f5=1;
+    if(!connection_state.usb_paired&&!gpio_read(GPIO_BUTTON_RS)){
+        if(f6){
+            pkt.typ=UART_PKG_CONNECT_CONTROL;
+            pkt.id=5;
+            pkt.arr[0]=1;
+            send_uart_pkt(&pkt);
+            upd=1;
+        }f6=0;
+    }else f6=1;
     if(upd)
         flush_rgb(ENABLE);
     if(save)//we save to flash
@@ -335,28 +321,34 @@ void ls_test()
         printf("ls down\r\n");
     }
 }
+#define START_CONNECTION_GAP (2000)
+void start_connect(){
+    static uint32_t tick;
+    if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
+        return;
+    if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
+    connection_state.esp32_connected&&!connection_state.esp32_bt_state&&!connection_state.esp32_sleep||!connection_state.esp32_paired))
+    {
+        pkt.typ=UART_PKG_CONNECT_CONTROL;
+        pkt.id=0;
+        pkt.arr[0]=1;
+        send_uart_pkt(&pkt);
+    }
+}
 void routine_service(void){
     //printf("routine service tick:%d %d %d\r\n",Get_Systick_MS(),SysTick->CNTL,SysTick->CMPLR);
     ++rts_cnt;
     if(!rts_cnt)
         rts_tcnt=1;
-    if(routine_tick!=Get_Systick_MS())
-    {
-        //printf("tick:%d\r\n",routine_tick);
-        //printf("cnt %d\r\n",routine_cnt);
-        //if(routine_cnt<2){
-        //    printf("performance warning! no routine task executed for %dms\r\n",Get_Systick_MS()-routine_tick);
-        //}
+    if(routine_tick!=Get_Systick_MS()){
+        rts_tcnt+=Get_Systick_MS()-routine_tick;
         routine_tick=Get_Systick_MS();
-        ++rts_tcnt;
-        //last_routine_cnt=routine_cnt;
-        //routine_cnt=1;
     }
     top_timer();
-    //ls_test();
     push_waveform_into_buffer_task();
     imu_upd();
     func_switch_task();
+    start_connect();
     //hd_rumble_high_acc_sequence_gen_task();
     //next_rumble_frame();
 }
@@ -381,13 +373,20 @@ void set_peripherals_state(uint8_t state)
 }
 void wake_esp32()
 {
-    static GPIO_InitTypeDef  GPIO_InitStructure = {0};
+    /*static GPIO_InitTypeDef  GPIO_InitStructure = {0};
     GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_OD;//input pullup
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Pin=GPIO_Pin_2;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-    GPIO_WriteBit(GPIOB, GPIO_Pin_2, 0);
+    GPIO_WriteBit(GPIOB, GPIO_Pin_2, 0);*/
+    //we wake up with uart?
     //Delay_Us(10);
+    pkt.typ=UART_PKG_PWR_CONTROL;
+    pkt.id=1;
+    pkt.arr[0]=0xff;
+    pkt.arr[1]=0xff;
+    pkt.arr[2]=0xff;
+    send_uart_pkt(&pkt);
     top_init();
 }
 static uint8_t stop_flag;
@@ -399,6 +398,7 @@ void init_all()
     }
     //stop_flag=0;
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    NVIC_HaltPushCfg(ENABLE);
     SystemCoreClockUpdate();
     RCC->CFGR0 &= ~RCC_HPRE;
     RCC->CFGR0 &= ~RCC_PPRE2;
@@ -528,7 +528,7 @@ void recv_pwr_control(){
     case 0x01:
         connection_state.esp32_sleep=1;
         break;
-    case 0x02:
+    case 0x02://for wireless update,we use this to restart ch32 mcu.
         flush_rgb(DISABLE);
         Delay_Ms(10);
         NVIC_SystemReset();
@@ -549,8 +549,10 @@ void recv_esp32_pkg()
         break;
     case UART_PKG_RUMBLE_FRAME:
         recv_rumble_frame();
+        break;
     case UART_PKG_PWR_CONTROL:
         recv_pwr_control();
+        break;
     default:
         break;
     }
@@ -602,14 +604,15 @@ void connection_state_handler()//decide if we go stop
                 //pkt.arr[0]=1;
                 send_uart_pkt(&pkt);
             }
-            if(!(connection_state.esp32_bt_state&0x1))
+            /*if(!(connection_state.esp32_bt_state&0x1))
             {
                 //printf("send bt start cmd\r\n");
                 pkt.typ=UART_PKG_CONNECT_CONTROL;
                 pkt.id=0;
                 pkt.arr[0]=1;
                 send_uart_pkt(&pkt);
-            }
+            }*/
+            //we active esp32 connect when user request
         }
         else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
             if((connection_state.esp32_bt_state&0x1))
@@ -619,6 +622,7 @@ void connection_state_handler()//decide if we go stop
                 pkt.id=0;
                 pkt.arr[0]=0;
                 send_uart_pkt(&pkt);
+                //actively close bt connection
             }
         }
 

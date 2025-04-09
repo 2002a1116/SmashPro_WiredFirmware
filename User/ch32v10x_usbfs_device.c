@@ -135,9 +135,8 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         R8_USB_CTRL = 0x00;
         NVIC_DisableIRQ(USBFS_IRQn);
     }
-    NVIC_SetPriority(USBFS_IRQn,0x00);
     NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
-    //todo set to highest
+    NVIC_SetPriority(USBFS_IRQn,0x00);
 }
 
 /*********************************************************************

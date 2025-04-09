@@ -26,26 +26,17 @@ uint8_t ring_buffer_init(pring_buffer rb,uint8_t* buf,uint8_t cap,uint8_t pkt_si
 uint8_t ring_buffer_push(pring_buffer rb,uint8_t* ptr,uint8_t len,uint8_t typ){
     if(!rb||!ptr||!rb->buf)return -1;
     if(rb->full||rb->capcity<=rb->size)return 1;
-    ck_uart_cap(100);
     if(len>rb->pkt_size)len=rb->pkt_size;
-    ck_uart_cap(101);
     ++rb->size;
-    ck_uart_cap(102);
     ++rb->end;
-    ck_uart_cap(103);
     if(rb->end>=rb->capcity)rb->end=0;
-    ck_uart_cap(104);
     memcpy(&rb->buf[rb->pkt_size*rb->end],ptr,len);
     if(!uart_tx_rb.capcity)
         printf("ps:%d ed:%d cap:%d len:%d\r\n",rb->pkt_size,rb->end,rb->capcity,len);
-    ck_uart_cap(105);
     rb->len[rb->end]=len;
-    ck_uart_cap(106);
     rb->typ[rb->end]=typ;
-    ck_uart_cap(107);
     if(rb->size>=rb->capcity)
         rb->full=1;
-    ck_uart_cap(108);
     return 0;
 }
 

@@ -219,13 +219,15 @@ typedef struct _user_config_data{
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
     int8_t joystick_ratio[4];
-    union{
+    /*union{
         uint8_t buffer[3];
         struct{
             uint16_t x:12;
             uint16_t y:12;
         };
-    }joystick_offset[2];
+    }joystick_offset[2];*/
+    uint8_t reserved[2];
+    uint16_t joystick_snapback_deadzone[2];
 
     //raw center+offset=2048
     //offset=2048-raw_center
@@ -251,6 +253,7 @@ typedef struct _user_config_data{
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;
 extern user_config_data user_config;
+extern uint32_t joystick_snapback_deadzone_sq[2];
 
 void conf_init();
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size);

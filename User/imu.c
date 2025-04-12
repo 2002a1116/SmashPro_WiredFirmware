@@ -146,7 +146,8 @@ void imu_upd()
     if(!imu_upd_cnt)
         imu_upd_cnt=3;
     uint32_t tick=Get_Systick_US();
-    if(tick<last_imu_upd+IMU_UPD_GAP)
+    //if(tick<last_imu_upd+IMU_UPD_GAP)
+    if(tick-last_imu_upd<user_config.imu_sample_gap)
         return;
     //HighPrecisionTimerStart();
     if(imu_read())

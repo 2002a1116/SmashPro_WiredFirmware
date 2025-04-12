@@ -11,7 +11,7 @@
 #include "ns_com_mux.h"
 
 #define FW_VERSION_HIGH (0)
-#define FW_VERSION_LOW (2)
+#define FW_VERSION_LOW (3)
 
 #define NS_SPI_USER_JOYSTICK_CALIBRATION_ADDR (0x8010)
 #define NS_SPI_USER_IMU_CALIBRATION_ADDR (0X8026)
@@ -194,9 +194,9 @@ typedef struct _factory_configuration_flash_pack{
     uint16_t BatteryVoltage;*/
 }factory_configuration_flash_pack;
 typedef struct _rgb_data_simple{
-    uint8_t r:4;
-    uint8_t g:4;
     uint8_t b:4;
+    uint8_t g:4;
+    uint8_t r:4;
 }rgb_data_simple;
 //used for wired model to save space
 typedef struct _user_config_data{
@@ -219,14 +219,8 @@ typedef struct _user_config_data{
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
     int8_t joystick_ratio[4];
-    /*union{
-        uint8_t buffer[3];
-        struct{
-            uint16_t x:12;
-            uint16_t y:12;
-        };
-    }joystick_offset[2];*/
-    uint8_t reserved[2];
+    //uint8_t reserved[2];
+    uint16_t imu_sample_gap;
     uint16_t joystick_snapback_deadzone[2];
 
     //raw center+offset=2048

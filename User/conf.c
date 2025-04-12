@@ -69,19 +69,18 @@ void conf_init()
         user_config.joystick_snapback_deadzone[1]=1200;
         user_config.dead_zone_mode=1;
         user_config.rgb_cnt=27;
+        user_config.imu_sample_gap=2500;
         for(int i=0;i<user_config.rgb_cnt;++i){
             user_config.rgb_data[i].load=0xffffff;
         }
         user_config.imu_ratio_x=127;
         user_config.imu_ratio_y=127;
         user_config.imu_ratio_z=127;
-        user_config.pro_fw_version=0;
+        user_config.pro_fw_version=2;
         user_config.joystick_snapback_filter_max_delay=10000;
         user_config.rumble_pattern=0;
         custom_conf_write();
     }
-    if(user_config.ns_pkt_timer_mode>2)user_config.ns_pkt_timer_mode=0;
-    if(user_config.pro_fw_version>1)user_config.pro_fw_version=1;
     conf_flush();
     MyCfgDescr[33]=user_config.out_interval;
     MyCfgDescr[40]=user_config.in_interval;

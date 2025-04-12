@@ -12,8 +12,8 @@
 #define PCB_TYPE_1_1 (2)
 #define PCB_TYPE_MICRO (3)
 
-//#define PCB_TYPE (PCB_TYPE_MICRO)
+#define PCB_TYPE (PCB_TYPE_MICRO)
 //#define PCB_TYPE (PCB_TYPE_1_0)
-#define PCB_TYPE (PCB_TYPE_1_1)
+//#define PCB_TYPE (PCB_TYPE_1_1)
 
 #endif /* USER_BOARD_TYPE_H_ */

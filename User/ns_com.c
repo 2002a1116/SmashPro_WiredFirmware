@@ -95,7 +95,7 @@ typedef struct{
     uint8_t use_spi_color;
 }device_info;
 #pragma pack(pop)
-device_info default_device_info={0x04,0x33,0x03,0x02,{},0x00,0x01};
+device_info default_device_info={0x04,0x33,0x03,0x02,{},0x04,0x02};
 //device_info default_device_info={0x03,0x48,0x03,0x02,{},0x00,0x02};
 void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
@@ -105,9 +105,14 @@ void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
         default_device_info.fw_version_minor=0x48;
         break;
     case 1:
-    default:
         default_device_info.fw_version_major=0x04;
         default_device_info.fw_version_minor=0x33;
+        break;
+    case 2:
+        /*fall through*/
+    default:
+        default_device_info.fw_version_major=0x03;
+        default_device_info.fw_version_minor=0x49;
     }
     //pkt.report.subcommand_report.subcommand_status=NS_SUBCOMMAND_STATUS_ACK;
     //pkt.report.subcommand_report.subcommand_id=cmd->subcommand_id;

@@ -128,11 +128,11 @@ void decode_rumble(uint8_t* ptr,rumble_frame* rumble_data)
     rumble_data->high_ccr*=0.637;
     rumble_data->low_ccr*=0.637;
 #endif
-    //printf("decode gap %d\r\n",Get_Systick_MS()-decode_time);
+    ////printf("decode gap %d\r\n",Get_Systick_MS()-decode_time);
     //rumble_data->low_ccr=0;
-    //printf("hs:%f ls:%f\r\n",rumble_data->high_amp,rumble_data->low_amp);
-    //printf("rumble 0x%02x 0x%02x 0x%02x 0x%02x\r\n",ptr[0],ptr[1],ptr[2],ptr[3]);
-    //printf("f1:0x%02x 0x%02x  f2:0x%02x\r\n",((0x3f&(ptr[0]>>2))+0x60),((ptr[1]&1)?0x40:0),((ptr[2]&0x7f)+0x40));
+    ////printf("hs:%f ls:%f\r\n",rumble_data->high_amp,rumble_data->low_amp);
+    ////printf("rumble 0x%02x 0x%02x 0x%02x 0x%02x\r\n",ptr[0],ptr[1],ptr[2],ptr[3]);
+    ////printf("f1:0x%02x 0x%02x  f2:0x%02x\r\n",((0x3f&(ptr[0]>>2))+0x60),((ptr[1]&1)?0x40:0),((ptr[2]&0x7f)+0x40));
     /*if(ptr[0]|(ptr[1]&1))//high byte exist
     {
         rumble_data->high_arr=(0x3f&(ptr[0]>>2));
@@ -153,7 +153,7 @@ void decode_rumble(uint8_t* ptr,rumble_frame* rumble_data)
     }*/
     /*rumble_data->high_ccr=ptr[1]>>1;//0~c8/2=64 aka 100
     rumble_data->low_ccr=((ptr[3]-0x40)<<1)+(1&(ptr[2]>>7));//0~32*2=64 aka 100
-    //printf("raw ccr :%d %d\r\n",rumble_data->high_ccr,rumble_data->low_ccr);
+    ////printf("raw ccr :%d %d\r\n",rumble_data->high_ccr,rumble_data->low_ccr);
     rumble_data->high_amp=decode_ccr(rumble_data->high_ccr);
     rumble_data->low_amp=decode_ccr(rumble_data->low_ccr);
     rumble_data->high_ccr=rumble_data->high_amp*rumble_data->high_arr;
@@ -165,7 +165,7 @@ void decode_rumble(uint8_t* ptr,rumble_frame* rumble_data)
     rumble_data->high_ccr*=0.637;
     rumble_data->low_ccr*=0.637;
     rumble_data->low_ccr=0;
-    printf("decode time:%d ha:%d la:%d,hc:%d,lc:%d\r\n",Get_Systick_MS()-decode_time,rumble_data->high_arr,rumble_data->low_arr,rumble_data->high_ccr,rumble_data->low_ccr);
+    //printf("decode time:%d ha:%d la:%d,hc:%d,lc:%d\r\n",Get_Systick_MS()-decode_time,rumble_data->high_arr,rumble_data->low_arr,rumble_data->high_ccr,rumble_data->low_ccr);
     /*
     rumble_data->high_sin=-sin(2*M_PI/rumble_data->high_arr)*rumble_data->high_arr/(4*M_PI);
     rumble_data->low_sin=-sin(2*M_PI/rumble_data->low_arr)*rumble_data->low_arr/(4*M_PI);
@@ -204,7 +204,7 @@ void set_rumble_status(rumble_frame* rumble_data)// freq = 1m/period-->period=1m
     if(!rumble_data){
         memset(&current_rumble_frame,0,sizeof(current_rumble_frame));
         //current_rumble_frame.high_ccr=current_rumble_frame.low_ccr=0;
-        //printf("rumble reset\r\n");
+        ////printf("rumble reset\r\n");
     }
     else
         current_rumble_frame=*rumble_data;
@@ -228,13 +228,13 @@ void next_rumble_frame(){
         set_rumble_status(ptr);
         is_rumbling=1;
         last_rumble_tick=Get_Systick_MS();
-        //printf("start rumble\r\n");
+        ////printf("start rumble\r\n");
     }
     else if(is_rumbling&&((Get_Systick_MS()-last_rumble_tick)>RUMBLE_FRAME_TIMEOUT_MS)){
         set_rumble_status(NULL);
         is_rumbling=0;
         last_rumble_tick=Get_Systick_MS();
-        printf("no more frame,stop rumble\r\n");
+        //printf("no more frame,stop rumble\r\n");
     }
     /*
     if(Get_Systick_MS()-last_rumble_tick<RUMBLE_FRAME_TIME_MS)
@@ -246,12 +246,12 @@ void next_rumble_frame(){
         ring_buffer_pop(&rumble_rb);
         set_rumble_status(ptr);
         is_rumbling=1;
-        //printf("start rumble\r\n");
+        ////printf("start rumble\r\n");
     }
     else if(is_rumbling){
         set_rumble_status(NULL);
         is_rumbling=0;
-        printf("no more frame,stop rumble\r\n");
+        //printf("no more frame,stop rumble\r\n");
     }
     */
 }
@@ -318,7 +318,7 @@ void TIM3_IRQHandler(void)//定时器3中断服务函数，硬件自动调用，不需要手动调用
 {
     if(TIM_GetFlagStatus(TIM3,TIM_FLAG_Update)==1)//判断定时器2更新标志位是否产生
     {
-        //printf("tim3 irq\r\n");
+        ////printf("tim3 irq\r\n");
         //rumble_ccr=0;
         if(rumble_reset)
         {
@@ -382,7 +382,7 @@ void TIM3_IRQHandler(void)//定时器3中断服务函数，硬件自动调用，不需要手动调用
         {
             rumble_set=0;
             rumble_ccr=RUMBLE_CRR_RESET|(((uint16_t)(high_ccr_tb[rumble_high_pos]+low_ccr_tb[rumble_low_pos])>>CCR_TABLE_FACTOR)/2);
-            //printf("high ccr:%d low_ccr:%d hp:%d lp:%d\r\n",high_ccr_tb[rumble_high_pos]>>CCR_TABLE_FACTOR,low_ccr_tb[rumble_low_pos],
+            ////printf("high ccr:%d low_ccr:%d hp:%d lp:%d\r\n",high_ccr_tb[rumble_high_pos]>>CCR_TABLE_FACTOR,low_ccr_tb[rumble_low_pos],
             //        rumble_high_pos,rumble_low_pos);
         }
 #elif(RUMBLE_MODE == RUMBLE_MODE_LINEAR)
@@ -492,13 +492,13 @@ void TIM3_IRQHandler(void)//定时器3中断服务函数，硬件自动调用，不需要手动调用
                 rumble_high_tick=0;
                 //rumble_ccr+=30;
                 //rumble_ccr|=0x80;
-                //printf("high freq clock reset\r\n");
+                ////printf("high freq clock reset\r\n");
             }else if(rumble_high_tick==current_rumble_frame.high_ccr){
                 //rumble_ccr-=30;
                 //rumble_ccr|=0x80;
             }
             rumble_ccr+=72*current_rumble_frame.high_amp*(0.5+current_rumble_frame.high_sin*cos(2*M_PI*(2*rumble_high_tick+1)/current_rumble_frame.high_arr));
-            //printf("rumble_ccr %d %f %f %f\r\n",rumble_ccr,current_rumble_frame.high_amp,current_rumble_frame.high_sin,cos(2*M_PI*(2*rumble_high_tick+1)/current_rumble_frame.high_arr));
+            ////printf("rumble_ccr %d %f %f %f\r\n",rumble_ccr,current_rumble_frame.high_amp,current_rumble_frame.high_sin,cos(2*M_PI*(2*rumble_high_tick+1)/current_rumble_frame.high_arr));
         }
         if(current_rumble_frame.low_amp){
             rumble_low_tick++;
@@ -506,19 +506,19 @@ void TIM3_IRQHandler(void)//定时器3中断服务函数，硬件自动调用，不需要手动调用
                 rumble_low_tick=0;
                 //rumble_ccr+=30;
                 //rumble_ccr|=0x80;
-                //printf("low freq clock reset\r\n");
+                ////printf("low freq clock reset\r\n");
             }else if(rumble_low_tick==current_rumble_frame.low_ccr){
                 //rumble_ccr-=30;
                 //rumble_ccr|=0x80;
             }
             rumble_ccr+=72*current_rumble_frame.low_amp*(0.5+current_rumble_frame.low_sin*cos(2*M_PI*(2*rumble_low_tick+1)/current_rumble_frame.low_arr));
         }
-        //printf("rumble_ccr %d\r\n",rumble_ccr);
+        ////printf("rumble_ccr %d\r\n",rumble_ccr);
         TIM_SetCompare1(TIM3, rumble_ccr);
         /*if(rumble_ccr&0x80)//set
         {
             rumble_ccr^=0x80;
-            //printf("set c:%d %d %d %d %d\r\n",rumble_ccr,current_rumble_frame.high_arr,current_rumble_frame.low_arr
+            ////printf("set c:%d %d %d %d %d\r\n",rumble_ccr,current_rumble_frame.high_arr,current_rumble_frame.low_arr
             //        ,current_rumble_frame.high_ccr,current_rumble_frame.low_ccr);
             TIM_SetCompare1(TIM3, rumble_ccr);
         }*/

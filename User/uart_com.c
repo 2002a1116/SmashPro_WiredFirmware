@@ -8,294 +8,300 @@
 #include "debug.h"
 #include "string.h"
 #include "ch32v10x_usbfs_device.h"
+#include "usbd_compatibility_hid.h"
 #include "ring_buffer.h"
+#include "gpio_digit.h"
 #include "ns_com.h"
 #include "ns_com_mux.h"
 #include "uart_com.h"
-
-//void USART1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-__attribute__ ((aligned(4))) uint8_t UART1_RxBuffer[DEF_UART1_BUF_SIZE];  // UART2 Rx Buffer
-
-uint8_t uart_rx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
-uint8_t uart_tx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
-ring_buffer uart_rx_rb;
-ring_buffer uart_tx_rb;
-
-volatile uint16_t UART1_TimeOut;                                           // UART2 RX timeout flag
-volatile uint8_t  UART1_Tx_Flag = 0;                                       // UART2 TX flag
-
-volatile uint16_t UART1_RX_CurCnt = 0;                                     // UART2 DMA current remain count
-volatile uint16_t UART1_RX_LastCnt = 0;                                    // UART2 DMA last remain count
-volatile uint16_t UART1_Rx_RemainLen = 0;                                  // UART2 RX data remain len
-volatile uint16_t UART1_Rx_Deal_Ptr = 0;                                   // UART2 RX data deal pointer
-
-void UART1_DMA_Init( void )
+#include "uart.h"
+#include "global_api.h"
+#include "spi.h"
+#include "conf.h"
+#include "pwr.h"
+static uart_packet pkt;
+static uint32_t input_update_tick;
+void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size)
 {
-    DMA_InitTypeDef DMA_InitStructure = {0};
-
-   // RCC_AHBPeriphClockCmd( RCC_AHBPeriph_DMA1, ENABLE );
-
-    /* UART2 Tx DMA initialization */
-    DMA_Cmd( DMA1_Channel4, DISABLE );
-    DMA_DeInit( DMA1_Channel4 );
-    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&USART1->DATAR);
-    //DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)Data_Buffer;
-    DMA_InitStructure.DMA_MemoryBaseAddr = NULL;
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-    DMA_InitStructure.DMA_BufferSize = 256;
-    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-    DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-    DMA_Init( DMA1_Channel4, &DMA_InitStructure );
-
-    /* UART2 Rx DMA initialization */
-    DMA_Cmd( DMA1_Channel5, DISABLE );
-    DMA_DeInit( DMA1_Channel5 );
-    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)UART1_RxBuffer;
-    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-    DMA_InitStructure.DMA_BufferSize = DEF_UART1_BUF_SIZE;
-    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-    DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-    DMA_Init( DMA1_Channel5, &DMA_InitStructure );
-    DMA_Cmd( DMA1_Channel5, ENABLE );
-    USART_DMACmd(USART1, USART_DMAReq_Rx, ENABLE);
+   pkt.typ=UART_PKG_CH32_FLASH_WRITE;
+   pkt.id=addr>>24;
+   addr&=0xff;
+   for(int i=0;i<size;i+=8){
+       pkt.load[0]=i+addr;
+       memcpy(pkt.load+1,ptr,8);
+       ptr+=8;
+       send_uart_pkt(&pkt);
+   }
 }
-
-
-/*********************************************************************
- * @fn      UART2_Init
- *
- * @brief   UART2 DMA initialization
- *
- * @return  none
- */
-void UART1_Init( void )
+void uart_update_config()
 {
-    GPIO_InitTypeDef  GPIO_InitStructure = {0};
-    USART_InitTypeDef USART_InitStructure = {0};
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-    //GPIO_PinRemapConfig(AFIO_PCFR1_USART1_REMAP, ENABLE);
-    //AFIO_PCFR1_USART1_REMAP=0;
-    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-    /* UART2 GPIO Init */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-    //GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    /* UART2 Init */
-    USART_InitStructure.USART_BaudRate = UART_BAUD_RATE;
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits = USART_StopBits_1;
-    USART_InitStructure.USART_Parity = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-    USART_Init(USART1, &USART_InitStructure);
-
-    USART_ClearFlag( USART1, USART_FLAG_TC );
-    //USART_ITConfig(USART1, USART_IT_TC, ENABLE);
-    USART_Cmd(USART1, ENABLE);
-
-    ring_buffer_init(&uart_rx_rb, uart_rx_rb_buf, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
-    ring_buffer_init(&uart_tx_rb, uart_tx_rb_buf, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
-
+    pkt.typ=UART_PKG_CH32_FLASH_WRITE;
+    pkt.id=0xF;
+    for(int i=0;i<sizeof(user_config);i+=8){
+        pkt.load[0]=i;
+        memcpy(pkt.load+1,((uint8_t*)&user_config)+i*8,8);
+        send_uart_pkt(&pkt);
+        send_uart_pkt(&pkt);
+    }
+    /*pkt.id=0x6;
+    for(int i=0;i<sizeof(factory_configuration);i+=8){
+        pkt.load[0]=i;
+        memcpy(pkt.load+1,((uint8_t*)&factory_configuration)+i*8,8);
+        send_uart_pkt(&pkt);
+        send_uart_pkt(&pkt);
+    }
+    pkt.id=0x8;
+    for(int i=0;i<sizeof(user_calibration);i+=8){
+        pkt.load[0]=i;
+        memcpy(pkt.load+1,((uint8_t*)&user_calibration)+i*8,8);
+        send_uart_pkt(&pkt);
+        send_uart_pkt(&pkt);
+    }*/
 }
-
-void UART1_DMA_Tx(uint8_t *pbuf,uint16_t len)
+void send_input_with_uart(void)
 {
-    USART_ClearFlag(USART1, USART_FLAG_TC);
-    DMA_Cmd( DMA1_Channel4, DISABLE );
-    DMA1_Channel4->MADDR = (uint32_t)pbuf;
-    DMA1_Channel4->CNTR = (uint32_t)len;
-    DMA_Cmd( DMA1_Channel4, ENABLE );
-    USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+    memset(&pkt,0,UART_PKG_SIZE);
+    pkt.typ=UART_PKG_INPUT_DATA;
+    pkt.id=1;//button status
+    /*pkt.load=global_input_data.button_status;
+    send_uart_pkt(&pkt);
+    pkt.id=2;//ljoy status
+    pkt.load=global_input_data.ljoy_status;
+    send_uart_pkt(&pkt);
+    pkt.id=3;//rjoy status
+    pkt.load=global_input_data.rjoy_status;
+    send_uart_pkt(&pkt);*/
+    memcpy(pkt.load,&global_input_data,9);
+    send_uart_pkt(&pkt);
 }
-
-/*********************************************************************
- * @fn      UART2_Tx_Service
- *
- * @brief   UART2 tx service routine that sends the data received by
- *          USB-HID via uart2.
- *
- * @return  none
- */
-void UART1_Tx_Service( void )
-{
-    uint16_t pkg_len = 0;
-    uint8_t *pbuf;
-    //printf("tx service\r\n");
-    if (UART1_Tx_Flag)
+void start_connect(){
+    static uint32_t tick;
+    if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
+        return;
+    if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
+    connection_state.esp32_connected&&!connection_state.esp32_bt_state&&!connection_state.esp32_sleep||!connection_state.esp32_paired))
     {
-        //printf("tx flag status %d\r\n",USART_GetFlagStatus(USART1, USART_FLAG_TC));
-        if (USART_GetFlagStatus(USART1, USART_FLAG_TC))                                  // Check whether uart2 has finished sending.
-        {
-            USART_ClearFlag(USART1, USART_FLAG_TC);
-            USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);
-            UART1_Tx_Flag = 0;
+        pkt.typ=UART_PKG_CONNECT_CONTROL;
+        pkt.id=0;
+        pkt.load[0]=1;
+        send_uart_pkt(&pkt);
+    }
+}
+void wake_esp32()
+{
+    //we wake up with uart
+    pkt.typ=UART_PKG_PWR_CONTROL;
+    pkt.id=1;
+    memset(pkt.load,-1,9);
+    send_uart_pkt(&pkt);
+}
+void recv_esp32_connect_control()
+{
+    switch(pkt.id){
+    case 0:
+        memcpy(connection_state.bd_addr,pkt.load,BD_ADDR_LEN);
+        connection_state.bd_addr_set=1;
+        //we reset this every time we start
+        break;
+    case 1:
+        for(int i=0;i<9;++i)
+            pkt.load[i]^=0xAA;
+        memcpy(connection_state.bt_ltk,pkt.load,9);
+        break;
+    case 2:
+        for(int i=0;i<7;++i)
+            pkt.load[i]^=0xAA;
+        memcpy(connection_state.bt_ltk+9,pkt.load,7);
+        connection_state.bt_ltk_set=1;
+        break;
+    case 0xC:
+        connection_state.esp32_paired=pkt.load[0];
+        ////printf("esp32_paired:%d\r\n",connection_state.esp32_paired);
+        break;
+    /*case 0xD:
+        connection_state.esp32_sleep=1;
+        break;*/
+    case 0xE:
+        connection_state.con_addr_set=0;
+        break;
+    case 0xF:
+        connection_state.esp32_bt_state=pkt.load[0];
+        break;
+    default:
+        break;
+    }
+}
+//static hd_rumble_frame uart_frame;
+static uint8_t uart_rumble_buf[8];
+void recv_rumble_frame(){
+    static uint8_t sts=0;
+    switch(pkt.id)
+    {
+    case 0:
+        decode_hd_rumble_multiformat_high_acc(pkt.load,pkt.load+4);
+        break;
+    default:
+        break;
+    }
+}
+void recv_pwr_control(){
+    switch(pkt.id){
+    case 0x00://force_esp32_active
+        force_esp32_active=pkt.load[0];
+        flush_rgb(ENABLE);
+        break;
+    case 0x01:
+        connection_state.esp32_sleep=1;
+        break;
+    case 0x02://for wireless update,we use this to restart ch32 mcu.
+        flush_rgb(DISABLE);
+        Delay_Ms(10);
+        NVIC_SystemReset();
+        break;
+    default:
+        break;
+    }
+}
+void recv_flash_operation(){
+    if(pkt.typ!=UART_PKG_CH32_FLASH_READ&&pkt.typ!=UART_PKG_CH32_FLASH_WRITE)return;
+    if(pkt.typ==UART_PKG_CH32_FLASH_READ){
+        pkt.typ=UART_PKG_CH32_FLASH_WRITE;
+        switch(pkt.id){
+            case 0xF://user config
+                conf_read(0xF000|(pkt.load[0]), pkt.load+1, 8);
+                break;
+            case 0x6:
+                conf_read(0x6000|(pkt.load[0]), pkt.load+1, 8);
+                break;
+            case 0x8:
+                conf_read(0x8000|(pkt.load[0]), pkt.load+1, 8);
+                break;
+            default:
+                break;
+        }
+    }else{//write
+        pkt.typ=UART_PKG_CH32_FLASH_READ;
+        switch(pkt.id){
+            case 0xF://user config
+                conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_config)-pkt.load[0]));
+                break;
+            case 0x6:
+                conf_write(0x6000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(factory_configuration)-pkt.load[0]));
+                break;
+            case 0x8:
+                conf_write(0x8000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_calibration)-pkt.load[0]));
+                break;
+            default:
+                break;
         }
     }
-    else
+    send_uart_pkt(&pkt);
+    send_uart_pkt(&pkt);
+}
+void recv_esp32_pkg()
+{
+    switch(pkt.typ)
     {
-        //printf("txss %d\r\n",uart_tx_rb.capcity);
-        if(uart_tx_rb.size){
-            pbuf=&uart_tx_rb_buf[uart_tx_rb.top*UART_PKG_SIZE];
-            if(uart_tx_rb.size+uart_tx_rb.top>uart_tx_rb.capcity){
-                pkg_len=uart_tx_rb.capcity-uart_tx_rb.top;
-                uart_tx_rb.size=uart_tx_rb.end/UART_PKG_SIZE+1;
-                uart_tx_rb.top=0;
-            }else {
-                pkg_len=uart_tx_rb.size;
-                uart_tx_rb.top=1;
-                uart_tx_rb.end=0;
-                uart_tx_rb.size=0;
+    case UART_PKG_INPUT_REQ:
+        ////printf("recv uart hb\r\n");
+        break;
+    case UART_PKG_CONNECT_CONTROL:
+        recv_esp32_connect_control();
+        break;
+    case UART_PKG_RUMBLE_FRAME:
+        recv_rumble_frame();
+        break;
+    case UART_PKG_PWR_CONTROL:
+        recv_pwr_control();
+        break;
+    case UART_PKG_CH32_FLASH_READ:
+        /*fall through*/
+    case UART_PKG_CH32_FLASH_WRITE:
+        recv_flash_operation();
+        break;
+    default:
+        break;
+    }
+}
+void connection_state_handler()//decide if we go stop
+{
+    start_connect();
+    if(!connection_state.usb_enumed && connection_state.esp32_sleep)
+    {
+        set_peripherals_state(DISABLE);
+        set_imu_sleep();
+        //stop_flag=set_pwr_mode_stop();
+        /*if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
+            NVIC_SystemReset();*/
+        //fail safe,try to reset everything
+        init_all();
+        set_peripherals_state(ENABLE);
+        wake_esp32();
+    }
+    else if(connection_state.esp32_connected&&!connection_state.esp32_sleep&&(Get_Systick_MS()-input_update_tick>UART_REPORT_GAP))
+    {
+        input_update_tick=Get_Systick_MS();
+        if(connection_state.con_addr_set)//if esp32 recved,we set this flag to be zero
+        {
+            pkt.typ=UART_PKG_CONNECT_CONTROL;
+            pkt.id=3;
+            memset(pkt.data,0,11);
+            memcpy(pkt.load,connection_state.con_addr,6);
+            send_uart_pkt(&pkt);
+        }
+        if(!connection_state.usb_paired)
+        {
+            send_input_with_uart();
+            ////printf("send bt start\r\n");
+            if(!connection_state.bd_addr_set)
+            {
+                //printf("send get bd addr cmd\r\n");
+                pkt.typ=UART_PKG_CONNECT_CONTROL;
+                pkt.id=1;
+                //pkt.arr[0]=1;
+                send_uart_pkt(&pkt);
             }
-            pkg_len=pkg_len*UART_PKG_SIZE;
-            uart_tx_rb.full=(uint8_t)(uart_tx_rb.capcity<=uart_tx_rb.size);
-            UART1_DMA_Tx( pbuf, pkg_len );
-            UART1_Tx_Flag = 1;
-            //printf("send len %d\r\n",pkg_len);
+            if(!connection_state.bt_ltk_set)
+            {
+                //printf("send get     bt ltk cmd\r\n");
+                pkt.typ=UART_PKG_CONNECT_CONTROL;
+                pkt.id=2;
+                //pkt.arr[0]=1;
+                send_uart_pkt(&pkt);
+            }
+            /*if(!(connection_state.esp32_bt_state&0x1))
+            {
+                ////printf("send bt start cmd\r\n");
+                pkt.typ=UART_PKG_CONNECT_CONTROL;
+                pkt.id=0;
+                pkt.arr[0]=1;
+                send_uart_pkt(&pkt);
+            }*/
+            //we active esp32 connect when user request
         }
-        //printf("txsd %d\r\n",uart_tx_rb.capcity);
-    }
-}
-int8_t rx_ptr=0;
-uint8_t rx_filter_buf[UART_PKG_SIZE];
-void UART1_Rx_Service( void )
-{
-    uint16_t u16_temp;
-    UART1_RX_CurCnt = DMA_GetCurrDataCounter(DMA1_Channel5);
-    //printf("rx\r\n");// Get DMA remaining count
-    if (UART1_RX_LastCnt != UART1_RX_CurCnt)
-    {
-        if (UART1_RX_LastCnt > UART1_RX_CurCnt)
-        {
-            u16_temp = UART1_RX_LastCnt - UART1_RX_CurCnt;
-        }
-        else
-        {
-            u16_temp = UART1_RX_LastCnt + ( DEF_UART1_BUF_SIZE - UART1_RX_CurCnt );
+        else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
+            if((connection_state.esp32_bt_state&0x1))
+            {
+                ////printf("send bt stop cmd\r\n");
+                pkt.typ=UART_PKG_CONNECT_CONTROL;
+                pkt.id=0;
+                pkt.load[0]=0;
+                send_uart_pkt(&pkt);
+                //actively close bt connection
+            }
         }
 
-        UART1_RX_LastCnt = UART1_RX_CurCnt;
-        //printf("u16temp :%d\r\n",u16_temp);
-        if ((UART1_Rx_RemainLen + u16_temp) > DEF_UART1_BUF_SIZE )
-        {
-            //printf("remain len: %d ,temp : %d\r\n",UART1_Rx_RemainLen,u16_temp);
-            //printf("Uart2 RX_buffer overflow\n");                                           // overflow: New data overwrites old data
-        }
-        else
-        {
-            UART1_Rx_RemainLen += u16_temp;
-        }
-        UART1_TimeOut = 0;
     }
-    //printf("r2 %d\r\n",UART1_Rx_RemainLen);
-    while(UART1_Rx_RemainLen)
-    {
-        if(UART1_RxBuffer[UART1_Rx_Deal_Ptr]&UART_PKG_HEADER_MASK)//HEADER
-        {
-            rx_ptr=1;
-            rx_filter_buf[0]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
-        }
-        else if(rx_ptr>0){//join a packet
-                rx_filter_buf[rx_ptr++]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
-                while(rx_ptr>=UART_PKG_SIZE){//recive one
-                    rx_ptr=0;
-                    //printf("uart pkt recved\r\n");
-                    //printf("uart pkt cksum %d %d\r\n",((uart_packet*)rx_filter_buf)->cksum,
-                    //        ((uart_packet*)rx_filter_buf)->header^UART_PKG_HEADER_MASK);
-                    if(check_uart_pkt((uart_packet*)rx_filter_buf))//if true,check fail,drop it
-                    {
-                        //rx_ptr=0;
-                        break;
-                    }
-                    decode_uart_pkt((uart_packet*)rx_filter_buf);
-                    //printf("uart pkt decode typ %d\r\n",((uart_packet*)rx_filter_buf)->typ);
-                    u16_temp=ring_buffer_push(&uart_rx_rb, rx_filter_buf, UART_PKG_SIZE, 0);
-                    if(u16_temp)
-                        printf("uart push error:%d\r\n",u16_temp);
-                    //printf("rb pushed\r\n");
-                }
-                //break;
-        }
-        else {
-            rx_ptr=0;
-        }
-        --UART1_Rx_RemainLen;
-        ++UART1_Rx_Deal_Ptr;
-        if (UART1_Rx_Deal_Ptr >= DEF_UART1_BUF_SIZE){
-            UART1_Rx_Deal_Ptr = 0x00;
-        }
-    }
-    //printf("rlen:%d\r\n",UART1_Rx_RemainLen);
-    //printf("rx end\r\n");
 }
-
-void encode_uart_pkt(uart_packet* pkt){
-    if(!pkt)return;
-    pkt->high_bit=(pkt->arr[0]&UART_PKG_HEADER_MASK)>>7;
-    pkt->high_bit|=(pkt->arr[1]&UART_PKG_HEADER_MASK)>>6;
-    pkt->high_bit|=(pkt->arr[2]&UART_PKG_HEADER_MASK)>>5;
-    //printf("arr0 %d %d %d  high %d\r\n",pkt->arr[0],pkt->arr[1],pkt->arr[2],pkt->arr[2]&~UART_PKG_HEADER_MASK);
-    pkt->load=pkt->load&UART_PKG_LOAD_MASK;
-    //printf("arr1 %d %d %d  high %d\r\n",pkt->arr[0],pkt->arr[1],pkt->arr[2],pkt->high_bit);
-    pkt->cksum=pkt->header^pkt->data[0]^pkt->data[1]^pkt->data[2]^pkt->data[3];
-}
-void decode_uart_pkt(uart_packet* pkt){
-    if(!pkt)return;
-    pkt->arr[0]|=UART_PKG_HEADER_MASK&(pkt->high_bit<<7);
-    pkt->arr[1]|=UART_PKG_HEADER_MASK&(pkt->high_bit<<6);
-    pkt->arr[2]|=UART_PKG_HEADER_MASK&(pkt->high_bit<<5);
-    pkt->header&=~UART_PKG_HEADER_MASK;
-}
-uint8_t check_uart_pkt(uart_packet* pkt){//if ok return false aka 0
-    if(!pkt)return -1;
-    return pkt->cksum!=(pkt->header^pkt->data[0]^pkt->data[1]^pkt->data[2]^pkt->data[3]^UART_PKG_HEADER_MASK);
-}
-static uart_packet send_buf;
-uint8_t send_uart_pkt(uart_packet* pkt)
+void uart_com_task()
 {
-    if(!pkt)return -2;
-    memcpy(&send_buf,pkt,UART_PKG_SIZE);
-    encode_uart_pkt(&send_buf);
-    send_buf.header|=UART_PKG_HEADER_MASK;
-    return ring_buffer_push(&uart_tx_rb, (uint8_t*)&send_buf, UART_PKG_SIZE, 0);
-}
-uint8_t send_uart_large(uint8_t* buf,uint8_t len,uint8_t typ)
-{
-    uart_packet pkg;
-    memset(&pkg,0,sizeof(uart_packet));
-    uint8_t id=0,res=0;
-    pkg.typ=typ;
-    while(len>=3)
+    uint8_t max_uart_handled=10;
+    while(uart_rx_rb.size&&max_uart_handled--)
     {
-        memcpy(pkg.arr,buf,3);
-        buf+=3;
-        pkg.id=id++;
-        //encode_uart_pkt(&pkg);
-        res = send_uart_pkt(&pkg);
-        if(res)
-            return res;
+        connection_state.esp32_connected=0x01;//if revice uart pkt from esp32,means it exist
+        memcpy(&pkt,&uart_rx_rb_buf[uart_rx_rb.top*UART_PKG_SIZE],UART_PKG_SIZE);
+        ring_buffer_pop(&uart_rx_rb);
+        recv_esp32_pkg();
     }
-    if(len)
-    {
-        memset(&pkg,0,sizeof(uart_packet));
-        memcpy(pkg.arr,buf,len);
-        pkg.id=id++;
-        pkg.typ=typ;
-        //encode_uart_pkt(&pkg);
-        send_uart_pkt(&pkg);
-    }
-    return res;
+    connection_state_handler();
 }

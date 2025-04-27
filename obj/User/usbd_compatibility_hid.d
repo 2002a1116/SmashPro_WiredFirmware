@@ -27,11 +27,10 @@ User/usbd_compatibility_hid.o: ../User/usbd_compatibility_hid.c \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h \
- ../User/ch32v10x_usbfs_device.h ../User/usb_desc.h \
- ../User/usbd_compatibility_hid.h ../User/ns_com.h ../User/ring_buffer.h \
- ../User/ns_com_mux.h ../User/uart_com.h ../User/rumble.h \
- ../User/hd_rumble.h ../User/imu.h ../User/i2c.h ../User/tick.h \
- ../User/conf.h
+ ../User/ch32v10x_usbfs_device.h ../User/usb_desc.h ../User/ring_buffer.h \
+ ../User/usbd_compatibility_hid.h ../User/ns_com.h ../User/ns_com_mux.h \
+ ../User/uart_com.h ../User/uart.h ../User/rumble.h ../User/hd_rumble.h \
+ ../User/imu.h ../User/i2c.h ../User/tick.h ../User/conf.h
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
 D:\WCH\CH32V103C8T6_USB\Core/core_riscv.h:
@@ -62,11 +61,12 @@ D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/ch32v10x_usbfs_device.h:
 ../User/usb_desc.h:
+../User/ring_buffer.h:
 ../User/usbd_compatibility_hid.h:
 ../User/ns_com.h:
-../User/ring_buffer.h:
 ../User/ns_com_mux.h:
 ../User/uart_com.h:
+../User/uart.h:
 ../User/rumble.h:
 ../User/hd_rumble.h:
 ../User/imu.h:

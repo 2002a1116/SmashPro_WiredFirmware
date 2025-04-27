@@ -58,7 +58,7 @@ void ns_subcommand_pair_by_wire(NS_SUBCOMMAND_CB_PARAM){
     uint8_t typ=cmd->subcommand_data[0];
     _ns_subcommand_set_ack(cmd->subcommand_id,0x81);
     pkt.data.subcommand_report.subcommand_data[0]=typ;
-    printf("pair by wire subc id:%d \t typ:%d\r\n",cmd->subcommand_id,typ);
+    //printf("pair by wire subc id:%d \t typ:%d\r\n",cmd->subcommand_id,typ);
     switch(typ){
     case 0x01://request bd addr
         memcpy(connection_state.con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
@@ -122,9 +122,9 @@ void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     //todo
     for(int i=0;i<BD_ADDR_LEN;++i){
         default_device_info.addr[i]=connection_state.bd_addr[BD_ADDR_LEN-i-1];
-        printf("0x%02x ",connection_state.bd_addr[BD_ADDR_LEN-i-1]);
+        //printf("0x%02x ",connection_state.bd_addr[BD_ADDR_LEN-i-1]);
     }
-    printf("\r\n");
+    //printf("\r\n");
     //memcpy(default_device_info.addr,bd_addr,BD_ADDR_LEN);
     //ESP_LOGW("MAC ","0x%02x  0x%02x  0x%02x",default_device_info.addr[5],bt_addr[5],addr[5]);
     memcpy(pkt.data.subcommand_report.subcommand_data,&default_device_info,sizeof(device_info));
@@ -136,7 +136,7 @@ uint8_t input_mode=0x30;
 #define SUBC_ID_SET_INPUT_MODE (0x03)
 void ns_subcommand_set_input_mode(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    printf("set input mode:0x%02x \r\n",cmd->subcommand_data[0]);
+    //printf("set input mode:0x%02x \r\n",cmd->subcommand_data[0]);
     if(cmd->subcommand_data[0]==0x30||cmd->subcommand_data[0]==0x31||cmd->subcommand_data[0]==0x32||cmd->subcommand_data[0]==0x33)
         input_mode=cmd->subcommand_data[0];
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
@@ -239,20 +239,11 @@ static uint8_t reply3333[] = {0x21, 0x03, 0x8E, 0x84, 0x00, 0x12, 0x01, 0x18, 0x
 #define SUBC_INPUT_SPI_READ_DATA_LENGTH (5)
 
 void ns_subcommand_spi_read(NS_SUBCOMMAND_CB_PARAM){
-    printf("spi read\r\n");
     pkt_clr();
-    //spi_addr=*(uint32_t*)cmd->subcommand_data;
     uint32_t spi_addr=fetch_uint32(cmd->subcommand_data);
     uint8_t size=cmd->subcommand_data[4];
-    printf("spi read addr 0x%08x\r\n", (uint16_t)spi_addr);
-    if(size>0x1D){
-        //ESP_LOGW("","%s warning spi read too long addr:%"PRIu32"  ,size:%"PRIu8,__func__,addr,size);
-    }else if(!size)
+    if(size>0x1D)
         size=0x1D;
-    //spi_addr=*(uint32_t*)(&(cmd->subcommand_data[4]));
-    //printf("spi addr %d\r\n",spi_addr);
-    //printf("spi read 0x%04x\r\n",spi_addr);
-    printf("SPI_READ :0x%02x,0x%02x,0x%02x,0x%02x, size:0x%02x\r\n",cmd->subcommand_data[0],cmd->subcommand_data[1],cmd->subcommand_data[2],cmd->subcommand_data[3],size);
     _ns_subcommand_set_ack(cmd->subcommand_id,0x90);
     memcpy(pkt.data.subcommand_report.subcommand_data,cmd->subcommand_data,SUBC_INPUT_SPI_READ_DATA_LENGTH);
     if(size>sizeof(pkt.data.subcommand_report.subcommand_data)-SUBC_INPUT_SPI_READ_DATA_LENGTH)
@@ -266,12 +257,11 @@ void ns_subcommand_spi_read(NS_SUBCOMMAND_CB_PARAM){
 #define SUBC_ID_SPI_WRITE (0x11)
 void ns_subcommand_spi_write(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    //uint32_t addr=*(uint32_t*)cmd->subcommand_data;
     uint32_t addr=fetch_uint32(cmd->subcommand_data);
     uint8_t size=cmd->subcommand_data[4];
     uint8_t *data=cmd->subcommand_data+5;
-    printf("spi write addr:%d size:%d\r\n",addr,size);
     conf_write(addr, data, size);
+    uart_conf_write(addr,data,size);
     //todo spi write,Replies with x8011 ack and a uint8 status. x00 = success, x01 = write protected.
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.data.subcommand_report.subcommand_data[0]=0x00;
@@ -442,7 +432,7 @@ _imu_conf imu_conf;
 void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     uint8_t state=cmd->subcommand_data[0];
-    printf("set imu state:%d\r\n",state);
+    //printf("set imu state:%d\r\n",state);
     imu_conf.state=state;
     imu_mode=state;
     //0x00 disable 0x01 enable
@@ -458,7 +448,7 @@ void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
 void ns_subcommand_set_imu_conf(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     imu_mode=cmd->subcommand_data[0];
-    printf("set imu mode to:%d\r\n",imu_mode);
+    //printf("set imu mode to:%d\r\n",imu_mode);
     if(!imu_conf.state){
         imu_conf.state=0x01;
         //todo : set imu conf to default
@@ -480,7 +470,7 @@ void ns_subcommand_set_imu_register(NS_SUBCOMMAND_CB_PARAM){
     uint8_t addr=cmd->subcommand_data[0];
     uint8_t value=cmd->subcommand_data[2];
     imu_set_reg(addr,value,0xff);
-    printf("imu set reg addr:%d value:%d\r\n",addr,value);
+    //printf("imu set reg addr:%d value:%d\r\n",addr,value);
     //exit(0);
 }
 
@@ -497,7 +487,7 @@ void ns_subcommand_read_imu_register(NS_SUBCOMMAND_CB_PARAM){
     _ns_subcommand_set_ack(cmd->subcommand_id,0xC0);
     pkt.data.subcommand_report.subcommand_data[0]=addr;
     pkt.data.subcommand_report.subcommand_data[1]=cnt;
-    printf("imu read reg addr:%d cnt:%d\r\n",addr,cnt);
+    //printf("imu read reg addr:%d cnt:%d\r\n",addr,cnt);
     i2c_read_continuous(addr, pkt.data.subcommand_report.subcommand_data+2, cnt);
     pkt.len=SUBC_REPORT_READ_IMU_REGISTER_BASIC_LENGTH+cnt;
     ns_send_report(&pkt);
@@ -508,7 +498,7 @@ void ns_subcommand_set_rumble_state(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     rumble_state=cmd->subcommand_data[0];
     //hd_rumble_set_status(rumble_state);
-    //printf("set rumble state %d\r\n",rumble_state);
+    ////printf("set rumble state %d\r\n",rumble_state);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;

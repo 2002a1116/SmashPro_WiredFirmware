@@ -53,7 +53,7 @@ all: CH32V103C8T6_USB.elf secondary-outputs
 
 # 工具调用
 CH32V103C8T6_USB.elf: $(OBJS) $(USER_OBJS)
-	@	@	riscv-none-elf-gcc -march=rv32imac -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized  -g -T "D:\WCH\CH32V103C8T6_USB\Ld\Link.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"CH32V103C8T6_USB.map" --specs=nano.specs --specs=nosys.specs  -o "CH32V103C8T6_USB.elf" $(OBJS) $(USER_OBJS) $(LIBS) -lprintfloat
+	@	@	riscv-none-elf-gcc -march=rv32imac -mabi=ilp32 -msmall-data-limit=8 -msave-restore -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized  -g -T "D:\WCH\CH32V103C8T6_USB\Ld\Link.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"CH32V103C8T6_USB.map" --specs=nano.specs --specs=nosys.specs -o "CH32V103C8T6_USB.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@	@
 CH32V103C8T6_USB.hex: CH32V103C8T6_USB.elf
 	@	riscv-none-elf-objcopy -O ihex "CH32V103C8T6_USB.elf"  "CH32V103C8T6_USB.hex"

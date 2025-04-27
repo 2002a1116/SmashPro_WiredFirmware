@@ -233,7 +233,7 @@ PWR_VDD PWR_VDD_SupplyVoltage(void)
 {
 
     PWR_VDD VDD_Voltage = PWR_VDD_3V3;
-    SysTick_Init();
+    //SysTick_Init();
     RCC_APB1PeriphClockCmd( RCC_APB1Periph_PWR, ENABLE);
     PWR_PVDLevelConfig(PWR_PVDLevel_MODE6);
     PWR_PVDCmd(ENABLE);

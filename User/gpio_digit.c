@@ -10,7 +10,7 @@
 #include "ch32v10x_rcc.h"
 #include "usbd_compatibility_hid.h"
 #include "gpio_digit.h"
-
+uint32_t sts_button;
 uint32_t hid_num_to_gpio[GPIO_INPUT_CNT]={};
 void gpio_tb_init(){
     hid_num_to_gpio[NS_BUTTON_LS]=GPIO_BUTTON_LS;
@@ -31,7 +31,7 @@ void gpio_tb_init(){
     hid_num_to_gpio[NS_BUTTON_PLUS]=GPIO_BUTTON_PLUS;
     hid_num_to_gpio[NS_BUTTON_HOME]=GPIO_BUTTON_HOME;
     hid_num_to_gpio[NS_BUTTON_CAP]=GPIO_BUTTON_CAP;
-    printf("board_type %d\r\n",PCB_TYPE);
+    //printf("board_type %d\r\n",PCB_TYPE);
 }
 void gpio_init(void){
     gpio_tb_init();
@@ -41,10 +41,11 @@ void gpio_init(void){
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);-
     GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IPU;//input pullup
+
     //GPIO_InitStructure.GPIO_Speed=;input dont need
     for(int i=0;i<GPIO_INPUT_CNT;++i){
         if(hid_num_to_gpio[i]&GPIOA_PIN_MASK){//gpio group A
-            printf("set gpio a %d\r\n",(uint16_t)hid_num_to_gpio[i]);
+            ////printf("set gpio a %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=hid_num_to_gpio[i];
         }
     }
@@ -52,7 +53,7 @@ void gpio_init(void){
     GPIO_InitStructure.GPIO_Pin=0;
     for(int i=0;i<GPIO_INPUT_CNT;++i){
         if(hid_num_to_gpio[i]&GPIOB_PIN_MASK){//gpio group B
-            printf("set gpio b %d\r\n",(uint16_t)hid_num_to_gpio[i]);
+            ////printf("set gpio b %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=hid_num_to_gpio[i];
         }
     }
@@ -60,7 +61,7 @@ void gpio_init(void){
     GPIO_InitStructure.GPIO_Pin=0;
     for(int i=0;i<GPIO_INPUT_CNT;++i){
         if(hid_num_to_gpio[i]&GPIOC_PIN_MASK){//gpio group C
-            printf("set gpio c %d\r\n",(uint16_t)hid_num_to_gpio[i]);
+            ////printf("set gpio c %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=hid_num_to_gpio[i];
         }
     }
@@ -86,7 +87,7 @@ uint32_t gpio_read_all(void){
             break;
         }
         //if(!ret)
-        //    printf("set %d\r\n",i);
+        //    //printf("set %d\r\n",i);
         res|=((!ret)<<i);
     }
     return res;

@@ -12,6 +12,7 @@
 #include "imu_quaternion.h"
 #include "conf.h"
 #include "tick.h"
+#include "watchdog.h"
 #include <string.h>
 #pragma pack(push,1)
 uint8_t imu_upd_cnt;
@@ -25,10 +26,10 @@ float imu_ratio_xf,imu_ratio_yf,imu_ratio_zf;
 uint8_t imu_set_reg(uint8_t reg,uint8_t value,uint8_t mask)
 {
     uint8_t buf,ret=0;
-    if(ret=i2c_read_byte(reg, &buf))
+    if(ret=i2c_read_byte(reg, &buf)){
         return ret;
+    }
     buf = (buf&(~mask))|value;
-    //buf |= rate;
     ret=i2c_write_byte(reg, buf);
     return ret;
 }
@@ -38,83 +39,77 @@ void imu_set_acc_bandwidth(uint8_t BW0XL, uint8_t ODR)
     imu_set_reg(LSM6DS3TRC_CTRL1_XL, BW0XL, 0);
     imu_set_reg(LSM6DS3TRC_CTRL8_XL, ODR, 0);
 }
+uint32_t imu_read_cnt,imu_read_fail_cnt;
 uint8_t imu_read(){
     static uint8_t status=0;
-    uint8_t ret;
+    static uint8_t ret;
     if(ret=i2c_read_byte(LSM6DS3TRC_STATUS_REG, &status)){
-        printf("imu status read fail,i2c error code:%d\r\n",i2c_error_code);
+        ++imu_read_cnt;
+        ++imu_read_fail_cnt;
         return ret;
     }
-    /*gyo_data=imu_raw_buf;
-    acc_data=&(imu_raw_buf[3]);*/
-    //memset(imu_raw_buf,0,12);
-    //acc_available=gyo_available=1;
     if((status&LSM6DS3TRC_STATUS_ACCELEROMETER)&&(status&LSM6DS3TRC_STATUS_GYROSCOPE)){
-        if(!i2c_read_continuous(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
-            return 0;
-        }
-        else {
+        ++imu_read_cnt;
+        if(i2c_read_continuous(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
+            ++imu_read_fail_cnt;
             return 1;
         }
-    }
-    /*
-    if(status&LSM6DS3TRC_STATUS_ACCELEROMETER){
-        if(!i2c_read_continuous(LSM6DS3TRC_OUTX_L_XL, imu_raw_buf+3, 6)){
-            acc_available=1;
+        else {
+            return 0;
         }
     }
-    if(status&LSM6DS3TRC_STATUS_GYROSCOPE){
-        if(!i2c_read_continuous(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 6)){
-            gyo_available=1;
-        }
-    }
-    factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=(acc_available<<4)+gyo_available;
-    if(acc_available&&gyo_available)
-    {
-        gyo_available=acc_available=0;
-        return 0;
-    }*/
     return 2;
 }
 void set_imu_awake()
 {
-    uint8_t ret=0;
-    ret = imu_set_reg(0x12,0x01,0xff);
-    printf("set_imu_awake 1\r\n");
-    Delay_Ms(100);
-    ret = imu_set_reg(0x13, 0x80, 0xFF);//if we set DRDY_MASK,imu seems crash?
-    printf("set_imu_awake 7 %d\r\n",ret );
-    ret = imu_set_reg(0x10,0x8e,0xff);
-    printf("set_imu_awake 2 %d\r\n",ret );
-    ret = imu_set_reg(0x11,0x5c,0xff);
-    printf("set_imu_awake 3 %d\r\n",ret );
-    //ret = imu_set_reg(LSM6DS3TRC_CTRL1_XL,0x0E,0x0f);//8g + 100hz aa
-    //printf("set_imu_awake 4 %d\r\n",ret );
-    //ret = imu_set_reg(LSM6DS3TRC_CTRL2_G,0x0C,0x0f);//2000dps
-    //printf("set_imu_awake 5 %d\r\n",ret );
-    //imu_set_acc_bandwidth(LSM6DS3TRC_ACC_BW0XL_400HZ, LSM6DS3TRC_ACC_LOW_PASS_ODR_100);
-    //ret = imu_set_reg(0x0a, 0b00110110, 0xff);
-    ret = imu_set_reg(0x12,0x44,0xff);//set Block Data Update
-    printf("set_imu_awake 6 %d\r\n",ret );
-    ret = imu_set_reg(0x14, 0x00, 0xFF);
-    printf("set_imu_awake 8 %d\r\n",ret );
-    ret = imu_set_reg(0x15, 0x00, 0xFF);
-    printf("set_imu_awake 9 %d\r\n",ret );
-    ret = imu_set_reg(0x16, 0x00, 0xff);
-    printf("set_imu_awake 10 %d\r\n",ret );
-    ret = imu_set_reg(0x17, 0x84, 0xFF);
-    //ret = imu_set_reg(0x17, 0x00, 0xFF);
-    printf("set_imu_awake 11 %d\r\n",ret );
-    ret = imu_set_reg(0x18, 0x38, 0xFF);
-    printf("set_imu_awake 12 %d\r\n",ret );
-    ret = imu_set_reg(0x19, 0x3C, 0xFF);
-    printf("set_imu_awake 13 %d\r\n",ret );
-    /*ret = imu_set_reg(0x1B, 0x0F, 0xFF);
-    printf("set_imu_awake 13 %d\r\n",ret );
-    ret = imu_set_reg(0x1D, 0x02, 0xFF);
-    printf("set_imu_awake 13 %d\r\n",ret );*/
+    uint8_t ret=0,retry=5;
+    retry=5;
+    do{
+        ret = imu_set_reg(0x12,0x01,0xff);
+    }while(ret&&retry--);
+    Delay_Ms(10);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x13, 0x80, 0xFF);//if we set DRDY_MASK,imu seems crash?
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x10,0x8e,0xff);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x11,0x5c,0xff);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x12,0x44,0xff);//set Block Data Update
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x14, 0x00, 0xFF);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x15, 0x00, 0xFF);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x16, 0x00, 0xff);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x17, 0x84, 0xFF);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x18, 0x38, 0xFF);
+    }while(ret&&retry--);
+    retry=5;
+    do{
+        ret = imu_set_reg(0x19, 0x3C, 0xFF);
+    }while(ret&&retry--);
     //todo:not sure about hpf freq.
-    imu_rdy=1;
+    imu_rdy=!ret;
 }
 void set_imu_sleep()
 {
@@ -139,20 +134,21 @@ void imu_upd()
 {
     static uint32_t last_upd=0;
     rep=&imu_pack_buf[imu_buf_pos];
-    if(user_config.imu_disabled)
+    if(user_config.imu_disabled){
+        memset(rep,0,IMU_GYO_SIZE*6);
+        set_imu_available(rep);
         return;//disabled mask
+    }
     if(!i2c_status)return;
     if(!imu_mode)return;
     if(!imu_upd_cnt)
         imu_upd_cnt=3;
     uint32_t tick=Get_Systick_US();
-    //if(tick<last_imu_upd+IMU_UPD_GAP)
     if(tick-last_imu_upd<user_config.imu_sample_gap)
         return;
-    //HighPrecisionTimerStart();
     if(imu_read())
     {
-        printf("error on %d\r\n",Get_Systick_US());
+        //printf("error on %d\r\n",Get_Systick_MS());
         return;
     }else {
         for(int i=0;i<6;++i)
@@ -160,7 +156,7 @@ void imu_upd()
         ++imu_sample_cnt;
         last_imu_upd=tick;
     }
-    if(tick>=last_upd+IMU_FLASH_GAP)
+    if(tick-last_upd>=IMU_FLASH_GAP)
     {
         imu_sum[0]*=imu_ratio_xf;
         imu_sum[1]*=imu_ratio_yf;
@@ -175,6 +171,7 @@ void imu_upd()
         memset(imu_sum,0,sizeof(imu_sum));
         last_upd=tick;
         //upd acc
+
         memcpy(&rep->acc0,&rep->acc1,IMU_ACC_SIZE);
         memcpy(&rep->acc1,&rep->acc2,IMU_ACC_SIZE);
         memcpy(&rep->acc2,imu_raw_buf+3,IMU_ACC_SIZE);
@@ -190,7 +187,7 @@ void imu_upd()
         }else if(imu_mode==0x02){
             imu_upd2(rep);
         }else{//it seems theres a mode 0x03,but we dont know whats it is. and i cant be bother to reverse engineer it
-            //printf("unknowed imu mode:%d\r\n",imu_mode);
+            ////printf("unknowed imu mode:%d\r\n",imu_mode);
         }
         if(!--imu_upd_cnt)
         {

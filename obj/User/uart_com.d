@@ -27,7 +27,10 @@ User/uart_com.o: ../User/uart_com.c D:\WCH\CH32V103C8T6_USB\Debug/debug.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h \
  ../User/ch32v10x_usbfs_device.h ../User/usb_desc.h ../User/ring_buffer.h \
- ../User/ns_com.h ../User/ns_com_mux.h ../User/uart_com.h
+ ../User/usbd_compatibility_hid.h ../User/ns_com.h ../User/gpio_digit.h \
+ ../User/board_type.h ../User/ns_com_mux.h ../User/uart_com.h \
+ ../User/uart.h ../User/global_api.h ../User/spi.h ../User/conf.h \
+ ../User/pwr.h
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
 D:\WCH\CH32V103C8T6_USB\Core/core_riscv.h:
@@ -59,6 +62,14 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/ch32v10x_usbfs_device.h:
 ../User/usb_desc.h:
 ../User/ring_buffer.h:
+../User/usbd_compatibility_hid.h:
 ../User/ns_com.h:
+../User/gpio_digit.h:
+../User/board_type.h:
 ../User/ns_com_mux.h:
 ../User/uart_com.h:
+../User/uart.h:
+../User/global_api.h:
+../User/spi.h:
+../User/conf.h:
+../User/pwr.h:

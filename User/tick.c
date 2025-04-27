@@ -12,7 +12,7 @@ void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 volatile uint32_t Systick_MS;
 static uint16_t const * const Systick_CLK=&TIM2->CNT;
 void _systick_init(void){
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); //使能定时器2时钟
+    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); //使能定时器2时钟
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;//定义定时器2结构体
     TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1;//设置时钟分频因子
     TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up;//设置计数模式为向上计数
@@ -36,7 +36,7 @@ void SysTick_Init(void)//定时器2初始化函数
     inited=1;
     _systick_init();
 
-    printf("systick init comp\r\n");
+    //printf("systick init comp\r\n");
 }
 
 void TIM2_IRQHandler(void)//定时器2中断服务函数，硬件自动调用，不需要手动调用
@@ -70,7 +70,7 @@ inline void _set_systick_cmp(uint64_t n){
     SysTick->CMPHR1 = n>>40;
     SysTick->CMPHR2 = n>>48;
     SysTick->CMPHR3 = n>>56;
-    //printf("set systick :%llu %llu",n,(((uint64_t)*(uint32_t*)(&SysTick->CMPLR0))<<32)+*(uint32_t*)(&SysTick->CMPHR0));
+    ////printf("set systick :%llu %llu",n,(((uint64_t)*(uint32_t*)(&SysTick->CMPLR0))<<32)+*(uint32_t*)(&SysTick->CMPHR0));
 }
 void _reset_systick_cnt();
 inline void _reset_systick_cnt(){
@@ -87,17 +87,6 @@ void HighPrecisionTimer_Init(void)
 {
     p_us = SystemCoreClock / 8000000;
     p_ms = (uint16_t)p_us * 1000;
-    /*
-    if(Systick_Inited)return;
-    _reset_systick_cnt();
-    NVIC_SetPriority(SysTicK_IRQn, 0x0);
-    NVIC_EnableIRQ(SysTicK_IRQn);
-    SysTick->CTLR = 0x0001;
-    Systick_Inited=1;
-    Delay_Ms(50);
-    printf("%d \r\n",Get_Systick_MS(),Get_Systick_CLK());
-    */
-    //exit(0);
 }
 void HighPrecisionTimerCmd(uint8_t status){
     SysTick->CTLR=status;
@@ -113,38 +102,34 @@ uint64_t HighPrecisionTimerCnt(){
 uint64_t HighPrecisionTimerUs(){
     return HighPrecisionTimerCnt()/p_us;
 }
-uint8_t execute_blocking_us(uint8_t (*func)(void*),void* param,uint32_t n)
+void HighPrecisionTimerDelayUs(uint32_t us){
+    HighPrecisionTimerStart();
+    us*=p_us;
+    while(HighPrecisionTimerCnt()<us);
+}
+uint8_t wait_nonblocking_us(uint8_t (*func)(void*),void* param,uint32_t n)
 {
     if(!func)return 0;
     volatile uint32_t tp=Get_Systick_US();
-    volatile uint32_t target=tp+n;
-    uint8_t flag=1;
-    if(target<tp)//overflowed,than wait it to be smaller first;
-        flag=0;
-    //printf("execute us now:%d tar:%d\r\n",tp,target);
+    //volatile uint32_t target=tp+n;
+    ////printf("execute us now:%d tar:%d\r\n",tp,target);
     while(1){
         if(func(param))
             return 0;
-        tp=Get_Systick_US();
-        if(tp<=target)flag=1;
-        else if(flag&&tp>target){
+        if(Get_Systick_US()-tp>n){
             return !func(param);
         }
     }
     return 1;
 }
-uint8_t execute_blocking_ms(uint8_t (*func)(void*),void* param,uint32_t n)
+uint8_t wait_nonblocking_ms(uint8_t (*func)(void*),void* param,uint32_t n)
 {
     if(!func)return 0;
-    volatile uint32_t target=Systick_MS+n;
-    volatile uint8_t flag=1;
-    if(target<Systick_MS)//overflowed,than wait it to be smaller first;
-        flag=0;
+    volatile uint32_t tp=Systick_MS;
     while(1){
         if(func(param))
             return 0;
-        if(Systick_MS<=target)flag=1;
-        if(flag&&Systick_MS>target)
+        if(Systick_MS-tp>n)
             return !func(param);
     }
     return 1;
@@ -152,39 +137,10 @@ uint8_t execute_blocking_ms(uint8_t (*func)(void*),void* param,uint32_t n)
 void Delay_Us(uint32_t n)
 {
     volatile uint32_t tp=Get_Systick_US();
-    uint32_t target=tp+n;
-    volatile uint8_t flag=1;
-    if(target<tp)//overflowed,than wait it to be smaller first;
-        flag=0;
-    //printf("Delay_Us :%d\r\n",tp);
-    while(!(((tp=Get_Systick_US())>target)&&flag)){
-        //printf("systick us:%d target:%d\r\n",Systick_US,target);
-        if(tp<=target)
-            flag=1;
-    }
+    while(Get_Systick_US()-tp<=n);
 }
 void Delay_Ms(uint32_t n)
 {
-    uint32_t target=Systick_MS+n;
-    volatile uint8_t flag=1;
-    if(target<Systick_MS)//overflowed,than wait it to be smaller first;
-        flag=0;
-    //printf("delay ms :%d %d\r\n",Systick_MS,target);
-    while(!(flag&&Systick_MS>target)){
-        //printf("systick ms:%d target:%d\r\n",Systick_MS,target);
-        if(Systick_MS<=target)
-            flag=1;
-    }
-}/*
-void Delay_Clk(uint32_t n)
-{
-    uint32_t tp=Get_Systick_CLK();
-    uint32_t target=(tp+n);
-    uint8_t flag=(target>tp);
-    printf("Delay_Clk %d %d\r\n",target,Get_Systick_CLK());
-    while(!(((tp=Get_Systick_CLK())>target)&&flag)){
-        //printf("systick us:%d target:%d\r\n",Systick_US,target);
-        if(tp<=target)
-            flag=1;
-    }
-}*/
+    volatile uint32_t tp=Systick_MS;
+    while(Systick_MS-tp<=n);
+}

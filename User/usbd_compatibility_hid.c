@@ -13,6 +13,7 @@
 #include "ns_com.h"
 #include "ns_com_mux.h"
 #include "uart_com.h"
+#include "uart.h"
 #include "rumble.h"
 #include "imu.h"
 #include "tick.h"
@@ -20,6 +21,7 @@
 
 __attribute__ ((aligned(4))) uint8_t  HID_Report_Buffer[64];              // HID Report Buffer
 volatile uint8_t HID_Set_Report_Flag = SET_REPORT_DEAL_OVER;               // HID SetReport flag
+
 
 void (*get_peripheral_data)(peripheral_data*);
 peripheral_data global_input_data;
@@ -31,7 +33,7 @@ void ns_set_peripheral_data_getter(void (*getter)(peripheral_data*)){
 void update_peripheral_data(){
         if(!get_peripheral_data)
         {
-            printf("error no peripheral data getter set\r\n");
+            //printf("error no peripheral data getter set\r\n");
                //ESP_LOGE("","%s error no peripheral data getter set",__func__);
                return;
         }
@@ -64,13 +66,13 @@ uint8_t _unknown_thing()
   return out;
 }*/
 void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
-    //printf("rpt\r\n");
+    ////printf("rpt\r\n");
         //todo : support more report typ someday
         memset(rpt,0,sizeof(std_report));
         rpt->typ=input_mode;
         rpt->typ=0x30;
         if(!rpt){
-                printf("error rpt addr not set\r\n");
+                //printf("error rpt addr not set\r\n");
                 //ESP_LOGE("","%s error rpt not exist",__func__);
                 return;
         }
@@ -104,13 +106,13 @@ void hid_init()
 void hid_tx_service( void )
 {
     if(USBFS_Endp_Busy[DEF_UEP1]){//busy, so skip
-        //printf("busy %d\r\n",Get_Systick_MS());
+        ////printf("busy %d\r\n",Get_Systick_MS());
         return;
     }
-    //printf("not busy\r\n");
+    ////printf("not busy\r\n");
     if(ns_usb_send_rb.size)//special packet to send
     {
-        pkg_ptr=&ns_usb_send_rb.buf[ns_usb_send_rb.top*RING_BUFFER_MAX_PKG_SIZE];
+        pkg_ptr=&ns_usb_send_rb.buf[ns_usb_send_rb.top*NS_USB_RINGBUFFER_PKG_SIZE];
         pkg_len=ns_usb_send_rb.len[ns_usb_send_rb.top];
         pkg_typ=ns_usb_send_rb.typ[ns_usb_send_rb.top];
         ring_buffer_pop(&ns_usb_send_rb);
@@ -121,7 +123,7 @@ void hid_tx_service( void )
             break;
         case 0x01://hid report
             //if hid report,just send
-            //printf("hid raw\r\n");
+            ////printf("hid raw\r\n");
             memcpy(rpt,pkg_ptr,pkg_len);
             break;
         case 0x02:
@@ -153,77 +155,25 @@ void hid_tx_service( void )
     pkg_len=64;
     R16_UEP1_T_LEN = pkg_len;
     USBFS_Endp_Busy[DEF_UEP1] = 1;
-    R8_UEP1_CTRL = (R8_UEP1_CTRL & ~MASK_UEP_T_RES) | UEP_T_RES_ACK;
+    //R8_UEP1_CTRL being 0x40023436,we need to handle 4 byte at once.
+    __AMOAND_W(0x40023434,0xFFFCFFFF);
+    //here is a critical zone which isnt taken care of;is this the reason why usb will disconnect randomly?
+    //i hope so,this shit is starting to be irritating.
+    //R8_UEP1_CTRL = (R8_UEP1_CTRL & ~MASK_UEP_T_RES) | UEP_T_RES_ACK;
 }
-static uint8_t usb_rx_buf[RING_BUFFER_MAX_PKG_SIZE];
+static uint8_t usb_rx_buf[NS_USB_RINGBUFFER_PKG_SIZE];
 void hid_rx_service(){
     static cmd_packet pkt;
     uint8_t pkg_len=0;
     uint8_t* pbuf=usb_rx_buf;
-    if(RingBuffer_Comm.RemainPack)
-    {
-        //send_en++;
-        //pkg_len = Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_FS_PACK_SIZE];  // Get the valid data length
-        pkg_len=RingBuffer_Comm.PackLen[RingBuffer_Comm.DealPtr];
-        //printf("rx pkg len %d\r\n",pkg_len);
-        if (pkg_len)
-        {
-            if (pkg_len > ( DEF_USBD_FS_PACK_SIZE  ) )
-            {
-                pkg_len = DEF_USBD_FS_PACK_SIZE ;
-                // Limit the length of this transmission
-            }
-            NVIC_DisableIRQ(USBFS_IRQn);
-            // Disable USB interrupts
-            RingBuffer_Comm.RemainPack--;
-            //pbuf = &Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_FS_PACK_SIZE];
-            memcpy(pbuf,&Data_Buffer[(RingBuffer_Comm.DealPtr) * DEF_USBD_FS_PACK_SIZE],pkg_len);
-            RingBuffer_Comm.DealPtr++;
-            if(RingBuffer_Comm.DealPtr == DEF_Ring_Buffer_Max_Blks)
-            {
-                RingBuffer_Comm.DealPtr = 0;
-            }
-            //pkt.cmd=(cmd_std*)pbuf;
-            pkt.data=pbuf;
-            pkt.len=pkg_len;
-            //if(pkg_len!=64)exit(0);
-            NVIC_EnableIRQ(USBFS_IRQn);
-            //got data
-            //printf("pkg hid typ:%d\r\n",pbuf[0]);
-            hid_dispatch(&pkt);
-            /*if(ns_hid_packet_dispatch_tb[pbuf[0]]){
-                //printf("dispatched %d\r\n",pbuf[0]);
-                ns_hid_packet_dispatch_tb[pbuf[0]](&pkt);
-            }
-            else{
-                printf("dispatch fail typ:0x%02x\r\n",pbuf[0]);
-
-            }*/
-        }
-        else{
-            /* drop out */
-            NVIC_DisableIRQ(USBFS_IRQn);
-            // Disable USB interrupts
-            RingBuffer_Comm.RemainPack--;
-            RingBuffer_Comm.DealPtr++;
-            if(RingBuffer_Comm.DealPtr == DEF_Ring_Buffer_Max_Blks)
-            {
-                RingBuffer_Comm.DealPtr = 0;
-            }
-            NVIC_EnableIRQ(USBFS_IRQn);
-            // Enable USB interrupts
-        }
-    }
-
-    /* Monitor whether the remaining space is available for further downloads */
-    if(RingBuffer_Comm.RemainPack < (DEF_Ring_Buffer_Max_Blks - DEF_RING_BUFFER_RESTART))
-    {
-        if(RingBuffer_Comm.StopFlag)
-        {
-            printf("USB ring buffer full, stop receiving further data.\n");
-            RingBuffer_Comm.StopFlag = 0;
-            R8_UEP1_CTRL = (R8_UEP1_CTRL & ~MASK_UEP_R_RES) | UEP_R_RES_ACK;
-        }
+    if(ns_usb_recv_rb.size){
+        pkg_len=ns_usb_recv_rb.len[ns_usb_recv_rb.top];
+        memcpy(pbuf,&ns_usb_recv_buf[ns_usb_recv_rb.top*NS_USB_RINGBUFFER_PKG_SIZE],pkg_len);
+        //we minimize critical section with atomic instruction,maybe unexpected disconnecting will be solved.
+        ring_buffer_pop(&ns_usb_recv_rb);
+        pkt.data=pbuf;
+        pkt.len=pkg_len;
+        hid_dispatch(&pkt);
     }
 }
 
@@ -240,12 +190,12 @@ void HID_Set_Report_Deal()
     uint16_t i;
     if (HID_Set_Report_Flag == SET_REPORT_WAIT_DEAL)
     {
-        printf("Set Report:\n");
+        //printf("Set Report:\n");
         for (i = 0; i < 64; ++i)
         {
-            printf("%02x ",HID_Report_Buffer[i]);
+            //printf("%02x ",HID_Report_Buffer[i]);
         }
-        printf("\n");
+        //printf("\n");
         HID_Set_Report_Flag = SET_REPORT_DEAL_OVER;
         R8_UEP0_T_LEN = 0;
         R8_UEP0_CTRL = RB_UEP_R_TOG | RB_UEP_T_TOG | UEP_T_RES_ACK;

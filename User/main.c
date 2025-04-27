@@ -32,11 +32,13 @@
 #include <math.h>
 #include "debug.h"
 #include "string.h"
+#include "global_api.h"
 #include "ch32v10x_usbfs_device.h"
 #include "usbd_compatibility_hid.h"
 #include "gpio_adc.h"
 #include "gpio_digit.h"
 #include "ns_com_mux.h"
+#include "uart.h"
 #include "uart_com.h"
 #include "tick.h"
 #include "conf.h"
@@ -49,16 +51,11 @@
 #include "imu.h"
 #include "pwr.h"
 #include "spi.h"
+#include "watchdog.h"
 
 void Var_Init(void)
 {
-    RingBuffer_Comm.LoadPtr = 0;
-    RingBuffer_Comm.StopFlag = 0;
-    RingBuffer_Comm.DealPtr = 0;
-    RingBuffer_Comm.RemainPack = 0;
-    for(uint16_t i=0; i<DEF_Ring_Buffer_Max_Blks; ++i){
-        RingBuffer_Comm.PackLen[i] = 0;
-    }
+
 }
 enum ADC_CHANNEL_ID{
     ADC_CHANNEL_LJOYS_HORI=0,
@@ -67,7 +64,6 @@ enum ADC_CHANNEL_ID{
     ADC_CHANNEL_RJOYS_VERT
 };
 static uint8_t top_trigger=0;
-uint32_t sts_button;
 void button_upd_all(){
     if(!top_trigger)
         sts_button=gpio_read_all();
@@ -83,11 +79,6 @@ typedef struct{
 }js_sample;
 js_sample js_snapback_samples[2];
 //dif=0.8
-int32_t i32_clamp(int32_t v,int32_t min,int32_t max){
-    if(v<min)return min;
-    if(v>max)return max;
-    return v;
-}
 uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     static uint8_t set=0;
     //deadzone is fixed
@@ -187,42 +178,32 @@ void get_peripheral_data_handler(peripheral_data* data){
     data->rjoy_status=sts_rjoy;
 }
 static uart_packet pkt;
-static uint32_t input_update_tick;
-#define UART_REPORT_GAP (2)
-void send_input_with_uart(void)
-{
-    memset(&pkt,0,UART_PKG_SIZE);
-    pkt.typ=UART_PKG_INPUT_DATA;
-    pkt.id=1;//button status
-    pkt.load=global_input_data.button_status;
-    send_uart_pkt(&pkt);
-    pkt.id=2;//ljoy status
-    pkt.load=global_input_data.ljoy_status;
-    send_uart_pkt(&pkt);
-    pkt.id=3;//rjoy status
-    pkt.load=global_input_data.rjoy_status;
-    send_uart_pkt(&pkt);
-}
 static uint32_t top_tick=0;
 static uart_packet test_uart_pkt;
 static uint32_t routine_tick,routine_cnt=0,last_routine_cnt;
 void imu_read_test(){
     static uint32_t last_tick;
     static uint8_t id=0,res=0;
-    if(last_tick+5>Get_Systick_MS())
+    if(Get_Systick_MS()-last_tick>5)
         return;
     last_tick=Get_Systick_MS();
-    printf("imu read start\r\n");
+    //printf("imu read start\r\n");
     i2c_write_byte(0x04, 0b00001000);
     id=0;
     res=i2c_read_byte(IMU_ID,&id);
-    printf("imu id:0x%02x ,res:%d\r\n",id,res);
+    //printf("imu id:0x%02x ,res:%d\r\n",id,res);
 }
 void func_switch_task(){
-    static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0;
+    static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,fhf=0;
     static uint8_t save=0,upd=0;
     if(!top_trigger)return;
     upd=save=0;
+    if(!gpio_read(GPIO_BUTTON_A)){//cause hard fault
+        if(fhf){
+            //trigger_hardfault();
+        }
+        fhf=0;
+    }else   fhf=1;
     if(!gpio_read(GPIO_BUTTON_MINUS)){//imu switch
         if(f1){
             user_config.imu_disabled=!user_config.imu_disabled;
@@ -250,7 +231,7 @@ void func_switch_task(){
             //force_esp32_active=!force_esp32_active;
             pkt.typ=UART_PKG_PWR_CONTROL;
             pkt.id=0;
-            pkt.arr[0]=!force_esp32_active;
+            pkt.load[0]=!force_esp32_active;
             send_uart_pkt(&pkt);
             upd=1;
         }
@@ -260,7 +241,7 @@ void func_switch_task(){
         if(f5){
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=0;
-            pkt.arr[0]=1;
+            pkt.load[0]=1;
             send_uart_pkt(&pkt);
             upd=1;
         }
@@ -270,7 +251,7 @@ void func_switch_task(){
         if(f6){
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=5;
-            pkt.arr[0]=1;
+            pkt.load[0]=1;
             send_uart_pkt(&pkt);
             upd=1;
         }f6=0;
@@ -288,18 +269,7 @@ void top_timer(void){
         {
             if(Get_Systick_MS()-top_tick>100){
                 if(!top_trigger){
-                    printf("top triggered last cnt:%d\r\n",last_routine_cnt);
-                    printf("esp32_connect:%d\r\n",connection_state.esp32_connected);
-                    printf("UART1_Tx_Flag:%d\r\n",UART1_Tx_Flag);
-                    test_uart_pkt.typ=UART_PKG_TEST_ECHO;
-                    memcpy(test_uart_pkt.arr,"tst",3);
-                    uint8_t res=send_uart_pkt(&test_uart_pkt);
-                    printf("res:%d siz:%d cap:%d full:%d\r\n",res,uart_tx_rb.size,uart_tx_rb.capcity,uart_tx_rb.full);
-                    imu_read_test();
-                    //printf("imu data:%llu %llu\r\n",imu_rpt.acc_sample0.load,imu_rpt.gyo_sample0.load);
-                    printf("i2c error code:%d\r\n",i2c_error_code);
-                    printf("adc:%d %d\r\n",adc_data[ADC_CHANNEL_LJOYS_HORI]&0xfff,adc_data[ADC_CHANNEL_LJOYS_VERT]&0xfff);
-                    printf("i2c status:%d\r\n",i2c_status);
+                    printf("top pressed\r\n");
                 }
                 top_trigger=1;
             }
@@ -318,25 +288,11 @@ void ls_test()
     uint8_t res=!gpio_read(NS_BUTTON_LS);
     if(res)
     {
-        printf("ls down\r\n");
-    }
-}
-#define START_CONNECTION_GAP (2000)
-void start_connect(){
-    static uint32_t tick;
-    if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
-        return;
-    if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
-    connection_state.esp32_connected&&!connection_state.esp32_bt_state&&!connection_state.esp32_sleep||!connection_state.esp32_paired))
-    {
-        pkt.typ=UART_PKG_CONNECT_CONTROL;
-        pkt.id=0;
-        pkt.arr[0]=1;
-        send_uart_pkt(&pkt);
+        //printf("ls down\r\n");
     }
 }
 void routine_service(void){
-    //printf("routine service tick:%d %d %d\r\n",Get_Systick_MS(),SysTick->CNTL,SysTick->CMPLR);
+    ////printf("routine service tick:%d %d %d\r\n",Get_Systick_MS(),SysTick->CNTL,SysTick->CMPLR);
     ++rts_cnt;
     if(!rts_cnt)
         rts_tcnt=1;
@@ -348,9 +304,6 @@ void routine_service(void){
     push_waveform_into_buffer_task();
     imu_upd();
     func_switch_task();
-    start_connect();
-    //hd_rumble_high_acc_sequence_gen_task();
-    //next_rumble_frame();
 }
 void routine_service_init(void){
     top_init();
@@ -371,41 +324,18 @@ void set_peripherals_state(uint8_t state)
     USART_Cmd(USART1, state);
     USART_DMACmd(USART1, USART_DMAReq_Rx, state);
 }
-void wake_esp32()
-{
-    /*static GPIO_InitTypeDef  GPIO_InitStructure = {0};
-    GPIO_InitStructure.GPIO_Mode=GPIO_Mode_Out_OD;//input pullup
-    GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Pin=GPIO_Pin_2;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-    GPIO_WriteBit(GPIOB, GPIO_Pin_2, 0);*/
-    //we wake up with uart?
-    //Delay_Us(10);
-    pkt.typ=UART_PKG_PWR_CONTROL;
-    pkt.id=1;
-    pkt.arr[0]=0xff;
-    pkt.arr[1]=0xff;
-    pkt.arr[2]=0xff;
-    send_uart_pkt(&pkt);
-    top_init();
-}
 static uint8_t stop_flag;
 void init_all()
 {
-    if(stop_flag){
-        SetSysClock();
-        //SystemInit();
-    }
-    //stop_flag=0;
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-    NVIC_HaltPushCfg(ENABLE);
-    SystemCoreClockUpdate();
-    RCC->CFGR0 &= ~RCC_HPRE;
-    RCC->CFGR0 &= ~RCC_PPRE2;
-    RCC->CFGR0 &= ~RCC_PPRE1;
-    USART_Printf_Init(115200);
-    //printf("\r\n\r\nPROCON PROJECT\r\n");
+    //SetSysClock();//this seems not reenterable?why?
+    RCC->CTLR|=RCC_CSSON;
     RCC_LSICmd(ENABLE);
+    //RCC->CFGR0 &= ~RCC_HPRE;
+    //RCC->CFGR0 &= ~RCC_PPRE2;
+    //RCC->CFGR0 &= ~RCC_PPRE1;
+    USART_printf_Init(115200);
+    memset(&connection_state,0,sizeof(connection_state));
+    printf("\r\n\r\nPROCON PROJECT\r\n");
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
@@ -413,254 +343,42 @@ void init_all()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-    printf("\r\n\r\nPROCON PROJECT\r\n");
+    HighPrecisionTimer_Init();
     SysTick_Init();
-    Delay_Ms(500);
+    Delay_Ms(10);
+    conf_init();
     RCC_ClocksTypeDef rcc_clock;
     RCC_GetClocksFreq(&rcc_clock);
-    printf("RCC_GetClocksFreq:%d %d %d %d\r\n",
-            rcc_clock.SYSCLK_Frequency,rcc_clock.HCLK_Frequency,rcc_clock.PCLK1_Frequency,rcc_clock.PCLK2_Frequency);
-    HighPrecisionTimer_Init();
-    memset(&connection_state,0,sizeof(connection_state));
     Var_Init();
     gpio_init();
-    conf_init();
     UART1_Init();
-    UART1_DMA_Init();//why
-
+    UART1_DMA_Init();
     adc_init();
-    USBFS_RCC_Init();
     wake_esp32();
     routine_service_init();
     spi_init();
     i2c_init();
     imu_init();
     set_imu_awake();
-    uint8_t tmp=0;
-    i2c_read_byte(0x12, &tmp);
-    printf("init all %d\r\n",tmp);
-}
-void recv_esp32_connect_control()
-{
-    switch(pkt.id){
-    case 0:
-        memcpy(connection_state.bd_addr,pkt.arr,UART_PKG_ARR_LENGTH);
-        break;
-    case 1:
-        memcpy(connection_state.bd_addr+UART_PKG_ARR_LENGTH,pkt.arr,UART_PKG_ARR_LENGTH);
-        connection_state.bd_addr_set=1;
-        for(int i=0;i<BD_ADDR_LEN;++i){
-            if(connection_state.bd_addr[i]!=user_config.bd_addr[i]){
-                memcpy(user_config.bd_addr,connection_state.bd_addr,BD_ADDR_LEN);
-                custom_conf_write();
-            }
-        }
-        break;
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-        pkt.load^=0xAAAAAA;
-        memcpy(connection_state.bt_ltk+((pkt.id-2)*UART_PKG_ARR_LENGTH),pkt.arr,UART_PKG_ARR_LENGTH);
-        break;
-    case 7:
-        connection_state.bt_ltk[15]=pkt.arr[0]^0xAA;
-        connection_state.bt_ltk_get=1;
-        break;
-    case 0xC:
-        connection_state.esp32_paired=pkt.arr[0];
-        //printf("esp32_paired:%d\r\n",connection_state.esp32_paired);
-        break;
-    /*case 0xD:
-        connection_state.esp32_sleep=1;
-        break;*/
-    case 0xE:
-        connection_state.con_addr_set=0;
-        break;
-    case 0xF:
-        connection_state.esp32_bt_state=pkt.arr[0];
-        break;
-    default:
-        break;
-    }
-}
-//static hd_rumble_frame uart_frame;
-static uint8_t uart_rumble_buf[8];
-void recv_rumble_frame(){
-    static uint8_t sts=0;
-    switch(pkt.id)
-    {
-    case 0:
-        sts=1;
-        memcpy(uart_rumble_buf,pkt.arr,3);
-        break;
-    case 1:
-        if(sts!=1){//drop
-            sts=0;
-            break;
-        }
-        sts=2;
-        memcpy(uart_rumble_buf+3,pkt.arr,3);
-        break;
-    case 2:
-        if(sts!=2){//drop
-            sts=0;
-            break;
-        }
-        sts=0;
-        memcpy(uart_rumble_buf+6,pkt.arr,2);
-        /*printf("rumble frame:0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\r\n",
-                uart_rumble_buf[0],uart_rumble_buf[1],uart_rumble_buf[2],uart_rumble_buf[3],
-                uart_rumble_buf[4],uart_rumble_buf[5],uart_rumble_buf[6],uart_rumble_buf[7]);*/
-        decode_hd_rumble_multiformat_high_acc((hd_rumble_multiformat*)uart_rumble_buf, (hd_rumble_multiformat*)(uart_rumble_buf+4));
-        break;
-    default:
-        break;
-    }
-}
-void recv_pwr_control(){
-    switch(pkt.id){
-    case 0x00://force_esp32_active
-        force_esp32_active=pkt.arr[0];
-        flush_rgb(ENABLE);
-        break;
-    case 0x01:
-        connection_state.esp32_sleep=1;
-        break;
-    case 0x02://for wireless update,we use this to restart ch32 mcu.
-        flush_rgb(DISABLE);
-        Delay_Ms(10);
-        NVIC_SystemReset();
-        break;
-    default:
-        break;
-    }
-}
-void recv_esp32_pkg()
-{
-    switch(pkt.typ)
-    {
-    case UART_PKG_INPUT_REQ:
-        //printf("recv uart hb\r\n");
-        break;
-    case UART_PKG_CONNECT_CONTROL:
-        recv_esp32_connect_control();
-        break;
-    case UART_PKG_RUMBLE_FRAME:
-        recv_rumble_frame();
-        break;
-    case UART_PKG_PWR_CONTROL:
-        recv_pwr_control();
-        break;
-    default:
-        break;
-    }
-}
-void connection_state_handler()//decide if we go stop
-{
-    if(!connection_state.usb_enumed && connection_state.esp32_sleep)
-    {
-        set_peripherals_state(DISABLE);
-        set_imu_sleep();
-        stop_flag=set_pwr_mode_stop();
-        /*if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
-            NVIC_SystemReset();*/
-        //fail safe,try to reset everything
-        init_all();
-        set_peripherals_state(ENABLE);
-        wake_esp32();
-    }
-    else if(connection_state.esp32_connected&&!connection_state.esp32_sleep&&(input_update_tick+UART_REPORT_GAP<=Get_Systick_MS()))
-    {
-        input_update_tick=Get_Systick_MS();
-        if(connection_state.con_addr_set)//if esp32 recved,we set this flag to be zero
-        {
-            pkt.typ=UART_PKG_CONNECT_CONTROL;
-            pkt.id=3;
-            memcpy(pkt.arr,connection_state.con_addr,UART_PKG_ARR_LENGTH);
-            send_uart_pkt(&pkt);
-            pkt.id=4;
-            memcpy(pkt.arr,connection_state.con_addr+UART_PKG_ARR_LENGTH,UART_PKG_ARR_LENGTH);
-            send_uart_pkt(&pkt);
-        }
-        if(!connection_state.usb_paired)
-        {
-            send_input_with_uart();
-            //printf("send bt start\r\n");
-            if(!connection_state.bd_addr_set)
-            {
-                printf("send get bd addr cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=1;
-                //pkt.arr[0]=1;
-                send_uart_pkt(&pkt);
-            }
-            if(!connection_state.bt_ltk_get)
-            {
-                printf("send get     bt ltk cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=2;
-                //pkt.arr[0]=1;
-                send_uart_pkt(&pkt);
-            }
-            /*if(!(connection_state.esp32_bt_state&0x1))
-            {
-                //printf("send bt start cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=0;
-                pkt.arr[0]=1;
-                send_uart_pkt(&pkt);
-            }*/
-            //we active esp32 connect when user request
-        }
-        else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
-            if((connection_state.esp32_bt_state&0x1))
-            {
-                //printf("send bt stop cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=0;
-                pkt.arr[0]=0;
-                send_uart_pkt(&pkt);
-                //actively close bt connection
-            }
-        }
-
-    }
-}
-//code size cant be larger than 57,255byte,then we can have 4*128byte to save config
-//we really used up this chip dont we.
-//no its just flash addr starter not correct value,it start at 57kb,so we actually still have 6kb
-//reset start to 60k now.
-int main(void)
-{
-    init_all();
-    //printf("\r\n\r\nUSBFS Compatibility HID Example\r\n");
-    printf("SystemClk:%d\r\n",SystemCoreClock);
-
-    //flash_test();
-    //conf_init();
-
-    is_rumble_start=gpio_read(NS_BUTTON_HOME);
-    //is_rumble_start=1;
-
-    ns_mux_init();
-    ns_set_peripheral_data_getter(get_peripheral_data_handler);
-
-
-    /* Usb init */
     USBFS_RCC_Init();
     USBFS_Device_Init( ENABLE , PWR_VDD_SupplyVoltage());
+    //sofw_watchdog_init();
+}
+int main(void)
+{
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+    SystemCoreClockUpdate();
+    //NVIC_HaltPushCfg(ENABLE);
+    //seems every pfic(nvic) operation will influnce sysclock,and increase imu fail rate.
+    //dont know why.
+    //todo: figure it out.
+    init_all();
+    printf("SystemClk:%d\r\n",SystemCoreClock);
+    is_rumble_start=gpio_read(NS_BUTTON_HOME);
+    ns_mux_init();
+    ns_set_peripheral_data_getter(get_peripheral_data_handler);
     hid_init();
-    
-    /* Timer init */
-    //TIM2_Init();
     hd_rumble_init(!is_rumble_start);
-    //spi_init();
-    //hd_rumble_init(1,0);
-    //uint8_t send_input=0;
-    printf("init fin\r\n");
-    //while(1);
     routine_service_init();
 #define COMPILE_WL
     while(1)
@@ -670,13 +388,9 @@ int main(void)
 #endif
         joystick_debounce_task();
         get_peripheral_data_handler(&global_input_data);
-
         routine_service();
-        //continue;
-        //printf("enum %d\r\n",USBFS_DevEnumStatus);
         if(USBFS_DevEnumStatus){//usb
             connection_state.usb_enumed=1;
-            //printf("enum %d\r\n",USBFS_DevEnumStatus);
             hid_rx_service();
             hid_tx_service();
         }
@@ -684,16 +398,10 @@ int main(void)
             connection_state.usb_enumed=connection_state.usb_paired=0;
         }
 #ifdef COMPILE_WL
-        while(uart_rx_rb.size)
-        {
-            connection_state.esp32_connected=0x01;//if revice uart pkt from esp32,means it exist
-            memcpy(&pkt,&uart_rx_rb_buf[uart_rx_rb.top*UART_PKG_SIZE],UART_PKG_SIZE);
-            ring_buffer_pop(&uart_rx_rb);
-            recv_esp32_pkg();
-        }
-        connection_state_handler();
+        uart_com_task();
         UART1_Tx_Service();
 #endif
+        soft_watchdog_feed();
     }
 }
 

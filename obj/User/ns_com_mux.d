@@ -31,7 +31,7 @@ User/ns_com_mux.o: ../User/ns_com_mux.c ../User/ns_com_mux.h \
  ../User/usb_desc.h ../User/usbd_compatibility_hid.h ../User/rumble.h \
  ../User/hd_rumble.h ../User/tick.h ../User/hd_rumble2.h ../User/conf.h \
  ../User/i2c.h ../User/imu.h ../User/gpio_adc.h ../User/global_api.h \
- ../User/spi.h
+ ../User/spi.h ../User/watchdog.h
 ../User/ns_com_mux.h:
 ../User/ns_com.h:
 ../User/ring_buffer.h:
@@ -76,3 +76,4 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/gpio_adc.h:
 ../User/global_api.h:
 ../User/spi.h:
+../User/watchdog.h:

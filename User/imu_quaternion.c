@@ -109,7 +109,7 @@ void _imu_update_quaternion(imu_pack *acc,imu_pack *gyo, uint32_t timestamp) {
     _imu_rotate_quaternion(&_imu_quat_state, &newstate);
 
     _imu_quat_normalize(&_imu_quat_state);
-    //printf("new quat %f %f %f %f\r\n",_imu_quat_state.x,_imu_quat_state.y,_imu_quat_state.z,_imu_quat_state.w);
+    ////printf("new quat %f %f %f %f\r\n",_imu_quat_state.x,_imu_quat_state.y,_imu_quat_state.z,_imu_quat_state.w);
 
     _imu_quat_state.ax = acc->data[0];
     _imu_quat_state.ay = acc->data[1];
@@ -161,5 +161,5 @@ void switch_motion_pack_quat(quaternion_s *in, imu_report_pack *out)
 void imu_upd2(){
     _imu_update_quaternion(imu_res+3,imu_res,Get_Systick_US());
     switch_motion_pack_quat(&_imu_quat_state, &imu_pack_buf[imu_buf_pos]);
-    //printf("imu ipd2 clk:%d\r\n",HighPrecisionTimerCnt());
+    ////printf("imu ipd2 clk:%d\r\n",HighPrecisionTimerCnt());
 }

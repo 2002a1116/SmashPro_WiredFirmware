@@ -12,7 +12,7 @@
 #include "ring_buffer.h"
 #include "debug.h"
 #define HD_RUMBLE_FRAME_TIME_MS (5)
-#define HD_RUMBLE_FRAME_TIMEOUT_MS (32)
+#define HD_RUMBLE_FRAME_TIMEOUT_MS (1000)
 #define HD_RUMBLE_HIGH (0)
 #define HD_RUMBLE_LOW (1)
 #define HD_RUMBLE_PWM_L (0)

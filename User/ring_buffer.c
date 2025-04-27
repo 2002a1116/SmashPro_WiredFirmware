@@ -8,7 +8,6 @@
 #include "ring_buffer.h"
 #include "debug.h"
 #include <string.h>
-#include "uart_com.h"
 
 uint8_t ring_buffer_init(pring_buffer rb,uint8_t* buf,uint8_t cap,uint8_t pkt_size){
     if(cap>RING_BUFFER_MAX_PKG_CNT)return -1;
@@ -22,17 +21,15 @@ uint8_t ring_buffer_init(pring_buffer rb,uint8_t* buf,uint8_t cap,uint8_t pkt_si
     rb->pkt_size=pkt_size;
     return 0;
 }
-
 uint8_t ring_buffer_push(pring_buffer rb,uint8_t* ptr,uint8_t len,uint8_t typ){
     if(!rb||!ptr||!rb->buf)return -1;
     if(rb->full||rb->capcity<=rb->size)return 1;
     if(len>rb->pkt_size)len=rb->pkt_size;
-    ++rb->size;
+    //++rb->size;
+    __AMOADD_W(&rb->size,1);
     ++rb->end;
     if(rb->end>=rb->capcity)rb->end=0;
     memcpy(&rb->buf[rb->pkt_size*rb->end],ptr,len);
-    if(!uart_tx_rb.capcity)
-        printf("ps:%d ed:%d cap:%d len:%d\r\n",rb->pkt_size,rb->end,rb->capcity,len);
     rb->len[rb->end]=len;
     rb->typ[rb->end]=typ;
     if(rb->size>=rb->capcity)
@@ -43,7 +40,8 @@ uint8_t ring_buffer_push(pring_buffer rb,uint8_t* ptr,uint8_t len,uint8_t typ){
 uint8_t ring_buffer_pop(pring_buffer rb){
     if(!rb||!rb->buf)return -1;
     if(rb->size==0)return 0;
-    --rb->size;
+    //--rb->size;
+    __AMOADD_W(&rb->size,-1);
     ++rb->top;
     if(rb->top>=rb->capcity)rb->top=0;
     if(rb->full)

@@ -18,7 +18,7 @@ const uint8_t  MyDevDescr[] =
 {
     0x12,                                               // bLength
     0x01,                                               // bDescriptorType (Device)
-    0x00, 0x02,                                         // bcdUSB 2.00
+    0x02, 0x00,                                         // bcdUSB 2.00
     0x00,                                               // bDeviceClass (Use class information in the Interface Descriptors)
     0x00,                                               // bDeviceSubClass
     0x00,                                               // bDeviceProtocol

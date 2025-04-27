@@ -26,9 +26,11 @@ C_SRCS += \
 ../User/spi.c \
 ../User/system_ch32v10x.c \
 ../User/tick.c \
+../User/uart.c \
 ../User/uart_com.c \
 ../User/usb_desc.c \
-../User/usbd_compatibility_hid.c 
+../User/usbd_compatibility_hid.c \
+../User/watchdog.c 
 
 OBJS += \
 ./User/ch32v10x_it.o \
@@ -52,9 +54,11 @@ OBJS += \
 ./User/spi.o \
 ./User/system_ch32v10x.o \
 ./User/tick.o \
+./User/uart.o \
 ./User/uart_com.o \
 ./User/usb_desc.o \
-./User/usbd_compatibility_hid.o 
+./User/usbd_compatibility_hid.o \
+./User/watchdog.o 
 
 C_DEPS += \
 ./User/ch32v10x_it.d \
@@ -78,9 +82,11 @@ C_DEPS += \
 ./User/spi.d \
 ./User/system_ch32v10x.d \
 ./User/tick.d \
+./User/uart.d \
 ./User/uart_com.d \
 ./User/usb_desc.d \
-./User/usbd_compatibility_hid.d 
+./User/usbd_compatibility_hid.d \
+./User/watchdog.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

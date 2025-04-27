@@ -36,12 +36,12 @@ void conf_init()
             user_calibration.internal_center[i]=2048;
     }
 
-/*    printf("user cali magic:%d\r\n",user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber);
+/*    //printf("user cali magic:%d\r\n",user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber);
     for(int i=0;i<9;++i)
     {
-        printf("0x%02x ",*(((uint8_t*)&user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserCalibrationValue)+i));
+        //printf("0x%02x ",*(((uint8_t*)&user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserCalibrationValue)+i));
     }
-    printf("\r\n");*/
+    //printf("\r\n");*/
     //0xb2 0xa1 0xf0 0x07 0x74 0x00 0x08 0x8b 0xf0 0x07 0x8a
     /*if(user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber!=0xa1b2)
     {
@@ -61,15 +61,15 @@ void conf_init()
         user_config.in_interval=8;
         user_config.out_interval=8;
         for(int i=0;i<4;++i){
-            user_config.joystick_ratio[i]=(i<2?48:48);
+            user_config.joystick_ratio[i]=(i<2?40:40);
             user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
-            user_config.dead_zone[i]=127;
+            user_config.dead_zone[i]=96;
         }
-        user_config.joystick_snapback_deadzone[0]=1200;
-        user_config.joystick_snapback_deadzone[1]=1200;
+        user_config.joystick_snapback_deadzone[0]=1400;
+        user_config.joystick_snapback_deadzone[1]=1400;
         user_config.dead_zone_mode=1;
         user_config.rgb_cnt=27;
-        user_config.imu_sample_gap=2500;
+        user_config.imu_sample_gap=1750;
         for(int i=0;i<user_config.rgb_cnt;++i){
             user_config.rgb_data[i].load=0xffffff;
         }
@@ -77,18 +77,19 @@ void conf_init()
         user_config.imu_ratio_y=127;
         user_config.imu_ratio_z=127;
         user_config.pro_fw_version=2;
-        user_config.joystick_snapback_filter_max_delay=10000;
+        user_config.joystick_snapback_filter_max_delay=12500;
         user_config.rumble_pattern=0;
         custom_conf_write();
     }
     conf_flush();
     MyCfgDescr[33]=user_config.out_interval;
     MyCfgDescr[40]=user_config.in_interval;
-    printf("interval %d %d \r\n",user_config.out_interval,user_config.in_interval);
-    printf("jsratio %d %d %d %d\r\n",user_config.joystick_ratio[0],
+    /*//printf("interval %d %d \r\n",user_config.out_interval,user_config.in_interval);
+    //printf("jsratio %d %d %d %d\r\n",user_config.joystick_ratio[0],
             user_config.joystick_ratio[1],user_config.joystick_ratio[2],user_config.joystick_ratio[3]);
-    printf("ampratio %d %d %d %d\r\n",user_config.hd_rumble_amp_ratio[0],
+    //printf("ampratio %d %d %d %d\r\n",user_config.hd_rumble_amp_ratio[0],
             user_config.hd_rumble_amp_ratio[1],user_config.hd_rumble_amp_ratio[2],user_config.hd_rumble_amp_ratio[3]);
+    */
     memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
 }
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
@@ -109,6 +110,9 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
     case 0x8000:
         memcpy(buf,((uint8_t*)&user_calibration)+(addr&0xff),size);
         break;
+    case 0xF000://user config
+        memcpy(buf,((uint8_t*)&user_config)+(addr&0xff),size);
+        break;
     default:
         break;
     }
@@ -127,10 +131,13 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
         flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
         break;
+    case 0xF000:
+        memcpy(((uint8_t*)&user_config)+(addr&0xff),(uint8_t*)buf,size);
+        break;
     default:
         break;
     }
-    //printf("conf write res: %d\r\n",flash_res);
+    ////printf("conf write res: %d\r\n",flash_res);
     return flash_res;
 }
 void custom_conf_read()
@@ -261,4 +268,5 @@ void conf_flush(){
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
+    uart_update_config();
 }

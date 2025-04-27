@@ -4,7 +4,7 @@
  * Version            : V1.0.0
  * Date               : 2020/04/30
  * Description        : This file contains all the functions prototypes for UART
- *                      Printf , Delay functions.
+ *                      //printf , Delay functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -19,7 +19,7 @@
 //while((*(__IO uint32_t *)0xE000F004) <= i) ;
 
 /*********************************************************************
- * @fn      USART_Printf_Init
+ * @fn      USART_//printf_Init
  *
  * @brief   Initializes the USARTx peripheral.
  *
@@ -27,7 +27,7 @@
  *
  * @return  None
  */
-void USART_Printf_Init(uint32_t baudrate)
+void USART_printf_Init(uint32_t baudrate)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
@@ -83,15 +83,15 @@ void USART_Printf_Init(uint32_t baudrate)
 }
 
 /*********************************************************************
- * @fn      SDI_Printf_Enable
+ * @fn      SDI_//printf_Enable
  *
- * @brief   Initializes the SDI printf Function.
+ * @brief   Initializes the SDI //printf Function.
  *
  * @param   None
  *
  * @return  None
  */
-void SDI_Printf_Enable(void)
+void SDI_printf_Enable(void)
 {
     *(DEBUG_DATA0_ADDRESS) = 0;
     //Delay_Init();
@@ -101,7 +101,7 @@ void SDI_Printf_Enable(void)
 /*********************************************************************
  * @fn      _write
  *
- * @brief   Support Printf Function
+ * @brief   Support //printf Function
  *
  * @param   *buf - UART send Data.
  *          size - Data length.

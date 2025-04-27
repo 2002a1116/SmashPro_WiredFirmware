@@ -151,7 +151,7 @@ void get_hd_rumble_pack(uint8_t id)
     if(pkg->low_freq&&ftmp>pkg->low_freq){
         ftmp=pkg->low_freq;
     }*/
-    //printf("lowf %f highf %f\r\n",pkg->low_freq/16384.0,pkg->high_freq/16384.0);
+    ////printf("lowf %f highf %f\r\n",pkg->low_freq/16384.0,pkg->high_freq/16384.0);
 }
 void deocde_hd_rumble_format1(VibrationAmFmPackFormatOne* pkg)
 {
@@ -314,6 +314,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     global_sample_channel=SAMPLE_CHANNEL_L;
     rumble_data_linear* ptr=NULL;
     //memset(sample,0,HD_RUMBLE_HIGH_ACC_PACK_SIZE);
+    decoded_cnt=0;
     switch(pkt->FromatZero.PackFormat)
     {
     case 0:
@@ -338,23 +339,16 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     case 3:
         decode_hd_rumble_format3(&pkt->FormatThree);
         break;
+    default:
+        break;
     }
     ptr=linear_samples;
+    decoded_cnt=i32_clamp(decoded_cnt, 0, 3);
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
-        /*sample.amp_high=(exp2_lookup_tb[lptr->hi_amp_linear]*user_config.hd_rumble_amp_ratio[0])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        sample.amp_low=(exp2_lookup_tb[lptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[2])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        printf("cal wave len:%d %d %d %d\r\n",lptr->hi_freq_linear,(exp2_lookup_tb[lptr->hi_freq_linear]),
-                (exp2_lookup_tb[lptr->lo_freq_linear]),(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/80/(
-                        ((exp2_lookup_tb[lptr->hi_freq_linear])*(exp2_lookup_tb[lptr->lo_freq_linear])/exp2_lookup_tb[192])));
-        sample.wave_len=(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(80LL*
-        (exp2_lookup_tb[lptr->hi_freq_linear])*exp2_lookup_tb[lptr->lo_freq_linear]+1);
-        sample.step_high=((uint32_t)((HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(80.0f*exp2_lookup_tb[lptr->hi_freq_linear]+1)*HD_RUMBLE_STEP))>>HD_RUMBLE_SAMPLERATE_SHIFT;
-        sample.step_low=((uint32_t)((HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(40.0f*exp2_lookup_tb[lptr->lo_freq_linear]+1)*HD_RUMBLE_STEP))>>HD_RUMBLE_SAMPLERATE_SHIFT;
-        ring_buffer_push(&hd_rumble_high_acc_rb_l,(void*)&sample,HD_RUMBLE_HIGH_ACC_PACK_SIZE,0);*/
         sample.amp=(exp2_lookup_tb[ptr->hi_amp_linear]*user_config.hd_rumble_amp_ratio[0])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
         sample.step=FULLSTEP/(1+exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
-        //printf("wave left low amp:%d step:%d amp linear:%d\r\n",sample.amp,sample.step,ptr->hi_amp_linear);
+        ////printf("wave left low amp:%d step:%d amp linear:%d\r\n",sample.amp,sample.step,ptr->hi_amp_linear);
         push_waveform(0,&sample);
         //ring_buffer_push(&left_high_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         sample.amp=(exp2_lookup_tb[ptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[2])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
@@ -391,6 +385,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     default:
         break;
     }
+    decoded_cnt=i32_clamp(decoded_cnt, 0, 3);
     ptr=linear_samples;
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
@@ -403,7 +398,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
         push_waveform(3,&sample);
         //ring_buffer_push(&right_low_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
     }
-    //printf("decoded")
+    ////printf("decoded")
 }
 /*
 static hd_rumble_frame rumble_frame[3];

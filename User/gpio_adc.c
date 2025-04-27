@@ -182,7 +182,7 @@ u16 Get_ConversionVal_5V(s16 val)
 
 void adc_init(void){
     ADC_Function_Init();
-    printf("CalibrattionValue:%d\r\n", Calibrattion_Val);
+    //printf("CalibrattionValue:%d\r\n", Calibrattion_Val);
     DMA_Tx_Init(DMA1_Channel1, (u32)&ADC1->RDATAR, (u32)adc_data, 4);
     //DMA_Cmd(DMA1_Channel1, ENABLE);
 

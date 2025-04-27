@@ -26,13 +26,13 @@ User/main.o: ../User/main.c D:\WCH\CH32V103C8T6_USB\Debug/debug.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h \
- ../User/ch32v10x_usbfs_device.h ../User/usb_desc.h \
- ../User/usbd_compatibility_hid.h ../User/ns_com.h ../User/gpio_adc.h \
- ../User/gpio_digit.h ../User/board_type.h ../User/ns_com_mux.h \
- ../User/ring_buffer.h ../User/uart_com.h ../User/tick.h ../User/conf.h \
- ../User/flash.h ../User/hd_rumble.h ../User/hd_rumble2.h \
+ ../User/global_api.h ../User/ch32v10x_usbfs_device.h ../User/usb_desc.h \
+ ../User/ring_buffer.h ../User/usbd_compatibility_hid.h ../User/ns_com.h \
+ ../User/gpio_adc.h ../User/gpio_digit.h ../User/board_type.h \
+ ../User/ns_com_mux.h ../User/uart.h ../User/uart_com.h ../User/tick.h \
+ ../User/conf.h ../User/flash.h ../User/hd_rumble.h ../User/hd_rumble2.h \
  ../User/hd_rumble_high_accuracy.h ../User/i2c.h ../User/imu.h \
- ../User/pwr.h ../User/spi.h
+ ../User/pwr.h ../User/spi.h ../User/watchdog.h
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
 D:\WCH\CH32V103C8T6_USB\Core/core_riscv.h:
@@ -61,15 +61,17 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb_host.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h:
 D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
+../User/global_api.h:
 ../User/ch32v10x_usbfs_device.h:
 ../User/usb_desc.h:
+../User/ring_buffer.h:
 ../User/usbd_compatibility_hid.h:
 ../User/ns_com.h:
 ../User/gpio_adc.h:
 ../User/gpio_digit.h:
 ../User/board_type.h:
 ../User/ns_com_mux.h:
-../User/ring_buffer.h:
+../User/uart.h:
 ../User/uart_com.h:
 ../User/tick.h:
 ../User/conf.h:
@@ -81,3 +83,4 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/imu.h:
 ../User/pwr.h:
 ../User/spi.h:
+../User/watchdog.h:

@@ -20,6 +20,7 @@
 #include "string.h"
 #include "ch32v10x_usb.h"
 #include "usb_desc.h"
+#include "ring_buffer.h"
 
 /******************************************************************************/
 /* Global Define */
@@ -61,7 +62,10 @@
 #define DEF_RING_BUFFER_REMINE        4
 #define DEF_RING_BUFFER_RESTART       8
 
-/* Ring Buffer typedef */
+#define NS_USB_RINGBUFFER_PKG_CAP (24+1)
+#define NS_USB_RINGBUFFER_PKG_SIZE (64)
+
+/* Ring Buffer typedef *//*
 typedef struct __PACKED _RING_BUFF_COMM
 {
     volatile uint8_t LoadPtr;
@@ -69,7 +73,7 @@ typedef struct __PACKED _RING_BUFF_COMM
     volatile uint8_t RemainPack;
     volatile uint8_t PackLen[DEF_Ring_Buffer_Max_Blks];
     volatile uint8_t StopFlag;
-} RING_BUFF_COMM, pRING_BUFF_COMM;
+} RING_BUFF_COMM, pRING_BUFF_COMM;*/
 
 /* Setup Request Packets */
 #define pUSBFS_SetupReqPak                 ((PUSB_SETUP_REQ)USBFS_EP0_Buf)
@@ -99,10 +103,14 @@ extern __attribute__ ((aligned(4))) uint8_t USBFS_EP1_Buf[];
 
 /* USB IN Endpoint Busy Flag */
 extern volatile uint8_t  USBFS_Endp_Busy[ ];
+extern ring_buffer ns_usb_send_rb;
+extern ring_buffer ns_usb_recv_rb;
+extern uint8_t ns_usb_send_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
+extern uint8_t ns_usb_recv_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
 
 /* Ringbuffer variables */
-extern RING_BUFF_COMM  RingBuffer_Comm;
-extern __attribute__ ((aligned(4))) uint8_t  Data_Buffer[];
+//extern RING_BUFF_COMM  RingBuffer_Comm;
+//extern __attribute__ ((aligned(4))) uint8_t  Data_Buffer[];
 
 /******************************************************************************/
 /* external functions */

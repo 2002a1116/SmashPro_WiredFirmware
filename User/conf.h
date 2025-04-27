@@ -82,13 +82,21 @@ typedef struct _user_calibration_data{
         uint8_t Reserved1[16];
         struct{
             uint8_t nonexist;
-            uint16_t internal_center[4];//
-            uint8_t reserved[7];
+            uint16_t internal_center[4];
+            uint8_t tag;
+            uint8_t tag2;
+            uint8_t reserved[5];
         };
     };
     user_joystick_calibration_data UserJoystickCalibrationValue;
     user_imu_calibration_data UserSixAxisSensorCalibrationValue;
-    uint8_t Reserved2[8];
+    union{
+        uint8_t Reserved2[8];
+        struct{
+            uint32_t mcause;
+            uint32_t mepc;
+        };
+    };
 }user_calibration_data;
 typedef struct _rgb_data_complete{
     union{

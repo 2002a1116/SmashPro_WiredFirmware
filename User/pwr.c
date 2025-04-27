@@ -17,7 +17,6 @@
 #include "pwr.h"
 #include "debug.h"
 #include "gpio_digit.h"
-#include "uart_com.h"
 /*uint32_t light_sleep_exti_gpio[]={GPIO_BUTTON_LS,GPIO_BUTTON_RS,GPIO_BUTTON_X,GPIO_BUTTON_Y,GPIO_BUTTON_A,
         GPIO_BUTTON_B,GPIO_BUTTON_UP,GPIO_BUTTON_DOWN,GPIO_BUTTON_LEFT,GPIO_BUTTON_RIGHT,GPIO_BUTTON_L,GPIO_BUTTON_R,
         GPIO_BUTTON_ZL,GPIO_BUTTON_ZR,GPIO_BUTTON_MINUS,GPIO_BUTTON_PLUS,GPIO_BUTTON_HOME,GPIO_BUTTON_CAP,
@@ -101,7 +100,7 @@ uint8_t set_pwr_mode_stop(void){
     if(!RCC_GetFlagStatus(RCC_FLAG_LSIRDY))
         return 1;
     {
-        printf("PUT TO SLEEP\r\n");
+        //printf("PUT TO SLEEP\r\n");
         Delay_Ms(1);
         //set_pwr_mode_sleep();
         PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFE);
@@ -112,7 +111,7 @@ uint8_t set_pwr_mode_stop(void){
     //todo:wake esp32
     setup_exti(DISABLE);
     //Delay_Init();
-    //USART_Printf_Init(115200);
+    //USART_//printf_Init(115200);
     //wake esp32 through top button.
     //this is some clumsy fk but at least better than use the backup plan(wkup pin) as its also used as right joystick button.
     //fk espressif for write uart2 cant wake esp32 not in the sleep mode document

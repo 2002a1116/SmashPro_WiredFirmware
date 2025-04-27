@@ -14,8 +14,6 @@
 
 #define NS_STD_REPORT_BASIC_LENGTH (13)
 
-#define NS_USB_RINGBUFFER_PKG_CAP (4)
-#define NS_USB_RINGBUFFER_PKG_SIZE (64)
 #define BT_LTK_LENGTH (16)
 
 
@@ -31,12 +29,10 @@ struct __connection_state{
     uint8_t bd_addr_set;
     uint8_t con_addr_set;
     uint8_t bt_ltk[BT_LTK_LENGTH];
-    uint8_t bt_ltk_get;
+    uint8_t bt_ltk_set;
 };
 extern struct __connection_state connection_state;
 extern ring_buffer ns_usb_send_rb;
-extern uint8_t ns_usb_send_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
-extern uint8_t ns_usb_recv_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
 extern void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
 extern uint8_t is_rumble_start;
 extern uint32_t rts_cnt,rts_tcnt;

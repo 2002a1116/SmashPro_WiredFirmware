@@ -25,7 +25,9 @@ User/i2c.o: ../User/i2c.c D:\WCH\CH32V103C8T6_USB\Debug/debug.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb_host.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
- D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h ../User/i2c.h
+ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h ../User/i2c.h \
+ ../User/conf.h ../User/ns_com_mux.h ../User/ns_com.h \
+ ../User/ring_buffer.h ../User/watchdog.h
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
 D:\WCH\CH32V103C8T6_USB\Core/core_riscv.h:
@@ -55,3 +57,8 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h:
 D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/i2c.h:
+../User/conf.h:
+../User/ns_com_mux.h:
+../User/ns_com.h:
+../User/ring_buffer.h:
+../User/watchdog.h:

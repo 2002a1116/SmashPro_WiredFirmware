@@ -1,4 +1,5 @@
 #include "hd_rumble_high_accuracy.h"
+#include "global_api.h"
 void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 int16_t ccr_lookup_tb[]={
         0,3,6,9,12,15,18,21,25,28,31,34,37,40,43,
@@ -165,12 +166,12 @@ void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr)
     case 0:
         res=ring_buffer_push(&left_high_rb, (uint8_t*)ptr, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         //if(ptr->amp)
-        //    printf("high amp:%d\r\n",ptr->amp);
+        //    //printf("high amp:%d\r\n",ptr->amp);
         break;
     case 2:
         res=ring_buffer_push(&left_low_rb, (uint8_t*)ptr, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         //if(ptr->amp)
-        //    printf("low amp:%d\r\n",ptr->amp);
+        //    //printf("low amp:%d\r\n",ptr->amp);
         break;
     case 1:
         res=ring_buffer_push(&right_high_rb, (uint8_t*)ptr, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
@@ -181,14 +182,15 @@ void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr)
     default:
         break;
     }
-    if(res)
-        printf("waveform push error res:%d\r\n",res);
+    //if(res)
+        //printf("waveform push error res:%d\r\n",res);
 }
 void push_waveform_into_buffer_task()
 {
     if(left_high_buf_stdby&&left_high_rb.size){
         left_high_buf_stdby=0;
-        left_high_buf=*(hd_rumble_high_accurary_pack*)(&left_high_rb_buf[left_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
+        memcpy(&left_high_buf,&left_high_rb_buf[left_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE],HD_RUMBLE_HIGH_ACC_PACK_SIZE);
+        //left_high_buf=*(hd_rumble_high_accurary_pack*)(&left_high_rb_buf[left_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
         ring_buffer_pop(&left_high_rb);
         left_high_buf_rdy=1;
         /*if(left_high_buf.amp!=left_high.amp||left_high_buf.step!=left_high.step){
@@ -198,7 +200,8 @@ void push_waveform_into_buffer_task()
     }
     if(left_low_buf_stdby&&left_low_rb.size){
         left_low_buf_stdby=0;
-        left_low_buf=*(hd_rumble_high_accurary_pack*)(&left_low_rb_buf[left_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
+        memcpy(&left_low_buf,&left_low_rb_buf[left_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE],HD_RUMBLE_HIGH_ACC_PACK_SIZE);
+        //left_low_buf=*(hd_rumble_high_accurary_pack*)(&left_low_rb_buf[left_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
         ring_buffer_pop(&left_low_rb);
         left_low_buf_rdy=1;
         /*if(left_low_buf.amp!=left_low.amp||left_low_buf.step!=left_low.step){
@@ -208,7 +211,8 @@ void push_waveform_into_buffer_task()
     }
     if(right_high_buf_stdby&&right_high_rb.size){
         right_high_buf_stdby=0;
-        right_high_buf=*(hd_rumble_high_accurary_pack*)(&right_high_rb_buf[right_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
+        memcpy(&right_high_buf,&right_high_rb_buf[right_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE],HD_RUMBLE_HIGH_ACC_PACK_SIZE);
+        //right_high_buf=*(hd_rumble_high_accurary_pack*)(&right_high_rb_buf[right_high_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
         ring_buffer_pop(&right_high_rb);
         right_high_buf_rdy=1;
         /*if(right_high_buf.amp!=right_high.amp||right_high_buf.step!=right_high.step){
@@ -218,7 +222,8 @@ void push_waveform_into_buffer_task()
     }
     if(right_low_buf_stdby&&right_low_rb.size){
         right_low_buf_stdby=0;
-        right_low_buf=*(hd_rumble_high_accurary_pack*)(&right_low_rb_buf[right_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
+        memcpy(&right_low_buf,&right_low_rb_buf[right_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE],HD_RUMBLE_HIGH_ACC_PACK_SIZE);
+        //right_low_buf=*(hd_rumble_high_accurary_pack*)(&right_low_rb_buf[right_low_rb.top*HD_RUMBLE_HIGH_ACC_PACK_SIZE]);
         ring_buffer_pop(&right_low_rb);
         right_low_buf_rdy=1;
         /*if(right_low_buf.amp!=right_low.amp||right_low_buf.step!=right_low.step){
@@ -227,22 +232,16 @@ void push_waveform_into_buffer_task()
         }*/
     }
 }
-static uint32_t step_tmp;
 uint8_t step_forward(uint16_t* pos,uint32_t* sum,uint32_t step)//return if new cycle
 {
+    uint32_t step_tmp;
     if(!step)return 1;
     *sum+=HD_RUMBLE_STEP;
     if(*sum>=step){
         step_tmp=*sum/step;
         *pos+=step_tmp;
-        //*sum%=step;
         *sum-=step_tmp*step;
-        /*do{
-            *sum-=step;
-            *pos++;
-        }while(*sum>=step);*/
         if((*pos)>>HD_RUMBLE_SAMPLERATE_SHIFT){
-        //if(*pos>=2048){
             *pos&=0x7ff;
             return 1;
         }
@@ -251,16 +250,15 @@ uint8_t step_forward(uint16_t* pos,uint32_t* sum,uint32_t step)//return if new c
 }
 static int32_t tim3_irq_tmp;
 static uint32_t left_high_tick,left_low_tick,right_high_tick,right_low_tick,tim3_counter;
-#define HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT (250UL)
-uint8_t rumble_pattern_check(hd_rumble_high_accurary_pack* p,uint16_t* pos,uint32_t* sum,uint32_t* tick)
+#define HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT (50UL*HD_RUMBLE_FRAME_TIME_MS)
+#define HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT (50UL*HD_RUMBLE_FRAME_TIMEOUT_MS)
+uint8_t rumble_pattern_check(hd_rumble_high_accurary_pack* p,uint16_t* pos,uint32_t* sum,uint32_t tick)
 {
-    //static uint8_t res;
-    //if(user_config.config_bitmap1&(0x40))
     if(user_config.rumble_pattern){
-        return (!p->amp)||(step_forward(pos, sum, p->step)&&(tim3_counter-*tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT);
+        return (!p->amp)||(step_forward(pos, sum, p->step)&&(tim3_counter-tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT);
     }
     else {
-        return (!p->amp||step_forward(pos, sum, p->step))&&(tim3_counter-*tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT;
+        return (!p->amp||step_forward(pos, sum, p->step))&&(tim3_counter-tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT;
     }
 }
 void TIM3_IRQHandler(void)
@@ -268,59 +266,56 @@ void TIM3_IRQHandler(void)
     if(TIM_GetITStatus(TIM3,TIM_IT_Update)==1){
         ++tim3_counter;
         //we unroll the loop manually incase the compiler didnt
-        //if(!left_high.amp||(step_forward(&left_high_pos, &left_high_sum, left_high.step)&&(tim3_counter-left_high_tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT)){//if new cycle,try to replace it with new waveform
-        if(rumble_pattern_check(&left_high,&left_high_pos,&left_high_sum,&left_high_tick)){
+        if(rumble_pattern_check(&left_high,&left_high_pos,&left_high_sum,left_high_tick)){
             if(left_high_buf_rdy){
                 left_high_buf_rdy=0;
                 left_high=left_high_buf;
                 left_high_sum=left_high_pos=0;
                 left_high_buf_stdby=1;
                 left_high_tick=tim3_counter;
-            }
+            }/*else if(tim3_counter-left_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+                left_high.amp=0;
+            }*/
         }
-        if(rumble_pattern_check(&left_low,&left_low_pos,&left_low_sum,&left_low_tick)){
-        //if(!left_low.amp||(step_forward(&left_low_pos, &left_low_sum, left_low.step)&&(tim3_counter-left_low_tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT)){
+        if(rumble_pattern_check(&left_low,&left_low_pos,&left_low_sum,left_low_tick)){
             if(left_low_buf_rdy){
                 left_low_buf_rdy=0;
                 left_low=left_low_buf;
                 left_low_sum=left_low_pos=0;
                 left_low_buf_stdby=1;
                 left_low_tick=tim3_counter;
-            }
+            }/*else if(tim3_counter-left_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+                left_low.amp=0;
+            }*/
         }
-        if(rumble_pattern_check(&right_high,&right_high_pos,&right_high_sum,&right_high_tick)){
-        //if(!right_high.amp||(step_forward(&right_high_pos, &right_high_sum, right_high.step)&&(tim3_counter-right_high_tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT)){
+        if(rumble_pattern_check(&right_high,&right_high_pos,&right_high_sum,right_high_tick)){
             if(right_high_buf_rdy){
                 right_high_buf_rdy=0;
                 right_high=right_high_buf;
                 right_high_sum=right_high_pos=0;
                 right_high_buf_stdby=1;
                 right_high_tick=tim3_counter;
-            }
+            }/*else if(tim3_counter-right_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+                right_high.amp=0;
+            }*/
         }
-        if(rumble_pattern_check(&right_low,&right_low_pos,&right_low_sum,&right_low_tick)){
-        //if(!right_low.amp||(step_forward(&right_low_pos, &right_low_sum, right_low.step)&&(tim3_counter-right_low_tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT)){
+        if(rumble_pattern_check(&right_low,&right_low_pos,&right_low_sum,right_low_tick)){
             if(right_low_buf_rdy){
                 right_low_buf_rdy=0;
                 right_low=right_low_buf;
                 right_low_sum=right_low_pos=0;
                 right_low_buf_stdby=1;
                 right_low_tick=tim3_counter;
-            }
+            }/*else if(tim3_counter-right_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+                right_low.amp=0;
+            }*/
         }
         tim3_irq_tmp=((HD_RUMBLE_TIM_PERIOD_MID*((ccr_lookup_tb[left_high_pos]*left_high.amp)+
                 (ccr_lookup_tb[left_low_pos]*left_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
-        if(tim3_irq_tmp>HD_RUMBLE_TIM_PERIOD)tim3_irq_tmp=HD_RUMBLE_TIM_PERIOD;
-        else if(tim3_irq_tmp<0)tim3_irq_tmp=0;
-        //if(tim3_irq_tmp!=HD_RUMBLE_TIM_PERIOD_MID)
-        //    printf("irq cvr:%d\r\n",tim3_irq_tmp);
-        CHLCVR=tim3_irq_tmp;
+        CHLCVR=i32_clamp(tim3_irq_tmp,0,HD_RUMBLE_TIM_PERIOD);
         tim3_irq_tmp=((HD_RUMBLE_TIM_PERIOD_MID*((ccr_lookup_tb[right_high_pos]*right_high.amp)+
                 (ccr_lookup_tb[right_low_pos]*right_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
-        if(tim3_irq_tmp>HD_RUMBLE_TIM_PERIOD)tim3_irq_tmp=HD_RUMBLE_TIM_PERIOD;
-        else if(tim3_irq_tmp<0)tim3_irq_tmp=0;
-        CHRCVR=tim3_irq_tmp;
-        //CHLCVR=tim3_irq_tmp;
+        CHRCVR=i32_clamp(tim3_irq_tmp,0,HD_RUMBLE_TIM_PERIOD);
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
 }

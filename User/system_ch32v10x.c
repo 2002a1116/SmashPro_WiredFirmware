@@ -19,11 +19,11 @@
 //#define SYSCLK_FREQ_HSE    HSE_VALUE
 //#define SYSCLK_FREQ_48MHz_HSE  48000000
 //#define SYSCLK_FREQ_56MHz_HSE  56000000
-#define SYSCLK_FREQ_72MHz_HSE  72000000
+//#define SYSCLK_FREQ_72MHz_HSE  72000000
 //#define SYSCLK_FREQ_HSI    HSI_VALUE
 //#define SYSCLK_FREQ_48MHz_HSI  48000000
 //#define SYSCLK_FREQ_56MHz_HSI  56000000
-//#define SYSCLK_FREQ_72MHz_HSI  72000000
+#define SYSCLK_FREQ_72MHz_HSI  72000000
 
 /* Clock Definitions */
 #ifdef SYSCLK_FREQ_HSE
@@ -430,7 +430,7 @@ static void SetSysClockTo72_HSE(void)
         /* PCLK2 = HCLK */
         RCC->CFGR0 |= (uint32_t)RCC_PPRE2_DIV1;
         /* PCLK1 = HCLK */
-        RCC->CFGR0 |= (uint32_t)RCC_PPRE1_DIV2;
+        RCC->CFGR0 |= (uint32_t)RCC_PPRE1_DIV1;
 
         /*  PLL configuration: PLLCLK = HSE * 9 = 72 MHz */
         RCC->CFGR0 &= (uint32_t)((uint32_t) ~(RCC_PLLSRC | RCC_PLLXTPRE |
@@ -456,6 +456,7 @@ static void SetSysClockTo72_HSE(void)
          * If HSE fails to start-up, the application will have wrong clock
          * configuration. User can add here some code to deal with this error
          */
+        while(1);
     }
 }
 

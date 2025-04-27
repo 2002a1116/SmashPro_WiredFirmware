@@ -17,13 +17,10 @@
 #include "gpio_adc.h"
 #include "global_api.h"
 #include "spi.h"
+#include "watchdog.h"
 
 struct __connection_state connection_state;
 void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
-ring_buffer ns_usb_send_rb;
-ring_buffer ns_usb_recv_rb;
-uint8_t ns_usb_send_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
-uint8_t ns_usb_recv_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
 uint8_t is_esp32_enabled=0;
 uint8_t bd_addr_default[BD_ADDR_LEN]={0x57, 0x30 ,0xea, 0x8a, 0xbb, 0x7c};
 //hd_rumble_frame data;
@@ -31,27 +28,19 @@ uint8_t is_rumble_start;
 uint32_t rts_cnt=0,rts_tcnt=1;
 void ns_rumble_handler(cmd_packet* pkt){
     if(!is_rumble_start)return;
-    if(!(pkt->cmd->rumble_data_left|pkt->cmd->rumble_data_right))
-        return;
     decode_hd_rumble_multiformat_high_acc(&pkt->cmd->rumble_data_left,&pkt->cmd->rumble_data_right);
-    //decode_hd_rumble(pkt->cmd->rumble_data, &data);
-    //decode_hd_rumble_multiformat(&pkt->cmd->rumble_data_left,&pkt->cmd->rumble_data_right);
-    //printf("revice rumble data 0x%03x 0x%03x 0x%03x 0x%03x\r\n",pkt->cmd->rumble_data[0],
-    //        pkt->cmd->rumble_data[1],pkt->cmd->rumble_data[2],pkt->cmd->rumble_data[3]);
-    //printf("rumble decode %d %d \r\n",data.amp[0][0],data.amp[0][1]);
-   // printf("res %d\r\n",res);
 }
 void ns_cmd_subcommand_dispatcher(cmd_packet* pkt){
         cmd_subcommand* cmd=(cmd_subcommand*)pkt->cmd;
         pkt->len-=NS_SUBCOMMAND_CMD_HEADER_LENGTH+1;
         //ESP_LOGI("SUBC ","dispatch subcmd:0x%02x",cmd->subcommand_id);
-        //printf("subc dispatch id:0x%02x,len:%d,tick:%d\r\n",cmd->subcommand_id,pkt->len,Get_Systick_MS());
+        ////printf("subc dispatch id:0x%02x,len:%d,tick:%d\r\n",cmd->subcommand_id,pkt->len,Get_Systick_MS());
         if(ns_cmd_subcommand_cb_tb[cmd->subcommand_id]){
-            //printf("dispatched %d\r\n",cmd->subcommand_id);
+            ////printf("dispatched %d\r\n",cmd->subcommand_id);
             ns_cmd_subcommand_cb_tb[cmd->subcommand_id](cmd,pkt->len);
         }
         else if(ns_cmd_subcommand_cb_tb[0]){
-             printf("error fall back to default ack");
+             //printf("error fall back to default ack");
              ns_cmd_subcommand_cb_tb[0](cmd,pkt->len);
         }
         else{
@@ -62,16 +51,16 @@ void ns_cmd_subcommand_dispatcher(cmd_packet* pkt){
 static uint8_t usb_handshake_buf[RING_BUFFER_MAX_PKG_SIZE];
 static uint8_t usb_hs01[]={0x81,0x01,0x00,0x03};
 void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
-    //printf("usb handeshake len:%d\r\n",pkt->len);
+    ////printf("usb handeshake len:%d\r\n",pkt->len);
     if(pkt->len<2||!pkt->data)return;
     uint8_t typ=pkt->data[1];
-    printf("usb handshake typ:%x\r\n",typ);
+    //printf("usb handshake typ:%x\r\n",typ);
     switch(typ){
     case 0x01:
         memcpy(usb_handshake_buf,usb_hs01,4);
         memcpy(usb_handshake_buf+4,connection_state.bd_addr,BD_ADDR_LEN);
         ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 10, 0x01);
-        //printf("rb pushed size:%d\r\n",ns_usb_send_rb.size);
+        ////printf("rb pushed size:%d\r\n",ns_usb_send_rb.size);
         break;
     case 0x02:
         usb_handshake_buf[0]=0x81;
@@ -102,6 +91,8 @@ void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
         break;
     case 0x92:
         break;
+    default:
+        break;
     }
 }
 static uint8_t fw_buf_raw[RING_BUFFER_MAX_PKG_SIZE];
@@ -117,7 +108,7 @@ uint8_t fw_snd_pkt(uint8_t id,uint8_t len){
 }
 #define FW_SUBC_ID_READ_SETTING (0x01)
 void fw_subcommand_read_setting(cmd_packet* pkt){
-    printf("fw read %d\r\n",pkt->data[0]);
+    //printf("fw read %d\r\n",pkt->data[0]);
     //fw_buf[0]=FW_SUBC_ID_READ_SETTING;
     uint8_t i=0;
     for(;FW_MAX_PAYLOAD_LENGTH*(i+1)<sizeof(user_config);i++){
@@ -143,20 +134,20 @@ void fw_subcommand_read_setting(cmd_packet* pkt){
 #define FW_SUBC_ID_WRITE_SETTING (0x02)
 static uint8_t fw_red_cnt=0;
 void fw_subcommand_write_setting(cmd_packet* pkt){
-    printf("fw write\r\n");
+    //printf("fw write\r\n");
     //fw_buf[0]=FW_SUBC_ID_WRITE_SETTING;
     uint8_t offset=pkt->data[1];
     if(offset==0xff){//confirm
         if(fw_red_cnt==pkt->data[2])
         {
-            printf("fw write success");
+            //printf("fw write success");
             if(pkt->data[3]==1)
                 custom_conf_write();
             conf_flush();
             fw_buf[0]=1;
         }
         else {
-            printf("fw write fail,data incomplate");
+            //printf("fw write fail,data incomplate");
             fw_buf[0]=0;
         }
         fw_buf[1]=pkt->data[3];
@@ -188,7 +179,7 @@ void fw_subcommand_write_emulate_rom(cmd_packet* pkt){
     //hid_send_full64byte_report(fw_buf, 2);
     fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 1);
 }
-#define CALIBRATE_MAX_RETRY (3)
+#define CALIBRATE_MAX_RETRY (5)
 #define CALIBRATE_SAMPLE_CNT (20)
 static int32_t calibrate_imu_raw_buf[6];
 uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
@@ -196,15 +187,12 @@ uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
     memset(calibrate_imu_raw_buf,0,sizeof(calibrate_imu_raw_buf));
     for(int i=0;i<sample_cnt;++i){
         retry=CALIBRATE_MAX_RETRY;
-        res=imu_read();
         Delay_Ms(5);
-        while(res&&retry)
-        {
-            --retry;
+        do{
             res=imu_read();
             Delay_Ms(5);
-        }
-        if(res||!retry)
+        }while(res&&retry--);
+        if(res)
             break;
         for(int j=0;j<6;++j){
             calibrate_imu_raw_buf[j]+=imu_raw_buf[j];
@@ -213,7 +201,7 @@ uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
     calibrate_imu_raw_buf[0]*=imu_ratio_xf;
     calibrate_imu_raw_buf[1]*=imu_ratio_yf;
     calibrate_imu_raw_buf[2]*=imu_ratio_zf;
-    return res||!retry;
+    return res;
 }
 uint8_t calibrate_imu(uint8_t cnt){
     uint8_t res=_calibrate_imu_raw(cnt);
@@ -237,7 +225,8 @@ void fw_subcommand_calibrate_imu(cmd_packet* pkt)
 {
     //fw_buf[0]=FW_SUBC_ID_CALIBRATE_IMU;
     fw_buf[0]=calibrate_imu(CALIBRATE_SAMPLE_CNT);
-    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_IMU, 1);
+    fw_buf[1]=i2c_error_code;
+    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_IMU, 2);
     //hid_send_full64byte_report(fw_buf,2);
 }
 
@@ -284,8 +273,11 @@ void fw_subcommand_calibrate_js_offset(cmd_packet* pkt){
 #define FW_SUBC_ID_GET_STATUS (0xFD)
 void fw_subcommand_get_status(cmd_packet* pkt){
     fw_buf[0]=i2c_read_byte(IMU_ID,fw_buf+1);
+    if(!rts_tcnt)rts_tcnt=1;
     fw_buf[2]=rts_cnt/rts_tcnt;
-    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 3);
+    memcpy(fw_buf+3,&imu_read_cnt,4);
+    memcpy(fw_buf+7,&imu_read_fail_cnt,4);
+    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 11);
 }
 #define FW_SUBC_ID_REBOOT (0xFE)
 void fw_subcommand_reboot(cmd_packet* pkt){
@@ -343,8 +335,6 @@ void fw_subcommand_dispatcher(cmd_packet* pkt){
     }
 }
 void ns_mux_init(){
-    ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, NS_USB_RINGBUFFER_PKG_CAP,NS_USB_RINGBUFFER_PKG_SIZE);
-    ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, NS_USB_RINGBUFFER_PKG_CAP,NS_USB_RINGBUFFER_PKG_SIZE);
     /*ns_hid_register_packet_dispatch(0x01,ns_cmd_subcommand_dispatcher);
     ns_hid_register_packet_dispatch(0x80,ns_mux_usb_handshake_handler);
     ns_hid_register_packet_dispatch(0x10, ns_rumble_handler);
@@ -370,7 +360,7 @@ void hid_dispatch(cmd_packet* pkt)
         fw_subcommand_dispatcher(pkt);
         break;
     default:
-        printf("dispatch fail typ:0x%02x\r\n",*(pkt->data));
+        //printf("dispatch fail typ:0x%02x\r\n",*(pkt->data));
         break;
     }
 }

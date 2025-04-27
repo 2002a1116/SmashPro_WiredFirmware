@@ -1,0 +1,546 @@
+.vector
+
+.text
+	|	0x00000140	|	__riscv_save_12                           	|	FUNC	|	0x30	|	HIDEEN
+	|	0x00000148	|	__riscv_save_10                           	|	FUNC	|	0x28	|	HIDEEN
+	|	0x00000148	|	__riscv_save_11                           	|	FUNC	|	0x28	|	HIDEEN
+	|	0x00000148	|	__riscv_save_8                            	|	FUNC	|	0x28	|	HIDEEN
+	|	0x00000148	|	__riscv_save_9                            	|	FUNC	|	0x28	|	HIDEEN
+	|	0x00000156	|	__riscv_save_4                            	|	FUNC	|	0x1a	|	HIDEEN
+	|	0x00000156	|	__riscv_save_5                            	|	FUNC	|	0x1a	|	HIDEEN
+	|	0x00000156	|	__riscv_save_6                            	|	FUNC	|	0x1a	|	HIDEEN
+	|	0x00000156	|	__riscv_save_7                            	|	FUNC	|	0x1a	|	HIDEEN
+	|	0x00000170	|	__riscv_save_0                            	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000170	|	__riscv_save_1                            	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000170	|	__riscv_save_2                            	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000170	|	__riscv_save_3                            	|	FUNC	|	0xc	|	HIDEEN
+	|	0x0000017c	|	__riscv_restore_12                        	|	FUNC	|	0x24	|	HIDEEN
+	|	0x00000180	|	__riscv_restore_10                        	|	FUNC	|	0x20	|	HIDEEN
+	|	0x00000180	|	__riscv_restore_11                        	|	FUNC	|	0x20	|	HIDEEN
+	|	0x00000180	|	__riscv_restore_8                         	|	FUNC	|	0x20	|	HIDEEN
+	|	0x00000180	|	__riscv_restore_9                         	|	FUNC	|	0x20	|	HIDEEN
+	|	0x0000018a	|	__riscv_restore_4                         	|	FUNC	|	0x16	|	HIDEEN
+	|	0x0000018a	|	__riscv_restore_5                         	|	FUNC	|	0x16	|	HIDEEN
+	|	0x0000018a	|	__riscv_restore_6                         	|	FUNC	|	0x16	|	HIDEEN
+	|	0x0000018a	|	__riscv_restore_7                         	|	FUNC	|	0x16	|	HIDEEN
+	|	0x00000194	|	__riscv_restore_0                         	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000194	|	__riscv_restore_1                         	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000194	|	__riscv_restore_2                         	|	FUNC	|	0xc	|	HIDEEN
+	|	0x00000194	|	__riscv_restore_3                         	|	FUNC	|	0xc	|	HIDEEN
+	|	0x000001a0	|	memcpy                                    	|	FUNC	|	0x16	|	
+	|	0x000001b6	|	memset                                    	|	FUNC	|	0x10	|	
+	|	0x000001c6	|	NMI_Handler                               	|	FUNC	|	0x28	|	
+	|	0x000001ee	|	HardFault_Handler                         	|	FUNC	|	0xa6	|	
+	|	0x00000294	|	USBFS_RCC_Init                            	|	FUNC	|	0x4a	|	
+	|	0x000002de	|	USBFS_Device_Endp_Init                    	|	FUNC	|	0x40	|	
+	|	0x0000031e	|	USBFS_IRQHandler                          	|	FUNC	|	0x684	|	
+	|	0x000009a2	|	USBFS_Device_Init                         	|	FUNC	|	0xc6	|	
+	|	0x00000a68	|	conf_read                                 	|	FUNC	|	0x44	|	
+	|	0x00000aac	|	custom_conf_read                          	|	FUNC	|	0x10	|	
+	|	0x00000abc	|	custom_conf_write                         	|	FUNC	|	0x10	|	
+	|	0x00000acc	|	pack_fac_conf                             	|	FUNC	|	0x6c	|	
+	|	0x00000b38	|	fac_conf_write                            	|	FUNC	|	0x12	|	
+	|	0x00000b4a	|	conf_write                                	|	FUNC	|	0x56	|	
+	|	0x00000ba0	|	unpack_fac_conf                           	|	FUNC	|	0x214	|	
+	|	0x00000db4	|	fac_conf_read                             	|	FUNC	|	0x1a	|	
+	|	0x00000dce	|	conf_flush                                	|	FUNC	|	0x76	|	
+	|	0x00000e44	|	conf_init                                 	|	FUNC	|	0x18c	|	
+	|	0x00000fd0	|	_flash_write                              	|	FUNC	|	0x52	|	
+	|	0x00001022	|	flash_write                               	|	FUNC	|	0x44	|	
+	|	0x00001066	|	get_raw_flash_buf                         	|	FUNC	|	0xa	|	
+	|	0x00001070	|	raw_flash_write                           	|	FUNC	|	0x2	|	
+	|	0x00001072	|	flash_read                                	|	FUNC	|	0x40	|	
+	|	0x000010b2	|	fetch_uint32                              	|	FUNC	|	0x18	|	
+	|	0x000010ca	|	i32_clamp                                 	|	FUNC	|	0x12	|	
+	|	0x000010dc	|	ADC_Function_Init                         	|	FUNC	|	0xb2	|	
+	|	0x0000118e	|	DMA_Tx_Init                               	|	FUNC	|	0x56	|	
+	|	0x000011e4	|	adc_init                                  	|	FUNC	|	0x6e	|	
+	|	0x00001252	|	gpio_tb_init                              	|	FUNC	|	0x7a	|	
+	|	0x000012cc	|	gpio_init                                 	|	FUNC	|	0xc2	|	
+	|	0x0000138e	|	gpio_read_all                             	|	FUNC	|	0x76	|	
+	|	0x00001404	|	gpio_read                                 	|	FUNC	|	0x54	|	
+	|	0x00001458	|	hd_rumble_init                            	|	FUNC	|	0x14c	|	
+	|	0x000015a4	|	hd_rumble_set_status                      	|	FUNC	|	0xe	|	
+	|	0x000015b2	|	ApplyCommand                              	|	FUNC	|	0x3e	|	
+	|	0x000015f0	|	ApplyAmCommand                            	|	FUNC	|	0x24	|	
+	|	0x00001614	|	ApplyFmCommand                            	|	FUNC	|	0x28	|	
+	|	0x0000163c	|	get_hd_rumble_pack                        	|	FUNC	|	0x1a	|	
+	|	0x00001656	|	deocde_hd_rumble_format1                  	|	FUNC	|	0x60	|	
+	|	0x000016b6	|	decode_hd_rumble_format1long              	|	FUNC	|	0x94	|	
+	|	0x0000174a	|	decode_hd_rumble_format1full              	|	FUNC	|	0x124	|	
+	|	0x0000186e	|	decode_hd_rumble_format2                  	|	FUNC	|	0xb8	|	
+	|	0x00001926	|	decode_hd_rumble_format2long              	|	FUNC	|	0xf8	|	
+	|	0x00001a1e	|	decode_hd_rumble_format3                  	|	FUNC	|	0x128	|	
+	|	0x00001b46	|	decode_hd_rumble_multiformat_high_acc     	|	FUNC	|	0x266	|	
+	|	0x00001dac	|	hd_rumble_high_accurary_init              	|	FUNC	|	0x7a	|	
+	|	0x00001e26	|	push_waveform                             	|	FUNC	|	0x5a	|	
+	|	0x00001e80	|	push_waveform_into_buffer_task            	|	FUNC	|	0x110	|	
+	|	0x00001f90	|	step_forward                              	|	FUNC	|	0x40	|	
+	|	0x00001fd0	|	rumble_pattern_check                      	|	FUNC	|	0x60	|	
+	|	0x00002030	|	TIM3_IRQHandler                           	|	FUNC	|	0x262	|	
+	|	0x00002292	|	i2c2_check_error                          	|	FUNC	|	0x32	|	
+	|	0x000022c4	|	i2c2_check_flag                           	|	FUNC	|	0x28	|	
+	|	0x000022ec	|	i2c2_check_event                          	|	FUNC	|	0x28	|	
+	|	0x00002314	|	I2C2_ER_IRQHandler                        	|	FUNC	|	0x2a	|	
+	|	0x0000233e	|	i2c_software_recovery                     	|	FUNC	|	0x11e	|	
+	|	0x0000245c	|	i2c2_reset                                	|	FUNC	|	0x44	|	
+	|	0x000024a0	|	i2c_hardware_init                         	|	FUNC	|	0xc0	|	
+	|	0x00002560	|	i2c_read_start                            	|	FUNC	|	0x140	|	
+	|	0x000026a0	|	i2c_read_continuous                       	|	FUNC	|	0xdc	|	
+	|	0x0000277c	|	i2c_read_byte                             	|	FUNC	|	0xac	|	
+	|	0x00002828	|	i2c_write_byte                            	|	FUNC	|	0x116	|	
+	|	0x0000293e	|	i2c_init                                  	|	FUNC	|	0x10	|	
+	|	0x0000294e	|	imu_set_reg                               	|	FUNC	|	0x48	|	
+	|	0x00002996	|	imu_read                                  	|	FUNC	|	0x5c	|	
+	|	0x000029f2	|	set_imu_awake                             	|	FUNC	|	0xa6	|	
+	|	0x00002a98	|	set_imu_sleep                             	|	FUNC	|	0x24	|	
+	|	0x00002abc	|	imu_init                                  	|	FUNC	|	0x2	|	
+	|	0x00002abe	|	imu_upd                                   	|	FUNC	|	0x254	|	
+	|	0x00002d12	|	_imu_quat_normalize                       	|	FUNC	|	0x90	|	
+	|	0x00002da2	|	_imu_rotate_quaternion                    	|	FUNC	|	0x128	|	
+	|	0x00002eca	|	_imu_update_quaternion                    	|	FUNC	|	0x1fe	|	
+	|	0x000030c8	|	switch_motion_pack_quat                   	|	FUNC	|	0x2b2	|	
+	|	0x0000337a	|	imu_upd2                                  	|	FUNC	|	0x44	|	
+	|	0x000033be	|	button_upd_all                            	|	FUNC	|	0x1e	|	
+	|	0x000033dc	|	get_peripheral_data_handler               	|	FUNC	|	0x56	|	
+	|	0x00003432	|	joystick_snapback_filter                  	|	FUNC	|	0x20c	|	
+	|	0x0000363e	|	joystick_debounce_task                    	|	FUNC	|	0x84	|	
+	|	0x000036c2	|	send_input_with_uart                      	|	FUNC	|	0xbc	|	
+	|	0x0000377e	|	imu_read_test                             	|	FUNC	|	0x34	|	
+	|	0x000037b2	|	func_switch_task                          	|	FUNC	|	0x1de	|	
+	|	0x00003990	|	top_timer                                 	|	FUNC	|	0x7c	|	
+	|	0x00003a0c	|	start_connect                             	|	FUNC	|	0x60	|	
+	|	0x00003a6c	|	routine_service                           	|	FUNC	|	0x86	|	
+	|	0x00003af2	|	set_peripherals_state                     	|	FUNC	|	0x92	|	
+	|	0x00003b84	|	wake_esp32                                	|	FUNC	|	0x1e	|	
+	|	0x00003ba2	|	init_all                                  	|	FUNC	|	0xe2	|	
+	|	0x00003c84	|	recv_esp32_connect_control                	|	FUNC	|	0x108	|	
+	|	0x00003d8c	|	recv_rumble_frame                         	|	FUNC	|	0x7e	|	
+	|	0x00003e0a	|	recv_pwr_control                          	|	FUNC	|	0x52	|	
+	|	0x00003e5c	|	recv_esp32_pkg                            	|	FUNC	|	0x30	|	
+	|	0x00003e8c	|	connection_state_handler                  	|	FUNC	|	0x100	|	
+	|	0x00003f8c	|	main                                      	|	FUNC	|	0x146	|	
+	|	0x000040d2	|	ns_subcommand_set_hci_state               	|	FUNC	|	0x2	|	
+	|	0x000040d4	|	ns_subcommand_set_imu_register            	|	FUNC	|	0x10	|	
+	|	0x000040e4	|	ns_subcommand_reset_mcu                   	|	FUNC	|	0x2	|	
+	|	0x000040e6	|	ns_subcommand_set_home_led                	|	FUNC	|	0x2	|	
+	|	0x000040e8	|	ns_subcommand_reset_pairing_info          	|	FUNC	|	0x2	|	
+	|	0x000040ea	|	pkt_clr                                   	|	FUNC	|	0x16	|	
+	|	0x00004100	|	ns_subcommand_set_mcu_conf                	|	FUNC	|	0x40	|	
+	|	0x00004140	|	ns_subcommand_default                     	|	FUNC	|	0x38	|	
+	|	0x00004178	|	ns_subcommand_pair_by_wire                	|	FUNC	|	0xa0	|	
+	|	0x00004218	|	ns_subcommand_get_device_info             	|	FUNC	|	0x9c	|	
+	|	0x000042b4	|	ns_subcommand_set_input_mode              	|	FUNC	|	0x4e	|	
+	|	0x00004302	|	ns_subcommand_trigger_buttons_elapsed_time	|	FUNC	|	0x46	|	
+	|	0x00004348	|	ns_subcommand_get_page_list_state         	|	FUNC	|	0x3a	|	
+	|	0x00004382	|	ns_subcommand_set_shipping_mode           	|	FUNC	|	0x38	|	
+	|	0x000043ba	|	ns_subcommand_spi_erase                   	|	FUNC	|	0x4	|	
+	|	0x000043be	|	ns_subcommand_enable_mcu_polling          	|	FUNC	|	0x4	|	
+	|	0x000043c2	|	ns_subcommand_disable_mcu_polling         	|	FUNC	|	0x4	|	
+	|	0x000043c6	|	ns_subcommand_spi_read                    	|	FUNC	|	0x82	|	
+	|	0x00004448	|	ns_subcommand_spi_write                   	|	FUNC	|	0x4c	|	
+	|	0x00004494	|	ns_subcommand_set_mcu_state               	|	FUNC	|	0x34	|	
+	|	0x000044c8	|	ns_subcommand_attachmend_write            	|	FUNC	|	0x4	|	
+	|	0x000044cc	|	ns_subcommand_write_charge_setting        	|	FUNC	|	0x4	|	
+	|	0x000044d0	|	ns_subcommand_attachmend_read             	|	FUNC	|	0x36	|	
+	|	0x00004506	|	ns_subcommand_attachment_state            	|	FUNC	|	0x30	|	
+	|	0x00004536	|	ns_subcommand_get_attachment_info         	|	FUNC	|	0x34	|	
+	|	0x0000456a	|	ns_subcommand_set_indicate_led            	|	FUNC	|	0x46	|	
+	|	0x000045b0	|	ns_subcommand_get_indicate_led            	|	FUNC	|	0x3c	|	
+	|	0x000045ec	|	ns_subcommand_set_imu_state               	|	FUNC	|	0x3e	|	
+	|	0x0000462a	|	ns_subcommand_set_imu_conf                	|	FUNC	|	0x72	|	
+	|	0x0000469c	|	ns_subcommand_read_imu_register           	|	FUNC	|	0x66	|	
+	|	0x00004702	|	ns_subcommand_set_rumble_state            	|	FUNC	|	0x3e	|	
+	|	0x00004740	|	ns_subcommand_get_battery_voltage         	|	FUNC	|	0x3a	|	
+	|	0x0000477a	|	ns_subcommand_read_charge_setting         	|	FUNC	|	0x38	|	
+	|	0x000047b2	|	ns_subcommand_callback_init               	|	FUNC	|	0x112	|	
+	|	0x000048c4	|	ns_rumble_handler                         	|	FUNC	|	0x14	|	
+	|	0x000048d8	|	ns_cmd_subcommand_dispatcher              	|	FUNC	|	0x3c	|	
+	|	0x00004914	|	ns_mux_usb_handshake_handler              	|	FUNC	|	0x92	|	
+	|	0x000049a6	|	_calibrate_imu_raw                        	|	FUNC	|	0xc0	|	
+	|	0x00004a66	|	calibrate_imu                             	|	FUNC	|	0x17e	|	
+	|	0x00004be4	|	fw_subcommand_reboot                      	|	FUNC	|	0x22	|	
+	|	0x00004c06	|	ns_mux_init                               	|	FUNC	|	0x4	|	
+	|	0x00004c0a	|	ns_send_report                            	|	FUNC	|	0x12	|	
+	|	0x00004c1c	|	hid_send_full64byte_report                	|	FUNC	|	0x10	|	
+	|	0x00004c2c	|	fw_snd_pkt                                	|	FUNC	|	0x20	|	
+	|	0x00004c4c	|	fw_subcommand_read_setting                	|	FUNC	|	0x92	|	
+	|	0x00004cde	|	fw_subcommand_write_setting               	|	FUNC	|	0x8c	|	
+	|	0x00004d6a	|	fw_subcommand_read_emulate_rom            	|	FUNC	|	0x4c	|	
+	|	0x00004db6	|	fw_subcommand_write_emulate_rom           	|	FUNC	|	0x2e	|	
+	|	0x00004de4	|	fw_subcommand_calibrate_imu               	|	FUNC	|	0x1e	|	
+	|	0x00004e02	|	fw_subcommand_calibrate_js_offset         	|	FUNC	|	0x6a	|	
+	|	0x00004e6c	|	fw_subcommand_get_status                  	|	FUNC	|	0x4c	|	
+	|	0x00004eb8	|	fw_subcommand_get_version                 	|	FUNC	|	0x16	|	
+	|	0x00004ece	|	fw_subcommand_dispatcher                  	|	FUNC	|	0x96	|	
+	|	0x00004f64	|	hid_dispatch                              	|	FUNC	|	0x46	|	
+	|	0x00004faa	|	setup_exti                                	|	FUNC	|	0x9e	|	
+	|	0x00005048	|	top_init                                  	|	FUNC	|	0x2e	|	
+	|	0x00005076	|	set_pwr_mode_stop                         	|	FUNC	|	0x4a	|	
+	|	0x000050c0	|	ring_buffer_init                          	|	FUNC	|	0x46	|	
+	|	0x00005106	|	ring_buffer_push                          	|	FUNC	|	0x98	|	
+	|	0x0000519e	|	ring_buffer_pop                           	|	FUNC	|	0x58	|	
+	|	0x000051f6	|	SPI_FullDuplex_Init                       	|	FUNC	|	0x76	|	
+	|	0x0000526c	|	spi_DMA_Tx_Init                           	|	FUNC	|	0x58	|	
+	|	0x000052c4	|	rgb_spi_pkg_gen                           	|	FUNC	|	0x54	|	
+	|	0x00005318	|	set_led_rgb                               	|	FUNC	|	0x7e	|	
+	|	0x00005396	|	flush_spi_tx_seq                          	|	FUNC	|	0xd0	|	
+	|	0x00005466	|	flush_rgb                                 	|	FUNC	|	0x44	|	
+	|	0x000054aa	|	spi_init                                  	|	FUNC	|	0x44	|	
+	|	0x000054ee	|	DMA1_Channel3_IRQHandler                  	|	FUNC	|	0x2e	|	
+	|	0x0000551c	|	SetSysClockTo72_HSE                       	|	FUNC	|	0xca	|	
+	|	0x000055e6	|	SystemInit                                	|	FUNC	|	0x44	|	
+	|	0x0000562a	|	SystemCoreClockUpdate                     	|	FUNC	|	0x76	|	
+	|	0x000056a0	|	SetSysClock                               	|	FUNC	|	0x4	|	
+	|	0x000056a4	|	TIM2_IRQHandler                           	|	FUNC	|	0x28	|	
+	|	0x000056cc	|	_systick_init                             	|	FUNC	|	0x6e	|	
+	|	0x0000573a	|	SysTick_Init                              	|	FUNC	|	0x12	|	
+	|	0x0000574c	|	Get_Systick_US                            	|	FUNC	|	0x18	|	
+	|	0x00005764	|	Get_Systick_MS                            	|	FUNC	|	0x6	|	
+	|	0x0000576a	|	_reset_systick_cnt                        	|	FUNC	|	0x26	|	
+	|	0x00005790	|	HighPrecisionTimer_Init                   	|	FUNC	|	0x16	|	
+	|	0x000057a6	|	HighPrecisionTimerStart                   	|	FUNC	|	0x18	|	
+	|	0x000057be	|	HighPrecisionTimerCnt                     	|	FUNC	|	0xa	|	
+	|	0x000057c8	|	HighPrecisionTimerDelayUs                 	|	FUNC	|	0x20	|	
+	|	0x000057e8	|	execute_blocking_us                       	|	FUNC	|	0x3c	|	
+	|	0x00005824	|	Delay_Us                                  	|	FUNC	|	0x20	|	
+	|	0x00005844	|	Delay_Ms                                  	|	FUNC	|	0x18	|	
+	|	0x0000585c	|	UART1_DMA_Init                            	|	FUNC	|	0xae	|	
+	|	0x0000590a	|	UART1_Init                                	|	FUNC	|	0xce	|	
+	|	0x000059d8	|	UART1_DMA_Tx                              	|	FUNC	|	0x48	|	
+	|	0x00005a20	|	UART1_Tx_Service                          	|	FUNC	|	0xb6	|	
+	|	0x00005ad6	|	encode_uart_pkt                           	|	FUNC	|	0x64	|	
+	|	0x00005b3a	|	decode_uart_pkt                           	|	FUNC	|	0x44	|	
+	|	0x00005b7e	|	check_uart_pkt                            	|	FUNC	|	0x34	|	
+	|	0x00005bb2	|	UART1_Rx_Service                          	|	FUNC	|	0x13a	|	
+	|	0x00005cec	|	send_uart_pkt                             	|	FUNC	|	0x48	|	
+	|	0x00005d34	|	ns_set_peripheral_data_getter             	|	FUNC	|	0x6	|	
+	|	0x00005d3a	|	ns_hid_get_packet_timer                   	|	FUNC	|	0x3e	|	
+	|	0x00005d78	|	rpt_warpper                               	|	FUNC	|	0x66	|	
+	|	0x00005dde	|	set_imu_available                         	|	FUNC	|	0x6	|	
+	|	0x00005de4	|	hid_init                                  	|	FUNC	|	0xe	|	
+	|	0x00005df2	|	hid_tx_service                            	|	FUNC	|	0x10c	|	
+	|	0x00005efe	|	hid_rx_service                            	|	FUNC	|	0x5a	|	
+	|	0x00005f58	|	soft_watchdog_feed                        	|	FUNC	|	0x10	|	
+	|	0x00005f68	|	sofw_watchdog_init                        	|	FUNC	|	0x5c	|	
+	|	0x00005fc4	|	TIM4_IRQHandler                           	|	FUNC	|	0x58	|	
+	|	0x0000609c	|	ADC_DeInit                                	|	FUNC	|	0x2a	|	
+	|	0x000060c6	|	ADC_Init                                  	|	FUNC	|	0x50	|	
+	|	0x00006116	|	ADC_Cmd                                   	|	FUNC	|	0x10	|	
+	|	0x00006126	|	ADC_DMACmd                                	|	FUNC	|	0x12	|	
+	|	0x00006138	|	ADC_ResetCalibration                      	|	FUNC	|	0xa	|	
+	|	0x00006142	|	ADC_GetResetCalibrationStatus             	|	FUNC	|	0x8	|	
+	|	0x0000614a	|	ADC_StartCalibration                      	|	FUNC	|	0xa	|	
+	|	0x00006154	|	ADC_GetCalibrationStatus                  	|	FUNC	|	0x8	|	
+	|	0x0000615c	|	ADC_SoftwareStartConvCmd                  	|	FUNC	|	0x18	|	
+	|	0x00006174	|	ADC_RegularChannelConfig                  	|	FUNC	|	0xb8	|	
+	|	0x0000622c	|	Get_CalibrationValue                      	|	FUNC	|	0x182	|	
+	|	0x000063ae	|	DMA_DeInit                                	|	FUNC	|	0xe0	|	
+	|	0x0000648e	|	DMA_Init                                  	|	FUNC	|	0x38	|	
+	|	0x000064c6	|	DMA_Cmd                                   	|	FUNC	|	0x14	|	
+	|	0x000064da	|	DMA_GetCurrDataCounter                    	|	FUNC	|	0x8	|	
+	|	0x000064e2	|	DMA_GetFlagStatus                         	|	FUNC	|	0x20	|	
+	|	0x00006502	|	DMA_ClearFlag                             	|	FUNC	|	0x1a	|	
+	|	0x0000651c	|	DMA_GetITStatus                           	|	FUNC	|	0x4	|	
+	|	0x00006520	|	DMA_ClearITPendingBit                     	|	FUNC	|	0x4	|	
+	|	0x00006524	|	EXTI_Init                                 	|	FUNC	|	0x62	|	
+	|	0x00006586	|	ROM_ERASE                                 	|	FUNC	|	0x80	|	
+	|	0x00006606	|	FLASH_ROM_ERASE                           	|	FUNC	|	0x11a	|	
+	|	0x00006720	|	FLASH_ROM_WRITE                           	|	FUNC	|	0x11a	|	
+	|	0x0000683a	|	GPIO_Init                                 	|	FUNC	|	0xbe	|	
+	|	0x000068f8	|	GPIO_ReadInputDataBit                     	|	FUNC	|	0xc	|	
+	|	0x00006904	|	GPIO_SetBits                              	|	FUNC	|	0x4	|	
+	|	0x00006908	|	GPIO_ResetBits                            	|	FUNC	|	0x4	|	
+	|	0x0000690c	|	GPIO_EXTILineConfig                       	|	FUNC	|	0x2c	|	
+	|	0x00006938	|	I2C_DeInit                                	|	FUNC	|	0x32	|	
+	|	0x0000696a	|	I2C_Init                                  	|	FUNC	|	0x112	|	
+	|	0x00006a7c	|	I2C_Cmd                                   	|	FUNC	|	0x1c	|	
+	|	0x00006a98	|	I2C_GenerateSTART                         	|	FUNC	|	0x1e	|	
+	|	0x00006ab6	|	I2C_GenerateSTOP                          	|	FUNC	|	0x1e	|	
+	|	0x00006ad4	|	I2C_AcknowledgeConfig                     	|	FUNC	|	0x1e	|	
+	|	0x00006af2	|	I2C_SendData                              	|	FUNC	|	0x6	|	
+	|	0x00006af8	|	I2C_ReceiveData                           	|	FUNC	|	0xa	|	
+	|	0x00006b02	|	I2C_Send7bitAddress                       	|	FUNC	|	0x10	|	
+	|	0x00006b12	|	I2C_SoftwareResetCmd                      	|	FUNC	|	0x16	|	
+	|	0x00006b28	|	I2C_NACKPositionConfig                    	|	FUNC	|	0x26	|	
+	|	0x00006b4e	|	I2C_CheckEvent                            	|	FUNC	|	0x1a	|	
+	|	0x00006b68	|	I2C_GetFlagStatus                         	|	FUNC	|	0x32	|	
+	|	0x00006b9a	|	NVIC_PriorityGroupConfig                  	|	FUNC	|	0x10	|	
+	|	0x00006baa	|	NVIC_Init                                 	|	FUNC	|	0x6e	|	
+	|	0x00006c18	|	PWR_PVDCmd                                	|	FUNC	|	0x14	|	
+	|	0x00006c2c	|	PWR_PVDLevelConfig                        	|	FUNC	|	0x10	|	
+	|	0x00006c3c	|	PWR_EnterSTOPMode                         	|	FUNC	|	0x62	|	
+	|	0x00006c9e	|	PWR_GetFlagStatus                         	|	FUNC	|	0xe	|	
+	|	0x00006cac	|	PWR_VDD_SupplyVoltage                     	|	FUNC	|	0x46	|	
+	|	0x00006cf2	|	RCC_USBCLKConfig                          	|	FUNC	|	0x24	|	
+	|	0x00006d16	|	RCC_ADCCLKConfig                          	|	FUNC	|	0x12	|	
+	|	0x00006d28	|	RCC_LSICmd                                	|	FUNC	|	0x14	|	
+	|	0x00006d3c	|	RCC_GetClocksFreq                         	|	FUNC	|	0xb0	|	
+	|	0x00006dec	|	RCC_AHBPeriphClockCmd                     	|	FUNC	|	0x1e	|	
+	|	0x00006e0a	|	RCC_APB2PeriphClockCmd                    	|	FUNC	|	0x1e	|	
+	|	0x00006e28	|	RCC_APB1PeriphClockCmd                    	|	FUNC	|	0x1e	|	
+	|	0x00006e46	|	RCC_APB2PeriphResetCmd                    	|	FUNC	|	0x1e	|	
+	|	0x00006e64	|	RCC_APB1PeriphResetCmd                    	|	FUNC	|	0x1e	|	
+	|	0x00006e82	|	RCC_GetFlagStatus                         	|	FUNC	|	0x2e	|	
+	|	0x00006eb0	|	SPI_Init                                  	|	FUNC	|	0x5a	|	
+	|	0x00006f0a	|	SPI_Cmd                                   	|	FUNC	|	0x1e	|	
+	|	0x00006f28	|	SPI_I2S_DMACmd                            	|	FUNC	|	0x16	|	
+	|	0x00006f3e	|	TIM_TimeBaseInit                          	|	FUNC	|	0x78	|	
+	|	0x00006fb6	|	TIM_OC1Init                               	|	FUNC	|	0x88	|	
+	|	0x0000703e	|	TIM_OC3Init                               	|	FUNC	|	0xb0	|	
+	|	0x000070ee	|	TIM_OC4Init                               	|	FUNC	|	0x80	|	
+	|	0x0000716e	|	TIM_Cmd                                   	|	FUNC	|	0x1c	|	
+	|	0x0000718a	|	TIM_CtrlPWMOutputs                        	|	FUNC	|	0x16	|	
+	|	0x000071a0	|	TIM_ITConfig                              	|	FUNC	|	0x16	|	
+	|	0x000071b6	|	TIM_ARRPreloadConfig                      	|	FUNC	|	0x1e	|	
+	|	0x000071d4	|	TIM_OC1PreloadConfig                      	|	FUNC	|	0x12	|	
+	|	0x000071e6	|	TIM_OC2PreloadConfig                      	|	FUNC	|	0x1a	|	
+	|	0x00007200	|	TIM_OC3PreloadConfig                      	|	FUNC	|	0x12	|	
+	|	0x00007212	|	TIM_OC4PreloadConfig                      	|	FUNC	|	0x1a	|	
+	|	0x0000722c	|	TIM_SetCompare1                           	|	FUNC	|	0x6	|	
+	|	0x00007232	|	TIM_SetCompare2                           	|	FUNC	|	0x6	|	
+	|	0x00007238	|	TIM_SetCompare3                           	|	FUNC	|	0x6	|	
+	|	0x0000723e	|	TIM_SetCompare4                           	|	FUNC	|	0x6	|	
+	|	0x00007244	|	TIM_GetFlagStatus                         	|	FUNC	|	0xc	|	
+	|	0x00007250	|	TIM_GetITStatus                           	|	FUNC	|	0x1c	|	
+	|	0x0000726c	|	TIM_ClearITPendingBit                     	|	FUNC	|	0xe	|	
+	|	0x0000727a	|	USART_Init                                	|	FUNC	|	0xa6	|	
+	|	0x00007320	|	USART_Cmd                                 	|	FUNC	|	0x18	|	
+	|	0x00007338	|	USART_DMACmd                              	|	FUNC	|	0x16	|	
+	|	0x0000734e	|	USART_GetFlagStatus                       	|	FUNC	|	0xc	|	
+	|	0x0000735a	|	USART_ClearFlag                           	|	FUNC	|	0xe	|	
+	|	0x00007368	|	USART_printf_Init                         	|	FUNC	|	0x2	|	
+	|	0x0000736a	|	sqrtf                                     	|	FUNC	|	0x48	|	
+	|	0x000073b2	|	__ieee754_sqrtf                           	|	FUNC	|	0x114	|	
+	|	0x000074c6	|	__udivdi3                                 	|	FUNC	|	0x3b0	|	HIDEEN
+	|	0x00007876	|	__adddf3                                  	|	FUNC	|	0x6e8	|	HIDEEN
+	|	0x00007f5e	|	__divdf3                                  	|	FUNC	|	0x5ae	|	HIDEEN
+	|	0x0000850c	|	__muldf3                                  	|	FUNC	|	0x54a	|	HIDEEN
+	|	0x00008a56	|	__subdf3                                  	|	FUNC	|	0x736	|	HIDEEN
+	|	0x0000918c	|	__floatsidf                               	|	FUNC	|	0x70	|	HIDEEN
+	|	0x000091fc	|	__floatunsidf                             	|	FUNC	|	0x70	|	HIDEEN
+	|	0x0000926c	|	__addsf3                                  	|	FUNC	|	0x368	|	HIDEEN
+	|	0x000095d4	|	__divsf3                                  	|	FUNC	|	0x2ea	|	HIDEEN
+	|	0x000098be	|	__gesf2                                   	|	FUNC	|	0x96	|	HIDEEN
+	|	0x000098be	|	__gtsf2                                   	|	FUNC	|	0x96	|	HIDEEN
+	|	0x00009954	|	__lesf2                                   	|	FUNC	|	0x98	|	HIDEEN
+	|	0x00009954	|	__ltsf2                                   	|	FUNC	|	0x98	|	HIDEEN
+	|	0x000099ec	|	__mulsf3                                  	|	FUNC	|	0x2d8	|	HIDEEN
+	|	0x00009cc4	|	__subsf3                                  	|	FUNC	|	0x38c	|	HIDEEN
+	|	0x0000a050	|	__unordsf2                                	|	FUNC	|	0x3c	|	HIDEEN
+	|	0x0000a08c	|	__fixsfsi                                 	|	FUNC	|	0x60	|	HIDEEN
+	|	0x0000a0ec	|	__floatsisf                               	|	FUNC	|	0xcc	|	HIDEEN
+	|	0x0000a1b8	|	__truncdfsf2                              	|	FUNC	|	0x16c	|	HIDEEN
+	|	0x0000a324	|	__clzsi2                                  	|	FUNC	|	0x6e	|	HIDEEN
+	|	0x0000a392	|	__errno                                   	|	FUNC	|	0x6	|	
+	|	0x0000a480	|	MySerNumInfo                              	|	OBJECT	|	0x16	|	
+	|	0x0000a498	|	MyProdInfo                                	|	OBJECT	|	0x2a	|	
+	|	0x0000a4c4	|	MyManuInfo                                	|	OBJECT	|	0xa	|	
+	|	0x0000a4d0	|	MyHIDReportDesc                           	|	OBJECT	|	0xdf	|	
+	|	0x0000a5b0	|	MyDevDescr                                	|	OBJECT	|	0x12	|	
+	|	0x0000a6ac	|	__clz_tab                                 	|	OBJECT	|	0x100	|	HIDEEN
+
+.fini
+
+.dalign
+
+.dlalign
+
+.data
+	|	0x20000000	|	CommandTable                              	|	OBJECT	|	0xc0	|	
+	|	0x200000c0	|	freq_exp2_index_lookup_tb                 	|	OBJECT	|	0x100	|	
+	|	0x200001c0	|	amp_exp2_index_lookup_tb                  	|	OBJECT	|	0x100	|	
+	|	0x200002c0	|	exp2_lookup_tb                            	|	OBJECT	|	0x500	|	
+	|	0x200007c0	|	ccr_lookup_tb                             	|	OBJECT	|	0x1000	|	
+	|	0x200017c0	|	_imu_quat_state                           	|	OBJECT	|	0x1c	|	
+	|	0x200017dc	|	default_et                                	|	OBJECT	|	0xe	|	
+	|	0x200017ec	|	default_device_info                       	|	OBJECT	|	0xc	|	
+	|	0x200017f8	|	AHBPrescTable                             	|	OBJECT	|	0x10	|	
+	|	0x20001808	|	MyCfgDescr                                	|	OBJECT	|	0x29	|	
+	|	0x20001834	|	APBAHBPrescTable                          	|	OBJECT	|	0x10	|	
+	|	0x20001844	|	impure_data                               	|	OBJECT	|	0x60	|	
+	|	0x200018a8	|	rumble_state                              	|	OBJECT	|	0x1	|	
+	|	0x200018ac	|	hliner                                    	|	OBJECT	|	0x4	|	
+	|	0x200018b0	|	input_mode                                	|	OBJECT	|	0x1	|	
+	|	0x200018b4	|	rts_tcnt                                  	|	OBJECT	|	0x4	|	
+	|	0x200018b8	|	spi_rgb_trans                             	|	OBJECT	|	0x2	|	
+	|	0x200018bc	|	SystemCoreClock                           	|	OBJECT	|	0x4	|	
+	|	0x200018c0	|	ADCPrescTable                             	|	OBJECT	|	0x4	|	
+	|	0x200018c4	|	tiny                                      	|	OBJECT	|	0x4	|	
+	|	0x200018c8	|	one                                       	|	OBJECT	|	0x4	|	
+	|	0x200018cc	|	_impure_ptr                               	|	OBJECT	|	0x4	|	
+	|	0x20001920	|	MyLangDescr                               	|	OBJECT	|	0x4	|	
+
+.bss
+	|	0x20001928	|	EXC_PC                                    	|	OBJECT	|	0x4	|	
+	|	0x2000192c	|	EXC_CAUSE                                 	|	OBJECT	|	0x4	|	
+	|	0x20001930	|	USBFS_Endp_Busy                           	|	OBJECT	|	0x8	|	
+	|	0x20001938	|	USBFS_HidProtocol                         	|	OBJECT	|	0x1	|	
+	|	0x20001939	|	USBFS_HidIdle                             	|	OBJECT	|	0x1	|	
+	|	0x2000193a	|	USBFS_DevEnumStatus                       	|	OBJECT	|	0x1	|	
+	|	0x2000193b	|	USBFS_DevSleepStatus                      	|	OBJECT	|	0x1	|	
+	|	0x2000193c	|	USBFS_DevAddr                             	|	OBJECT	|	0x1	|	
+	|	0x2000193d	|	USBFS_DevConfig                           	|	OBJECT	|	0x1	|	
+	|	0x2000193e	|	USBFS_SetupReqLen                         	|	OBJECT	|	0x2	|	
+	|	0x20001940	|	USBFS_SetupReqIndex                       	|	OBJECT	|	0x2	|	
+	|	0x20001942	|	USBFS_SetupReqValue                       	|	OBJECT	|	0x2	|	
+	|	0x20001944	|	USBFS_SetupReqType                        	|	OBJECT	|	0x1	|	
+	|	0x20001945	|	USBFS_SetupReqCode                        	|	OBJECT	|	0x1	|	
+	|	0x20001948	|	pUSBFS_Descr                              	|	OBJECT	|	0x4	|	
+	|	0x2000194c	|	fac                                       	|	OBJECT	|	0x4	|	
+	|	0x20001950	|	joystick_snapback_deadzone_sq             	|	OBJECT	|	0x8	|	
+	|	0x20001958	|	Calibrattion_Val                          	|	OBJECT	|	0x2	|	
+	|	0x2000195c	|	adc_data                                  	|	OBJECT	|	0x8	|	
+	|	0x20001964	|	sample                                    	|	OBJECT	|	0x8	|	
+	|	0x2000196c	|	m_state                                   	|	OBJECT	|	0x8	|	
+	|	0x20001974	|	global_sample_channel                     	|	OBJECT	|	0x1	|	
+	|	0x20001975	|	decoded_cnt                               	|	OBJECT	|	0x1	|	
+	|	0x20001978	|	tim3_counter                              	|	OBJECT	|	0x4	|	
+	|	0x2000197c	|	right_low_tick                            	|	OBJECT	|	0x4	|	
+	|	0x20001980	|	right_high_tick                           	|	OBJECT	|	0x4	|	
+	|	0x20001984	|	left_low_tick                             	|	OBJECT	|	0x4	|	
+	|	0x20001988	|	left_high_tick                            	|	OBJECT	|	0x4	|	
+	|	0x2000198c	|	right_low_sum                             	|	OBJECT	|	0x4	|	
+	|	0x20001990	|	right_high_sum                            	|	OBJECT	|	0x4	|	
+	|	0x20001994	|	left_low_sum                              	|	OBJECT	|	0x4	|	
+	|	0x20001998	|	left_high_sum                             	|	OBJECT	|	0x4	|	
+	|	0x2000199c	|	right_low_pos                             	|	OBJECT	|	0x2	|	
+	|	0x2000199e	|	right_high_pos                            	|	OBJECT	|	0x2	|	
+	|	0x200019a0	|	left_low_pos                              	|	OBJECT	|	0x2	|	
+	|	0x200019a2	|	left_high_pos                             	|	OBJECT	|	0x2	|	
+	|	0x200019a4	|	right_low_buf_stdby                       	|	OBJECT	|	0x1	|	
+	|	0x200019a5	|	right_high_buf_stdby                      	|	OBJECT	|	0x1	|	
+	|	0x200019a6	|	left_low_buf_stdby                        	|	OBJECT	|	0x1	|	
+	|	0x200019a7	|	left_high_buf_stdby                       	|	OBJECT	|	0x1	|	
+	|	0x200019a8	|	right_low_buf_rdy                         	|	OBJECT	|	0x1	|	
+	|	0x200019a9	|	right_high_buf_rdy                        	|	OBJECT	|	0x1	|	
+	|	0x200019aa	|	left_low_buf_rdy                          	|	OBJECT	|	0x1	|	
+	|	0x200019ab	|	left_high_buf_rdy                         	|	OBJECT	|	0x1	|	
+	|	0x200019ac	|	right_low_buf                             	|	OBJECT	|	0x8	|	
+	|	0x200019b4	|	right_high_buf                            	|	OBJECT	|	0x8	|	
+	|	0x200019bc	|	left_low_buf                              	|	OBJECT	|	0x8	|	
+	|	0x200019c4	|	left_high_buf                             	|	OBJECT	|	0x8	|	
+	|	0x200019cc	|	right_low                                 	|	OBJECT	|	0x8	|	
+	|	0x200019d4	|	right_high                                	|	OBJECT	|	0x8	|	
+	|	0x200019dc	|	left_low                                  	|	OBJECT	|	0x8	|	
+	|	0x200019e4	|	left_high                                 	|	OBJECT	|	0x8	|	
+	|	0x200019ec	|	res.0                                     	|	OBJECT	|	0x1	|	
+	|	0x200019ed	|	i2c_intr_error                            	|	OBJECT	|	0x1	|	
+	|	0x200019ee	|	i2c_error_code                            	|	OBJECT	|	0x1	|	
+	|	0x200019ef	|	i2c_status                                	|	OBJECT	|	0x1	|	
+	|	0x200019f0	|	last_upd.0                                	|	OBJECT	|	0x4	|	
+	|	0x200019f4	|	status.2                                  	|	OBJECT	|	0x1	|	
+	|	0x200019f8	|	rep                                       	|	OBJECT	|	0x4	|	
+	|	0x200019fc	|	imu_buf_pos                               	|	OBJECT	|	0x1	|	
+	|	0x200019fd	|	imu_sample_cnt                            	|	OBJECT	|	0x1	|	
+	|	0x20001a00	|	last_imu_upd                              	|	OBJECT	|	0x4	|	
+	|	0x20001a04	|	imu_ratio_zf                              	|	OBJECT	|	0x4	|	
+	|	0x20001a08	|	imu_ratio_yf                              	|	OBJECT	|	0x4	|	
+	|	0x20001a0c	|	imu_ratio_xf                              	|	OBJECT	|	0x4	|	
+	|	0x20001a10	|	imu_mode                                  	|	OBJECT	|	0x1	|	
+	|	0x20001a11	|	imu_rdy                                   	|	OBJECT	|	0x1	|	
+	|	0x20001a12	|	imu_upd_cnt                               	|	OBJECT	|	0x1	|	
+	|	0x20001a13	|	pos.2                                     	|	OBJECT	|	0x1	|	
+	|	0x20001a14	|	timestamp.4                               	|	OBJECT	|	0x4	|	
+	|	0x20001a18	|	prev_timestamp.5                          	|	OBJECT	|	0x4	|	
+	|	0x20001a1c	|	sts.0                                     	|	OBJECT	|	0x1	|	
+	|	0x20001a1d	|	f6.2                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a1e	|	f5.3                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a1f	|	f4.4                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a20	|	f3.5                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a21	|	f2.6                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a22	|	f1.7                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a23	|	upd.9                                     	|	OBJECT	|	0x1	|	
+	|	0x20001a24	|	save.10                                   	|	OBJECT	|	0x1	|	
+	|	0x20001a25	|	id.12                                     	|	OBJECT	|	0x1	|	
+	|	0x20001a28	|	last_tick.13                              	|	OBJECT	|	0x4	|	
+	|	0x20001a2c	|	set.14                                    	|	OBJECT	|	0x1	|	
+	|	0x20001a30	|	uart_rumble_buf                           	|	OBJECT	|	0x8	|	
+	|	0x20001a38	|	stop_flag                                 	|	OBJECT	|	0x1	|	
+	|	0x20001a3c	|	routine_tick                              	|	OBJECT	|	0x4	|	
+	|	0x20001a40	|	test_uart_pkt                             	|	OBJECT	|	0x6	|	
+	|	0x20001a48	|	top_tick                                  	|	OBJECT	|	0x4	|	
+	|	0x20001a4c	|	input_update_tick                         	|	OBJECT	|	0x4	|	
+	|	0x20001a50	|	pkt                                       	|	OBJECT	|	0x6	|	
+	|	0x20001a58	|	sts_rjoy                                  	|	OBJECT	|	0x4	|	
+	|	0x20001a5c	|	sts_ljoy                                  	|	OBJECT	|	0x4	|	
+	|	0x20001a60	|	sts_button                                	|	OBJECT	|	0x4	|	
+	|	0x20001a64	|	top_trigger                               	|	OBJECT	|	0x1	|	
+	|	0x20001a68	|	imu_conf                                  	|	OBJECT	|	0x5	|	
+	|	0x20001a6d	|	indicate_led_status                       	|	OBJECT	|	0x1	|	
+	|	0x20001a6e	|	fw_red_cnt                                	|	OBJECT	|	0x1	|	
+	|	0x20001a70	|	rts_cnt                                   	|	OBJECT	|	0x4	|	
+	|	0x20001a74	|	is_rumble_start                           	|	OBJECT	|	0x1	|	
+	|	0x20001a75	|	force_esp32_active                        	|	OBJECT	|	0x1	|	
+	|	0x20001a78	|	p.1                                       	|	OBJECT	|	0x3	|	
+	|	0x20001a7c	|	inited.0                                  	|	OBJECT	|	0x4	|	
+	|	0x20001a80	|	p_us                                      	|	OBJECT	|	0x1	|	
+	|	0x20001a84	|	Systick_MS                                	|	OBJECT	|	0x4	|	
+	|	0x20001a88	|	send_buf                                  	|	OBJECT	|	0x6	|	
+	|	0x20001a90	|	rx_filter_buf                             	|	OBJECT	|	0x6	|	
+	|	0x20001a96	|	rx_ptr                                    	|	OBJECT	|	0x1	|	
+	|	0x20001a98	|	UART1_Rx_Deal_Ptr                         	|	OBJECT	|	0x2	|	
+	|	0x20001a9a	|	UART1_Rx_RemainLen                        	|	OBJECT	|	0x2	|	
+	|	0x20001a9c	|	UART1_RX_LastCnt                          	|	OBJECT	|	0x2	|	
+	|	0x20001a9e	|	UART1_RX_CurCnt                           	|	OBJECT	|	0x2	|	
+	|	0x20001aa0	|	UART1_Tx_Flag                             	|	OBJECT	|	0x1	|	
+	|	0x20001aa2	|	UART1_TimeOut                             	|	OBJECT	|	0x2	|	
+	|	0x20001aa4	|	pkt.0                                     	|	OBJECT	|	0x8	|	
+	|	0x20001aac	|	rep                                       	|	OBJECT	|	0x4	|	
+	|	0x20001ab0	|	rpt                                       	|	OBJECT	|	0x4	|	
+	|	0x20001ab4	|	pkg_typ                                   	|	OBJECT	|	0x1	|	
+	|	0x20001ab5	|	pkg_len                                   	|	OBJECT	|	0x1	|	
+	|	0x20001ab8	|	pkg_ptr                                   	|	OBJECT	|	0x4	|	
+	|	0x20001abc	|	ns_hid_pkt_cnt                            	|	OBJECT	|	0x1	|	
+	|	0x20001ac0	|	get_peripheral_data                       	|	OBJECT	|	0x4	|	
+	|	0x20001ac4	|	HID_Set_Report_Flag                       	|	OBJECT	|	0x1	|	
+	|	0x20001ac5	|	watchdog_pos                              	|	OBJECT	|	0x1	|	
+	|	0x20001ac8	|	last_feed_ms                              	|	OBJECT	|	0x4	|	
+	|	0x20001acc	|	NVIC_Priority_Group                       	|	OBJECT	|	0x4	|	
+	|	0x20001ad0	|	pEP1_RAM_Addr                             	|	OBJECT	|	0x4	|	
+	|	0x20001ad4	|	ep1_data_buffer                           	|	OBJECT	|	0x200	|	
+	|	0x20001cd4	|	ns_usb_recv_buf                           	|	OBJECT	|	0x640	|	
+	|	0x20002314	|	ns_usb_send_buf                           	|	OBJECT	|	0x640	|	
+	|	0x20002954	|	ns_usb_recv_rb                            	|	OBJECT	|	0x90	|	
+	|	0x200029e4	|	ns_usb_send_rb                            	|	OBJECT	|	0x90	|	
+	|	0x20002a74	|	USBFS_EP0_Buf                             	|	OBJECT	|	0x40	|	
+	|	0x20002ab4	|	user_config                               	|	OBJECT	|	0x7b	|	
+	|	0x20002b30	|	user_calibration                          	|	OBJECT	|	0x48	|	
+	|	0x20002b78	|	factory_configuration                     	|	OBJECT	|	0xb1	|	
+	|	0x20002c2c	|	flash_buf                                 	|	OBJECT	|	0x80	|	
+	|	0x20002cac	|	hid_num_to_gpio                           	|	OBJECT	|	0x60	|	
+	|	0x20002d0c	|	linear_samples                            	|	OBJECT	|	0x18	|	
+	|	0x20002d24	|	right_low_rb_buf                          	|	OBJECT	|	0x80	|	
+	|	0x20002da4	|	right_high_rb_buf                         	|	OBJECT	|	0x80	|	
+	|	0x20002e24	|	left_low_rb_buf                           	|	OBJECT	|	0x80	|	
+	|	0x20002ea4	|	left_high_rb_buf                          	|	OBJECT	|	0x80	|	
+	|	0x20002f24	|	right_low_rb                              	|	OBJECT	|	0x90	|	
+	|	0x20002fb4	|	right_high_rb                             	|	OBJECT	|	0x90	|	
+	|	0x20003044	|	left_low_rb                               	|	OBJECT	|	0x90	|	
+	|	0x200030d4	|	left_high_rb                              	|	OBJECT	|	0x90	|	
+	|	0x20003164	|	imu_pack_buf                              	|	OBJECT	|	0x4a	|	
+	|	0x200031b0	|	imu_res                                   	|	OBJECT	|	0xc	|	
+	|	0x200031bc	|	imu_raw_buf                               	|	OBJECT	|	0xc	|	
+	|	0x200031c8	|	imu_sum                                   	|	OBJECT	|	0x18	|	
+	|	0x200031e0	|	quaternion_30bit_components.0             	|	OBJECT	|	0xc	|	
+	|	0x200031ec	|	gyo_samples.3                             	|	OBJECT	|	0x12	|	
+	|	0x20003200	|	js_snapback_samples                       	|	OBJECT	|	0x30	|	
+	|	0x20003230	|	adc_debounce                              	|	OBJECT	|	0x10	|	
+	|	0x20003240	|	pkt                                       	|	OBJECT	|	0x34	|	
+	|	0x20003274	|	ns_cmd_subcommand_cb_tb                   	|	OBJECT	|	0x400	|	
+	|	0x20003674	|	calibrate_imu_raw_buf                     	|	OBJECT	|	0x18	|	
+	|	0x2000368c	|	fw_buf_raw                                	|	OBJECT	|	0x40	|	
+	|	0x200036cc	|	usb_handshake_buf                         	|	OBJECT	|	0x40	|	
+	|	0x2000370c	|	connection_state                          	|	OBJECT	|	0x25	|	
+	|	0x20003734	|	spi_tx_buf                                	|	OBJECT	|	0x123	|	
+	|	0x20003858	|	uart_tx_rb                                	|	OBJECT	|	0x90	|	
+	|	0x200038e8	|	uart_rx_rb                                	|	OBJECT	|	0x90	|	
+	|	0x20003978	|	uart_tx_rb_buf                            	|	OBJECT	|	0x180	|	
+	|	0x20003af8	|	uart_rx_rb_buf                            	|	OBJECT	|	0x180	|	
+	|	0x20003c78	|	UART1_RxBuffer                            	|	OBJECT	|	0x180	|	
+	|	0x20003df8	|	usb_rx_buf                                	|	OBJECT	|	0x40	|	
+	|	0x20003e38	|	global_input_data                         	|	OBJECT	|	0x9	|	
+	|	0x20003e44	|	HID_Report_Buffer                         	|	OBJECT	|	0x40	|	
+
+.stack
+

@@ -26,8 +26,7 @@ User/ring_buffer.o: ../User/ring_buffer.c ../User/ring_buffer.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb_host.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
- D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h \
- ../User/uart_com.h
+ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h
 ../User/ring_buffer.h:
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
@@ -57,4 +56,3 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb_host.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h:
 D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
-../User/uart_com.h:

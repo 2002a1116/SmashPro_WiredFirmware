@@ -151,14 +151,14 @@ void flush_spi_tx_seq(uint8_t status)
 {
     //spi_tx_buf[0].load=0;
     //spi_tx_buf[1].load=0;
-    printf("flush rgb sequence.\r\n");
+    //printf("flush rgb sequence.\r\n");
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
     for(int i=0;i<user_config.rgb_cnt;++i){
         if(user_config.led_disabled||!status)
             set_led_rgb(i, 0, 0, 0);
         else
             set_led_rgb(i, user_config.rgb_data[i].r, user_config.rgb_data[i].g, user_config.rgb_data[i].b);
-        printf("rgb %d 0x%02x 0x%02x 0x%02x\r\n",i,user_config.rgb_data[i].r,user_config.rgb_data[i].g,user_config.rgb_data[i].b);
+        //printf("rgb %d 0x%02x 0x%02x 0x%02x\r\n",i,user_config.rgb_data[i].r,user_config.rgb_data[i].g,user_config.rgb_data[i].b);
     }
     if(!status)
         return;
@@ -189,7 +189,7 @@ int spi_init(void)
 {
     SPI_FullDuplex_Init();
     spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
-    printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
+    //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     flush_rgb(ENABLE);
     return 0;
 }
@@ -199,6 +199,6 @@ void DMA1_Channel3_IRQHandler(){
         DMA_ClearITPendingBit(DMA1_IT_GL3); //清除全部中断标志
         DMA_Cmd(DMA1_Channel3, DISABLE);
         SPI_Cmd(SPI1, DISABLE);
-        //printf("spi dma complete\r\n");
+        ////printf("spi dma complete\r\n");
     }
 }

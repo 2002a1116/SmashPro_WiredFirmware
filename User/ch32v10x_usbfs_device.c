@@ -12,6 +12,7 @@
 
 #include "ch32v10x_usbfs_device.h"
 #include "usbd_compatibility_hid.h"
+#include "ring_buffer.h"
 /*******************************************************************************/
 /* Variable Definition */
 
@@ -38,14 +39,18 @@ volatile uint8_t USBFS_HidProtocol;
 
 /* Endpoint Buffer */
 __attribute__ ((aligned(4))) uint8_t USBFS_EP0_Buf[DEF_USBD_UEP0_SIZE];   
-__attribute__ ((aligned(4))) uint8_t USBFS_EP1_Buf[DEF_USB_EP1_FS_SIZE];
+__attribute__ ((aligned(4))) uint8_t USBFS_EP1_Buf[DEF_USB_EP1_FS_SIZE*2];
 
 /* USB IN Endpoint Busy Flag */
 volatile uint8_t  USBFS_Endp_Busy[ DEF_UEP_NUM ];
 
 /* Ring buffer */
-RING_BUFF_COMM  RingBuffer_Comm;
-__attribute__ ((aligned(4))) uint8_t Data_Buffer[DEF_RING_BUFFER_SIZE];
+//RING_BUFF_COMM  RingBuffer_Comm;
+//__attribute__ ((aligned(4))) uint8_t Data_Buffer[DEF_RING_BUFFER_SIZE];
+ring_buffer ns_usb_send_rb;
+ring_buffer ns_usb_recv_rb;
+uint8_t ns_usb_send_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
+uint8_t ns_usb_recv_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
 
 /******************************************************************************/
 /* Interrupt Service Routine Declaration*/
@@ -80,14 +85,13 @@ void USBFS_RCC_Init(void)
  *
  * @return  none
  */
-uint8_t* ep1_data_buffer[128];
 void USBFS_Device_Endp_Init(void)
 {
     R8_UEP4_1_MOD = RB_UEP1_RX_EN|RB_UEP1_TX_EN;
     //R8_UEP2_3_MOD = RB_UEP2_TX_EN;
 
     R16_UEP0_DMA = (uint16_t)(uint32_t)USBFS_EP0_Buf;
-    pEP1_RAM_Addr=ep1_data_buffer;
+    pEP1_RAM_Addr=USBFS_EP1_Buf;
     R16_UEP1_DMA = (UINT16)(UINT32)pEP1_RAM_Addr;
     //R16_UEP1_DMA = (uint16_t)(uint32_t)Data_Buffer;
     //R16_UEP2_DMA = (uint16_t)(uint32_t)Data_Buffer;
@@ -126,6 +130,10 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
 		USBFS_Device_Endp_Init( );
         R8_UDEV_CTRL = RB_UD_PD_DIS | RB_UD_PORT_EN;
+        ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, NS_USB_RINGBUFFER_PKG_CAP-1,NS_USB_RINGBUFFER_PKG_SIZE);
+        ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, NS_USB_RINGBUFFER_PKG_CAP-1,NS_USB_RINGBUFFER_PKG_SIZE);
+        //NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
+        NVIC_SetPriority(USBFS_IRQn,0x10);
         NVIC_EnableIRQ(USBFS_IRQn);
     }
     else
@@ -135,8 +143,6 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         R8_USB_CTRL = 0x00;
         NVIC_DisableIRQ(USBFS_IRQn);
     }
-    NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
-    NVIC_SetPriority(USBFS_IRQn,0x00);
 }
 
 /*********************************************************************
@@ -284,10 +290,10 @@ void USBFS_IRQHandler( void )
 
     intflag = R8_USB_INT_FG;
     intst   = R8_USB_INT_ST;
-    //printf("irq flag: %d st:%d\r\n",intflag,intst);
+    ////printf("irq flag: %d st:%d\r\n",intflag,intst);
     if( intflag & RB_UIF_TRANSFER )
     {
-       // printf("a 0x%02x\r\n", intst & MASK_UIS_TOKEN );
+       // //printf("a 0x%02x\r\n", intst & MASK_UIS_TOKEN );
         switch ( intst & MASK_UIS_TOKEN )
         {
             /* data-in stage processing */
@@ -296,7 +302,7 @@ void USBFS_IRQHandler( void )
                 {
                     /* end-point 0 data in interrupt */
                     case UIS_TOKEN_IN | DEF_UEP0:
-                        //printf("USBFS_SetupReqLen %d\r\n",USBFS_SetupReqLen);
+                        ////printf("USBFS_SetupReqLen %d\r\n",USBFS_SetupReqLen);
                         if( USBFS_SetupReqLen == 0 )
                         {
                             R8_UEP0_CTRL = (R8_UEP0_CTRL & ~MASK_UEP_R_RES ) | UEP_R_RES_ACK;
@@ -307,7 +313,7 @@ void USBFS_IRQHandler( void )
                         }
                         else
                         {
-                            //printf("edp0 req code :%d \r\n",USBFS_SetupReqCode);
+                            ////printf("edp0 req code :%d \r\n",USBFS_SetupReqCode);
                             switch( USBFS_SetupReqCode )
                             {
                                 case USB_GET_DESCRIPTOR:
@@ -332,7 +338,7 @@ void USBFS_IRQHandler( void )
 
                     /* end-point 1 data in interrupt */
                     case UIS_TOKEN_IN | DEF_UEP1:
-                    //printf("edp1 in irq\r\n");
+                    ////printf("edp1 in irq\r\n");
                         R8_UEP1_CTRL = (R8_UEP1_CTRL & ~MASK_UEP_T_RES) | UEP_T_RES_NAK;
                         R8_UEP1_CTRL ^= RB_UEP_T_TOG;
                         USBFS_Endp_Busy[ DEF_UEP1 ] = 0;
@@ -349,15 +355,15 @@ void USBFS_IRQHandler( void )
                 {
                     /* end-point 0 data out interrupt */
                     case UIS_TOKEN_OUT | DEF_UEP0:
-                    //printf("edp0 recv\r\n");
+                    ////printf("edp0 recv\r\n");
                         if ( intst & RB_UIS_TOG_OK )
                         {
-                            //printf("USBFS_SetupReqType %d \r\n",USBFS_SetupReqType);
+                            ////printf("USBFS_SetupReqType %d \r\n",USBFS_SetupReqType);
                             if ( ( USBFS_SetupReqType & USB_REQ_TYP_MASK ) != USB_REQ_TYP_STANDARD )
                             {
                                 if (( USBFS_SetupReqType & USB_REQ_TYP_MASK ) == USB_REQ_TYP_CLASS)
                                 {
-                                    //printf("edp0 out req code :%d\r\n",USBFS_SetupReqCode);
+                                    ////printf("edp0 out req code :%d\r\n",USBFS_SetupReqCode);
                                     switch( USBFS_SetupReqCode )
                                     {
                                         case HID_SET_REPORT:
@@ -382,28 +388,9 @@ void USBFS_IRQHandler( void )
                     case UIS_TOKEN_OUT | DEF_UEP1:
                         if ( intst & RB_UIS_TOG_OK )
                         {
-                            //printf("hid recv %d\r\n",send_en);
-                            //printf("endpoint1 data recv,len: %d \t\r\n",R16_USB_RX_LEN & MASK_UIS_RX_LEN);
-                            //for(int i=0,j=(R16_USB_RX_LEN & MASK_UIS_RX_LEN)>10?10:R16_USB_RX_LEN & MASK_UIS_RX_LEN;i<j;++i){
-                            //    printf("0x%02x ",pEP1_OUT_DataBuf[i]);
-                            //}
-                            //printf("\r\n");
-                            /* Write In Buffer */
                             R8_UEP1_CTRL ^= RB_UEP_R_TOG;
-                            RingBuffer_Comm.PackLen[RingBuffer_Comm.LoadPtr] = (uint16_t)(R16_USB_RX_LEN & MASK_UIS_RX_LEN );
-                            memcpy(&Data_Buffer[ (RingBuffer_Comm.LoadPtr) * DEF_USBD_FS_PACK_SIZE],pEP1_OUT_DataBuf,(uint16_t)(R16_USB_RX_LEN & MASK_UIS_RX_LEN ));
-                            RingBuffer_Comm.LoadPtr ++;
-                            if(RingBuffer_Comm.LoadPtr == DEF_Ring_Buffer_Max_Blks)
-                            {
-                                RingBuffer_Comm.LoadPtr = 0;
-                            }
-                            //R16_UEP1_DMA = (uint32_t)(&Data_Buffer[ (RingBuffer_Comm.LoadPtr) * DEF_USBD_FS_PACK_SIZE] );
-                            RingBuffer_Comm.RemainPack ++;
-                            if(RingBuffer_Comm.RemainPack >= DEF_Ring_Buffer_Max_Blks-DEF_RING_BUFFER_REMINE)
-                            {
-                                R8_UEP1_CTRL = (R8_UEP1_CTRL & ~MASK_UEP_R_RES) | UEP_R_RES_NAK;
-                                RingBuffer_Comm.StopFlag = 1;
-                            }
+                            ring_buffer_push(&ns_usb_recv_rb, pEP1_OUT_DataBuf, (R16_USB_RX_LEN & MASK_UIS_RX_LEN ), 0);
+
                         }
                         break;
                     default:
@@ -423,7 +410,7 @@ void USBFS_IRQHandler( void )
                 USBFS_SetupReqIndex = pUSBFS_SetupReqPak->wIndex;
                 len = 0;
                 errflag = 0;
-                //printf("USBFS_SetupReqType %d \t USBFS_SetupReqCode %d \r\n",USBFS_SetupReqType,USBFS_SetupReqCode);
+                ////printf("USBFS_SetupReqType %d \t USBFS_SetupReqCode %d \r\n",USBFS_SetupReqType,USBFS_SetupReqCode);
                 if ( ( USBFS_SetupReqType & USB_REQ_TYP_MASK ) != USB_REQ_TYP_STANDARD )
                 {
                     if (( USBFS_SetupReqType & USB_REQ_TYP_MASK ) == USB_REQ_TYP_CLASS)
@@ -498,12 +485,12 @@ void USBFS_IRQHandler( void )
                 else
                 {
                     /* usb standard request processing */
-                    //printf("setup req code : %d\treq len:%d\r\n",USBFS_SetupReqCode,USBFS_SetupReqLen);
+                    ////printf("setup req code : %d\treq len:%d\r\n",USBFS_SetupReqCode,USBFS_SetupReqLen);
                     switch( USBFS_SetupReqCode )
                     {
                         /* get device/configuration/string/report/... descriptors */
                         case USB_GET_DESCRIPTOR:
-                            //printf("USBFS_SetupReqValue>>8 :%d\r\n",(uint8_t)(USBFS_SetupReqValue>>8));
+                            ////printf("USBFS_SetupReqValue>>8 :%d\r\n",(uint8_t)(USBFS_SetupReqValue>>8));
                             switch( (uint8_t)( USBFS_SetupReqValue >> 8 ) )
                             {
                                 /* get usb device descriptor */
@@ -593,7 +580,7 @@ void USBFS_IRQHandler( void )
                         /* Set usb address */
                         case USB_SET_ADDRESS:
                             USBFS_DevAddr = (uint8_t)( USBFS_SetupReqValue & 0xFF );
-                            printf("dev addr %d\r\n",USBFS_DevAddr);
+                            //printf("dev addr %d\r\n",USBFS_DevAddr);
                             break;
 
                         /* Get usb configuration now set */
@@ -829,8 +816,8 @@ void USBFS_IRQHandler( void )
     {
         /* usb suspend interrupt processing */
         R8_USB_INT_FG = RB_UIF_SUSPEND;
-        printf("usb suspend interrupt processing\r\n");
-        //Delay_Us(10);
+        //printf("usb suspend interrupt processing\r\n");
+        Delay_Us(10);
         if ( R8_USB_MIS_ST & RB_UMS_SUSPEND )
         {
             USBFS_DevSleepStatus |= 0x02;

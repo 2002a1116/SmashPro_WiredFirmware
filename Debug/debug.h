@@ -4,7 +4,7 @@
  * Version            : V1.0.0
  * Date               : 2020/04/30
  * Description        : This file contains all the functions prototypes for UART
- *                      Printf , Delay functions.
+ *                      //printf , Delay functions.
 *********************************************************************************
 * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
 * Attention: This software (modified or not) and binary are used for 
@@ -23,7 +23,7 @@ extern "C" {
 /*  HID function ,1 close HID function ,0 open HID function */
 #define ch32v10x_usb_hid       0
 
-/* UART Printf Definition */
+/* UART //printf Definition */
 #define DEBUG_UART1    1
 #define DEBUG_UART2    2
 #define DEBUG_UART3    3
@@ -34,7 +34,7 @@ extern "C" {
 #define DEBUG   DEBUG_NONE
 #endif
 
-/* SDI Printf Definition */
+/* SDI //printf Definition */
 #define SDI_PR_CLOSE   0
 #define SDI_PR_OPEN    1
 
@@ -42,8 +42,8 @@ extern "C" {
 #define SDI_PRINT   SDI_PR_CLOSE
 #endif
 
-void USART_Printf_Init(uint32_t baudrate);
-void SDI_Printf_Enable(void);
+void USART_printf_Init(uint32_t baudrate);
+void SDI_printf_Enable(void);
 
 #ifdef __cplusplus
 }

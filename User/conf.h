@@ -18,6 +18,9 @@
 
 #define RGB_MAX_CNT (29)
 
+#define CONF_PCB_TYPE_LARGE (0)
+#define CONF_PCB_TYPE_SMALL (1)
+
 /*
 Firmware
 The firmware is stored inside the flash in Broadcom's PatchRAM format as follows:
@@ -215,7 +218,7 @@ typedef struct _user_config_data{
         struct{
             uint8_t nonexist:1;
             uint8_t led_disabled:1;
-            uint8_t home_led_typ:1;
+            uint8_t cross_key_disabled:1;//maybe someone want it
             uint8_t x_y_swap:1;
             uint8_t a_b_swap:1;
             uint8_t rumble_disabled:1;
@@ -245,8 +248,17 @@ typedef struct _user_config_data{
     uint8_t dead_zone_mode;
     uint8_t rgb_cnt;
     rgb_data_complete rgb_data[RGB_MAX_CNT];
+    union{
+        uint8_t config_bitmap2;
+        struct{
+            uint8_t pcb_typ:2;
+            uint8_t rgb_typ:2;
+            uint8_t input_typ:1;//0:raw 1:scan
+            uint8_t reserved:3;
+        };
+    };
 }user_config_data;
-//117 byte now
+//118 byte now
 #pragma pack(pop)
 
 #define JOYSITCK_FITTING_PARAM_RATIO (255)

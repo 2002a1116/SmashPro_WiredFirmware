@@ -162,6 +162,7 @@ void flush_spi_tx_seq(uint8_t status)
     }
     if(!status)
         return;
+#ifdef PCB_TYPE
 #if (PCB_TYPE==PCB_TYPE_MICRO)
     set_led_rgb(0, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
     set_led_rgb(1, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
@@ -172,6 +173,21 @@ void flush_spi_tx_seq(uint8_t status)
     set_led_rgb(5, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
     set_led_rgb(6, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
     set_led_rgb(7, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+#endif
+#else
+    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)//CONF_PCB_TYPE_LARGE
+    {
+        set_led_rgb(0, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
+        set_led_rgb(1, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
+        set_led_rgb(2, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
+        set_led_rgb(3, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+    }
+    else if(user_config.pcb_typ==CONF_PCB_TYPE_SMALL){//CONF_PCB_TYPE_LARGE
+        set_led_rgb(4, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
+        set_led_rgb(5, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
+        set_led_rgb(6, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
+        set_led_rgb(7, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+    }
 #endif
     //spi_tx_buf[user_config.rgb_cnt*3].load=0;
     //spi_tx_buf[user_config.rgb_cnt*3+1].load=0;

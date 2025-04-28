@@ -9,25 +9,6 @@
 * Attention: This software (modified or not) and binary are used for 
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
-
-/* @Note
- * Compatibility HID Example:
- * This program provides examples of the pass-through of USB-HID data and serial port
- *  data based on compatibility HID device. And the data returned by Get_Report request is
- *  the data sent by the last Set_Report request.Speed of UART1/2 is 115200bps.
- *
- * Interrupt Transfers:
- *   UART2_RX   ---> Endpoint2
- *   Endpoint1  ---> UART2_TX
- *
- *   Note that the first byte is the valid data length and the remaining bytes are
- *   the transmission data for interrupt Transfers.
- *
- * Control Transfers:
- *   Set_Report ---> UART1_TX
- *   Get_Report <--- last Set_Report packet
- *
- *  */
 #include <stdlib.h>
 #include <math.h>
 #include "debug.h"
@@ -237,13 +218,11 @@ void func_switch_task(){
         }
         f4=0;
     }else   f4=1;
-    if(!connection_state.usb_paired&&!gpio_read(GPIO_BUTTON_LS)){
+    if(!gpio_read(GPIO_BUTTON_LS)){
         if(f5){
-            pkt.typ=UART_PKG_CONNECT_CONTROL;
-            pkt.id=0;
-            pkt.load[0]=1;
-            send_uart_pkt(&pkt);
-            upd=1;
+            for(int i=5;i>=0&&(user_config.bd_addr[i]++)==255;--i);
+            memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
+            custom_conf_write();
         }
         f5=0;
     }else f5=1;

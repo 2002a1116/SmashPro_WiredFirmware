@@ -10,6 +10,7 @@
 #include "ch32v10x_rcc.h"
 #include "usbd_compatibility_hid.h"
 #include "gpio_digit.h"
+#include "conf.h"
 uint32_t sts_button;
 uint32_t hid_num_to_gpio[GPIO_INPUT_CNT]={};
 void gpio_tb_init(){
@@ -67,10 +68,15 @@ void gpio_init(void){
     }
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
-
+uint32_t gpio_kb_scan(){
+    return 0;
+}
 uint32_t gpio_read_all(void){
     uint8_t ret=0;
     uint32_t res=0;
+    if(user_config.input_typ){
+        //return gpio_kb_scan();
+    }
     for(int i=0;i<GPIO_INPUT_CNT;++i){
         switch(hid_num_to_gpio[i] & GPIO_GROUP_MASK){
         case GPIOA_PIN_MASK:

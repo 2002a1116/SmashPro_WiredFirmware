@@ -104,9 +104,9 @@ typedef struct _user_calibration_data{
 typedef struct _rgb_data_complete{
     union{
         struct{
-            uint8_t b;
-            uint8_t g;
             uint8_t r;
+            uint8_t g;
+            uint8_t b;
         };
         uint32_t load:24;
     };

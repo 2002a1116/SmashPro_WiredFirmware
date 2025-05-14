@@ -62,7 +62,7 @@ void conf_init()
         user_config.in_interval=8;
         user_config.out_interval=8;
         for(int i=0;i<4;++i){
-            user_config.joystick_ratio[i]=(i<2?40:40);
+            user_config.joystick_ratio[i]=(i<2?56:56);
             user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
             user_config.dead_zone[i]=96;
         }
@@ -270,19 +270,5 @@ void conf_flush(){
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
     gpio_tb_init();
-    if(user_config.a_b_swap){
-        hid_num_to_gpio[NS_BUTTON_A]=GPIO_BUTTON_B;
-        hid_num_to_gpio[NS_BUTTON_B]=GPIO_BUTTON_A;
-    }
-    if(user_config.x_y_swap){
-        hid_num_to_gpio[NS_BUTTON_X]=GPIO_BUTTON_Y;
-        hid_num_to_gpio[NS_BUTTON_Y]=GPIO_BUTTON_X;
-    }
-    if(user_config.cross_key_disabled){
-        hid_num_to_gpio[NS_BUTTON_UP]=GPIO_BUTTON_NONE;
-        hid_num_to_gpio[NS_BUTTON_DOWN]=GPIO_BUTTON_NONE;
-        hid_num_to_gpio[NS_BUTTON_LEFT]=GPIO_BUTTON_NONE;
-        hid_num_to_gpio[NS_BUTTON_RIGHT]=GPIO_BUTTON_NONE;
-    }
     uart_update_config();
 }

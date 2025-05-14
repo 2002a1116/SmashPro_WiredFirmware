@@ -116,6 +116,7 @@ void recv_esp32_connect_control()
         break;
     case 0xC:
         connection_state.esp32_paired=pkt.load[0];
+        flush_rgb(!connection_state.esp32_sleep);
         ////printf("esp32_paired:%d\r\n",connection_state.esp32_paired);
         break;
     /*case 0xD:
@@ -196,7 +197,7 @@ void recv_flash_operation(){
         }
     }
     send_uart_pkt(&pkt);
-    send_uart_pkt(&pkt);
+    //send_uart_pkt(&pkt);
 }
 void recv_esp32_pkg()
 {
@@ -230,15 +231,15 @@ void connection_state_handler()//decide if we go stop
     {
         set_peripherals_state(DISABLE);
         set_imu_sleep();
-        //stop_flag=set_pwr_mode_stop();
-        /*if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
-            NVIC_SystemReset();*/
+        uint8_t stop_flag=set_pwr_mode_stop();
+        if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
+            NVIC_SystemReset();
         //fail safe,try to reset everything
         init_all();
-        set_peripherals_state(ENABLE);
+        //set_peripherals_state(ENABLE);
         wake_esp32();
     }
-    else if(connection_state.esp32_connected&&!connection_state.esp32_sleep&&(Get_Systick_MS()-input_update_tick>UART_REPORT_GAP))
+    else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_MS()-input_update_tick>UART_REPORT_GAP))
     {
         input_update_tick=Get_Systick_MS();
         if(connection_state.con_addr_set)//if esp32 recved,we set this flag to be zero
@@ -295,7 +296,7 @@ void connection_state_handler()//decide if we go stop
 }
 void uart_com_task()
 {
-    uint8_t max_uart_handled=10;
+    uint8_t max_uart_handled=50;
     while(uart_rx_rb.size&&max_uart_handled--)
     {
         connection_state.esp32_connected=0x01;//if revice uart pkt from esp32,means it exist

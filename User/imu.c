@@ -85,7 +85,7 @@ void set_imu_awake()
         ret = imu_set_reg(0x12,0x44,0xff);//set Block Data Update
     }while(ret&&retry--);
     retry=5;
-    do{
+    /*do{
         ret = imu_set_reg(0x14, 0x00, 0xFF);
     }while(ret&&retry--);
     retry=5;
@@ -108,6 +108,7 @@ void set_imu_awake()
     do{
         ret = imu_set_reg(0x19, 0x3C, 0xFF);
     }while(ret&&retry--);
+    */
     //todo:not sure about hpf freq.
     imu_rdy=!ret;
 }

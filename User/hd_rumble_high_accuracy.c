@@ -273,9 +273,9 @@ void TIM3_IRQHandler(void)
                 left_high_sum=left_high_pos=0;
                 left_high_buf_stdby=1;
                 left_high_tick=tim3_counter;
-            }/*else if(tim3_counter-left_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+            }else if(tim3_counter-left_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
                 left_high.amp=0;
-            }*/
+            }
         }
         if(rumble_pattern_check(&left_low,&left_low_pos,&left_low_sum,left_low_tick)){
             if(left_low_buf_rdy){
@@ -284,9 +284,9 @@ void TIM3_IRQHandler(void)
                 left_low_sum=left_low_pos=0;
                 left_low_buf_stdby=1;
                 left_low_tick=tim3_counter;
-            }/*else if(tim3_counter-left_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+            }else if(tim3_counter-left_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
                 left_low.amp=0;
-            }*/
+            }
         }
         if(rumble_pattern_check(&right_high,&right_high_pos,&right_high_sum,right_high_tick)){
             if(right_high_buf_rdy){
@@ -295,9 +295,9 @@ void TIM3_IRQHandler(void)
                 right_high_sum=right_high_pos=0;
                 right_high_buf_stdby=1;
                 right_high_tick=tim3_counter;
-            }/*else if(tim3_counter-right_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+            }else if(tim3_counter-right_high_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
                 right_high.amp=0;
-            }*/
+            }
         }
         if(rumble_pattern_check(&right_low,&right_low_pos,&right_low_sum,right_low_tick)){
             if(right_low_buf_rdy){
@@ -306,9 +306,9 @@ void TIM3_IRQHandler(void)
                 right_low_sum=right_low_pos=0;
                 right_low_buf_stdby=1;
                 right_low_tick=tim3_counter;
-            }/*else if(tim3_counter-right_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
+            }else if(tim3_counter-right_low_tick>=HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT){
                 right_low.amp=0;
-            }*/
+            }
         }
         tim3_irq_tmp=((HD_RUMBLE_TIM_PERIOD_MID*((ccr_lookup_tb[left_high_pos]*left_high.amp)+
                 (ccr_lookup_tb[left_low_pos]*left_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;

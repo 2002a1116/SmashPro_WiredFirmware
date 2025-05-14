@@ -153,11 +153,21 @@ void flush_spi_tx_seq(uint8_t status)
     //spi_tx_buf[1].load=0;
     //printf("flush rgb sequence.\r\n");
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
-    for(int i=0;i<user_config.rgb_cnt;++i){
+    for(int i=0,j=0;i<user_config.rgb_cnt;++i){
         if(user_config.led_disabled||!status)
             set_led_rgb(i, 0, 0, 0);
-        else
-            set_led_rgb(i, user_config.rgb_data[i].r, user_config.rgb_data[i].g, user_config.rgb_data[i].b);
+        else{
+            set_led_rgb(i, user_config.rgb_data[j].r, user_config.rgb_data[j].g, user_config.rgb_data[j].b);
+#ifdef PCB_TYPE
+    #if (PCB_TYPE==PCB_TYPE_MICRO)
+                j+=(i>3);//skip 0~3;
+    #else
+                j+=(i<4||i>7);//skip 4~7
+    #endif
+#else
+            ++j;
+#endif
+        }
         //printf("rgb %d 0x%02x 0x%02x 0x%02x\r\n",i,user_config.rgb_data[i].r,user_config.rgb_data[i].g,user_config.rgb_data[i].b);
     }
     if(!status)

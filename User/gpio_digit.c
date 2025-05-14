@@ -32,6 +32,20 @@ void gpio_tb_init(){
     hid_num_to_gpio[NS_BUTTON_PLUS]=GPIO_BUTTON_PLUS;
     hid_num_to_gpio[NS_BUTTON_HOME]=GPIO_BUTTON_HOME;
     hid_num_to_gpio[NS_BUTTON_CAP]=GPIO_BUTTON_CAP;
+    if(user_config.a_b_swap){
+        hid_num_to_gpio[NS_BUTTON_A]=GPIO_BUTTON_B;
+        hid_num_to_gpio[NS_BUTTON_B]=GPIO_BUTTON_A;
+    }
+    if(user_config.x_y_swap){
+        hid_num_to_gpio[NS_BUTTON_X]=GPIO_BUTTON_Y;
+        hid_num_to_gpio[NS_BUTTON_Y]=GPIO_BUTTON_X;
+    }
+    if(user_config.cross_key_disabled){
+        hid_num_to_gpio[NS_BUTTON_UP]=GPIO_BUTTON_NONE;
+        hid_num_to_gpio[NS_BUTTON_DOWN]=GPIO_BUTTON_NONE;
+        hid_num_to_gpio[NS_BUTTON_LEFT]=GPIO_BUTTON_NONE;
+        hid_num_to_gpio[NS_BUTTON_RIGHT]=GPIO_BUTTON_NONE;
+    }
     //printf("board_type %d\r\n",PCB_TYPE);
 }
 void gpio_init(void){

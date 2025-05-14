@@ -89,7 +89,6 @@ void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
         rpt->con_info=0x01;//todo : expect set this to 0x00 to be pro controller on battery,check if its correct;
         rpt->rumble_status=0x80;//todo : value includes(0x70,0xC0,0xB0,0x80,0xA0),what does these mean?
         //rpt->rumble_status=_unknown_thing();
-        //todo : set imu data
 }
 uint8_t empty_report[]={0xa1,0x00};
 uint8_t* pkg_ptr;

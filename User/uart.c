@@ -136,6 +136,7 @@ void UART1_Tx_Service( void )
 {
     uint16_t pkg_len = 0;
     uint8_t *pbuf;
+    static uint8_t cnt=0,f=0;
     ////printf("tx service\r\n");
     if (UART1_Tx_Flag)
     {
@@ -146,6 +147,10 @@ void UART1_Tx_Service( void )
             USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);
             UART1_Tx_Flag = 0;
         }
+        /*if(DMA_GetFlagStatus(DMA1_FLAG_TC4)){
+            USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);
+            UART1_Tx_Flag = 0;
+        }*/
     }
     else
     {
@@ -154,15 +159,17 @@ void UART1_Tx_Service( void )
             pbuf=&uart_tx_rb_buf[uart_tx_rb.top*UART_PKG_SIZE];
             if(uart_tx_rb.top>uart_tx_rb.end){
                 pkg_len=uart_tx_rb.capcity-uart_tx_rb.top;
-                uart_tx_rb.size=uart_tx_rb.end;
+                uart_tx_rb.size=uart_tx_rb.end+1;
                 uart_tx_rb.top=0;
             }else {
                 pkg_len=uart_tx_rb.size;
-                uart_tx_rb.top=uart_tx_rb.end;
+                uart_tx_rb.top=uart_tx_rb.end+1;
+                if(uart_tx_rb.top>=uart_tx_rb.capcity)
+                    uart_tx_rb.top=0;
                 uart_tx_rb.size=0;
             }
             pkg_len=pkg_len*UART_PKG_SIZE;
-            uart_tx_rb.full=(uint8_t)(uart_tx_rb.capcity<=uart_tx_rb.size);
+            uart_tx_rb.full=0;
             UART1_DMA_Tx( pbuf, pkg_len );
             UART1_Tx_Flag = 1;
             ////printf("send len %d\r\n",pkg_len);

@@ -127,13 +127,16 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
     case 0x6000:
         memcpy(((uint8_t*)&factory_configuration)+(addr&0xff),(uint8_t*)buf,size);
         flash_res=fac_conf_write();
+        uart_conf_write(addr, ((uint8_t*)&factory_configuration)+(addr&0xff), size);
         break;
     case 0x8000:
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
         flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+        uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:
         memcpy(((uint8_t*)&user_config)+(addr&0xff),(uint8_t*)buf,size);
+        uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
         break;
     default:
         break;
@@ -270,5 +273,5 @@ void conf_flush(){
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
     gpio_tb_init();
-    uart_update_config();
+    //uart_update_config();
 }

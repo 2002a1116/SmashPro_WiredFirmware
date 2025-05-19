@@ -63,7 +63,8 @@ enum UART_PACKET_TYP{
     UART_PKG_PWR_CONTROL=0x06,
     UART_PKG_TEST_ECHO=0X07,
     UART_PKG_CH32_FLASH_READ=0x08,
-    UART_PKG_CH32_FLASH_WRITE=0x09
+    UART_PKG_CH32_FLASH_WRITE=0x09,
+    UART_PKG_ESP32_EROM_BUFFER_RESET=0X0A
 };
 #pragma pack(pop)
 
@@ -72,7 +73,7 @@ enum UART_PACKET_TYP{
 #define UART_BAUD_RATE (3000000)
 //#define UART_BAUD_RATE (921600)
 #define UART_PKG_SIZE (13)
-#define UART_RINGBUFFER_PKG_CAP (32)
+#define UART_RINGBUFFER_PKG_CAP (64)
 #define DEF_UART1_BUF_SIZE            384
 extern void UART1_Tx_Service( void );
 extern void UART1_Rx_Service( void );

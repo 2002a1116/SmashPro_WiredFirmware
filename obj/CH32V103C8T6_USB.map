@@ -317,6 +317,8 @@ Discarded input sections
  .text          0x0000000000000000        0x0 ./User/uart_com.o
  .data          0x0000000000000000        0x0 ./User/uart_com.o
  .bss           0x0000000000000000        0x0 ./User/uart_com.o
+ .text.uart_update_config
+                0x0000000000000000       0x74 ./User/uart_com.o
  .text          0x0000000000000000        0x0 ./User/usb_desc.o
  .data          0x0000000000000000        0x0 ./User/usb_desc.o
  .bss           0x0000000000000000        0x0 ./User/usb_desc.o
@@ -1595,7 +1597,7 @@ END GROUP
                 0x0000000000000140                . = ALIGN (0x40)
  *fill*         0x0000000000000128       0x18 
 
-.text           0x0000000000000140     0xbaf8
+.text           0x0000000000000140     0xbaa4
                 0x0000000000000140                . = ALIGN (0x4)
  *(.text)
  .text          0x0000000000000140       0x60 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(save-restore.o)
@@ -1664,1130 +1666,1127 @@ END GROUP
                 0x0000000000000b28       0x12 ./User/conf.o
                 0x0000000000000b28                fac_conf_write
  .text.conf_write
-                0x0000000000000b3a       0x6e ./User/conf.o
+                0x0000000000000b3a       0x90 ./User/conf.o
                 0x0000000000000b3a                conf_write
  .text.unpack_fac_conf
-                0x0000000000000ba8      0x214 ./User/conf.o
-                0x0000000000000ba8                unpack_fac_conf
+                0x0000000000000bca      0x214 ./User/conf.o
+                0x0000000000000bca                unpack_fac_conf
  .text.fac_conf_read
-                0x0000000000000dbc       0x1a ./User/conf.o
-                0x0000000000000dbc                fac_conf_read
+                0x0000000000000dde       0x1a ./User/conf.o
+                0x0000000000000dde                fac_conf_read
  .text.conf_flush
-                0x0000000000000dd6       0x7c ./User/conf.o
-                0x0000000000000dd6                conf_flush
+                0x0000000000000df8       0x78 ./User/conf.o
+                0x0000000000000df8                conf_flush
  .text.conf_init
-                0x0000000000000e52      0x18e ./User/conf.o
-                0x0000000000000e52                conf_init
+                0x0000000000000e70      0x18e ./User/conf.o
+                0x0000000000000e70                conf_init
  .text._flash_write
-                0x0000000000000fe0       0x52 ./User/flash.o
-                0x0000000000000fe0                _flash_write
+                0x0000000000000ffe       0x52 ./User/flash.o
+                0x0000000000000ffe                _flash_write
  .text.flash_write
-                0x0000000000001032       0x44 ./User/flash.o
-                0x0000000000001032                flash_write
+                0x0000000000001050       0x44 ./User/flash.o
+                0x0000000000001050                flash_write
  .text.get_raw_flash_buf
-                0x0000000000001076        0xa ./User/flash.o
-                0x0000000000001076                get_raw_flash_buf
+                0x0000000000001094        0xa ./User/flash.o
+                0x0000000000001094                get_raw_flash_buf
  .text.raw_flash_write
-                0x0000000000001080        0x2 ./User/flash.o
-                0x0000000000001080                raw_flash_write
+                0x000000000000109e        0x2 ./User/flash.o
+                0x000000000000109e                raw_flash_write
  .text.flash_read
-                0x0000000000001082       0x40 ./User/flash.o
-                0x0000000000001082                flash_read
- .text.i32_min  0x00000000000010c2        0xc ./User/global_api.o
-                0x00000000000010c2                i32_min
+                0x00000000000010a0       0x40 ./User/flash.o
+                0x00000000000010a0                flash_read
+ .text.i32_min  0x00000000000010e0        0xc ./User/global_api.o
+                0x00000000000010e0                i32_min
  .text.fetch_uint32
-                0x00000000000010ce       0x18 ./User/global_api.o
-                0x00000000000010ce                fetch_uint32
+                0x00000000000010ec       0x18 ./User/global_api.o
+                0x00000000000010ec                fetch_uint32
  .text.i32_clamp
-                0x00000000000010e6       0x12 ./User/global_api.o
-                0x00000000000010e6                i32_clamp
+                0x0000000000001104       0x12 ./User/global_api.o
+                0x0000000000001104                i32_clamp
  .text.ADC_Function_Init
-                0x00000000000010f8       0xb2 ./User/gpio_adc.o
-                0x00000000000010f8                ADC_Function_Init
+                0x0000000000001116       0xb2 ./User/gpio_adc.o
+                0x0000000000001116                ADC_Function_Init
  .text.DMA_Tx_Init
-                0x00000000000011aa       0x56 ./User/gpio_adc.o
-                0x00000000000011aa                DMA_Tx_Init
+                0x00000000000011c8       0x56 ./User/gpio_adc.o
+                0x00000000000011c8                DMA_Tx_Init
  .text.adc_init
-                0x0000000000001200       0x6e ./User/gpio_adc.o
-                0x0000000000001200                adc_init
+                0x000000000000121e       0x6e ./User/gpio_adc.o
+                0x000000000000121e                adc_init
  .text.gpio_tb_init
-                0x000000000000126e       0xb8 ./User/gpio_digit.o
-                0x000000000000126e                gpio_tb_init
+                0x000000000000128c       0xb8 ./User/gpio_digit.o
+                0x000000000000128c                gpio_tb_init
  .text.gpio_init
-                0x0000000000001326       0xc2 ./User/gpio_digit.o
-                0x0000000000001326                gpio_init
+                0x0000000000001344       0xc2 ./User/gpio_digit.o
+                0x0000000000001344                gpio_init
  .text.gpio_read_all
-                0x00000000000013e8       0x76 ./User/gpio_digit.o
-                0x00000000000013e8                gpio_read_all
+                0x0000000000001406       0x76 ./User/gpio_digit.o
+                0x0000000000001406                gpio_read_all
  .text.gpio_read
-                0x000000000000145e       0x54 ./User/gpio_digit.o
-                0x000000000000145e                gpio_read
+                0x000000000000147c       0x54 ./User/gpio_digit.o
+                0x000000000000147c                gpio_read
  .text.hd_rumble_init
-                0x00000000000014b2      0x14c ./User/hd_rumble.o
-                0x00000000000014b2                hd_rumble_init
+                0x00000000000014d0      0x14c ./User/hd_rumble.o
+                0x00000000000014d0                hd_rumble_init
  .text.hd_rumble_set_status
-                0x00000000000015fe        0xe ./User/hd_rumble.o
-                0x00000000000015fe                hd_rumble_set_status
+                0x000000000000161c        0xe ./User/hd_rumble.o
+                0x000000000000161c                hd_rumble_set_status
  .text.ApplyCommand
-                0x000000000000160c       0x3e ./User/hd_rumble2.o
-                0x000000000000160c                ApplyCommand
+                0x000000000000162a       0x3e ./User/hd_rumble2.o
+                0x000000000000162a                ApplyCommand
  .text.ApplyAmCommand
-                0x000000000000164a       0x24 ./User/hd_rumble2.o
-                0x000000000000164a                ApplyAmCommand
+                0x0000000000001668       0x24 ./User/hd_rumble2.o
+                0x0000000000001668                ApplyAmCommand
  .text.ApplyFmCommand
-                0x000000000000166e       0x28 ./User/hd_rumble2.o
-                0x000000000000166e                ApplyFmCommand
+                0x000000000000168c       0x28 ./User/hd_rumble2.o
+                0x000000000000168c                ApplyFmCommand
  .text.get_hd_rumble_pack
-                0x0000000000001696       0x1a ./User/hd_rumble2.o
-                0x0000000000001696                get_hd_rumble_pack
+                0x00000000000016b4       0x1a ./User/hd_rumble2.o
+                0x00000000000016b4                get_hd_rumble_pack
  .text.deocde_hd_rumble_format1
-                0x00000000000016b0       0x60 ./User/hd_rumble2.o
-                0x00000000000016b0                deocde_hd_rumble_format1
+                0x00000000000016ce       0x60 ./User/hd_rumble2.o
+                0x00000000000016ce                deocde_hd_rumble_format1
  .text.decode_hd_rumble_format1long
-                0x0000000000001710       0x94 ./User/hd_rumble2.o
-                0x0000000000001710                decode_hd_rumble_format1long
+                0x000000000000172e       0x94 ./User/hd_rumble2.o
+                0x000000000000172e                decode_hd_rumble_format1long
  .text.decode_hd_rumble_format1full
-                0x00000000000017a4      0x124 ./User/hd_rumble2.o
-                0x00000000000017a4                decode_hd_rumble_format1full
+                0x00000000000017c2      0x124 ./User/hd_rumble2.o
+                0x00000000000017c2                decode_hd_rumble_format1full
  .text.decode_hd_rumble_format2
-                0x00000000000018c8       0xb8 ./User/hd_rumble2.o
-                0x00000000000018c8                decode_hd_rumble_format2
+                0x00000000000018e6       0xb8 ./User/hd_rumble2.o
+                0x00000000000018e6                decode_hd_rumble_format2
  .text.decode_hd_rumble_format2long
-                0x0000000000001980       0xfa ./User/hd_rumble2.o
-                0x0000000000001980                decode_hd_rumble_format2long
+                0x000000000000199e       0xfa ./User/hd_rumble2.o
+                0x000000000000199e                decode_hd_rumble_format2long
  .text.decode_hd_rumble_format3
-                0x0000000000001a7a      0x128 ./User/hd_rumble2.o
-                0x0000000000001a7a                decode_hd_rumble_format3
+                0x0000000000001a98      0x128 ./User/hd_rumble2.o
+                0x0000000000001a98                decode_hd_rumble_format3
  .text.decode_hd_rumble_multiformat_high_acc
-                0x0000000000001ba2      0x266 ./User/hd_rumble2.o
-                0x0000000000001ba2                decode_hd_rumble_multiformat_high_acc
+                0x0000000000001bc0      0x266 ./User/hd_rumble2.o
+                0x0000000000001bc0                decode_hd_rumble_multiformat_high_acc
  .text.hd_rumble_high_accurary_init
-                0x0000000000001e08       0x82 ./User/hd_rumble_high_accuracy.o
-                0x0000000000001e08                hd_rumble_high_accurary_init
+                0x0000000000001e26       0x82 ./User/hd_rumble_high_accuracy.o
+                0x0000000000001e26                hd_rumble_high_accurary_init
  .text.push_waveform
-                0x0000000000001e8a       0x5a ./User/hd_rumble_high_accuracy.o
-                0x0000000000001e8a                push_waveform
+                0x0000000000001ea8       0x5a ./User/hd_rumble_high_accuracy.o
+                0x0000000000001ea8                push_waveform
  .text.push_waveform_into_buffer_task
-                0x0000000000001ee4      0x110 ./User/hd_rumble_high_accuracy.o
-                0x0000000000001ee4                push_waveform_into_buffer_task
+                0x0000000000001f02      0x110 ./User/hd_rumble_high_accuracy.o
+                0x0000000000001f02                push_waveform_into_buffer_task
  .text.step_forward
-                0x0000000000001ff4       0x40 ./User/hd_rumble_high_accuracy.o
-                0x0000000000001ff4                step_forward
+                0x0000000000002012       0x40 ./User/hd_rumble_high_accuracy.o
+                0x0000000000002012                step_forward
  .text.rumble_pattern_check
-                0x0000000000002034       0x5c ./User/hd_rumble_high_accuracy.o
-                0x0000000000002034                rumble_pattern_check
+                0x0000000000002052       0x5c ./User/hd_rumble_high_accuracy.o
+                0x0000000000002052                rumble_pattern_check
  .text.TIM3_IRQHandler
-                0x0000000000002090      0x260 ./User/hd_rumble_high_accuracy.o
-                0x0000000000002090                TIM3_IRQHandler
+                0x00000000000020ae      0x260 ./User/hd_rumble_high_accuracy.o
+                0x00000000000020ae                TIM3_IRQHandler
  .text.i2c2_check_flag
-                0x00000000000022f0       0x1a ./User/i2c.o
-                0x00000000000022f0                i2c2_check_flag
+                0x000000000000230e       0x1a ./User/i2c.o
+                0x000000000000230e                i2c2_check_flag
  .text.i2c2_check_event
-                0x000000000000230a       0x1a ./User/i2c.o
-                0x000000000000230a                i2c2_check_event
+                0x0000000000002328       0x1a ./User/i2c.o
+                0x0000000000002328                i2c2_check_event
  .text.I2C2_ER_IRQHandler
-                0x0000000000002324       0x2a ./User/i2c.o
-                0x0000000000002324                I2C2_ER_IRQHandler
+                0x0000000000002342       0x2a ./User/i2c.o
+                0x0000000000002342                I2C2_ER_IRQHandler
  .text.i2c_software_recovery
-                0x000000000000234e      0x11e ./User/i2c.o
-                0x000000000000234e                i2c_software_recovery
+                0x000000000000236c      0x11e ./User/i2c.o
+                0x000000000000236c                i2c_software_recovery
  .text.i2c2_reset
-                0x000000000000246c       0x44 ./User/i2c.o
-                0x000000000000246c                i2c2_reset
+                0x000000000000248a       0x44 ./User/i2c.o
+                0x000000000000248a                i2c2_reset
  .text.i2c_hardware_init
-                0x00000000000024b0       0xc0 ./User/i2c.o
-                0x00000000000024b0                i2c_hardware_init
+                0x00000000000024ce       0xc0 ./User/i2c.o
+                0x00000000000024ce                i2c_hardware_init
  .text.i2c_read_start
-                0x0000000000002570      0x140 ./User/i2c.o
-                0x0000000000002570                i2c_read_start
+                0x000000000000258e      0x140 ./User/i2c.o
+                0x000000000000258e                i2c_read_start
  .text.i2c_read_byte
-                0x00000000000026b0       0x84 ./User/i2c.o
-                0x00000000000026b0                i2c_read_byte
+                0x00000000000026ce       0x84 ./User/i2c.o
+                0x00000000000026ce                i2c_read_byte
  .text.i2c_read_continuous
-                0x0000000000002734       0xac ./User/i2c.o
-                0x0000000000002734                i2c_read_continuous
+                0x0000000000002752       0xac ./User/i2c.o
+                0x0000000000002752                i2c_read_continuous
  .text.i2c_write_byte
-                0x00000000000027e0      0x116 ./User/i2c.o
-                0x00000000000027e0                i2c_write_byte
+                0x00000000000027fe      0x116 ./User/i2c.o
+                0x00000000000027fe                i2c_write_byte
  .text.i2c_init
-                0x00000000000028f6       0x10 ./User/i2c.o
-                0x00000000000028f6                i2c_init
+                0x0000000000002914       0x10 ./User/i2c.o
+                0x0000000000002914                i2c_init
  .text.imu_set_reg
-                0x0000000000002906       0x34 ./User/imu.o
-                0x0000000000002906                imu_set_reg
+                0x0000000000002924       0x34 ./User/imu.o
+                0x0000000000002924                imu_set_reg
  .text.imu_read
-                0x000000000000293a       0x62 ./User/imu.o
-                0x000000000000293a                imu_read
+                0x0000000000002958       0x62 ./User/imu.o
+                0x0000000000002958                imu_read
  .text.set_imu_awake
-                0x000000000000299c       0x96 ./User/imu.o
-                0x000000000000299c                set_imu_awake
+                0x00000000000029ba       0x96 ./User/imu.o
+                0x00000000000029ba                set_imu_awake
  .text.set_imu_sleep
-                0x0000000000002a32       0x24 ./User/imu.o
-                0x0000000000002a32                set_imu_sleep
+                0x0000000000002a50       0x24 ./User/imu.o
+                0x0000000000002a50                set_imu_sleep
  .text.imu_init
-                0x0000000000002a56        0x2 ./User/imu.o
-                0x0000000000002a56                imu_init
- .text.imu_upd  0x0000000000002a58      0x236 ./User/imu.o
-                0x0000000000002a58                imu_upd
+                0x0000000000002a74        0x2 ./User/imu.o
+                0x0000000000002a74                imu_init
+ .text.imu_upd  0x0000000000002a76      0x236 ./User/imu.o
+                0x0000000000002a76                imu_upd
  .text._imu_quat_normalize
-                0x0000000000002c8e       0x90 ./User/imu_quaternion.o
-                0x0000000000002c8e                _imu_quat_normalize
+                0x0000000000002cac       0x90 ./User/imu_quaternion.o
+                0x0000000000002cac                _imu_quat_normalize
  .text._imu_rotate_quaternion
-                0x0000000000002d1e      0x128 ./User/imu_quaternion.o
-                0x0000000000002d1e                _imu_rotate_quaternion
+                0x0000000000002d3c      0x128 ./User/imu_quaternion.o
+                0x0000000000002d3c                _imu_rotate_quaternion
  .text._imu_update_quaternion
-                0x0000000000002e46      0x1fe ./User/imu_quaternion.o
-                0x0000000000002e46                _imu_update_quaternion
+                0x0000000000002e64      0x1fe ./User/imu_quaternion.o
+                0x0000000000002e64                _imu_update_quaternion
  .text.switch_motion_pack_quat
-                0x0000000000003044      0x2b2 ./User/imu_quaternion.o
-                0x0000000000003044                switch_motion_pack_quat
+                0x0000000000003062      0x2b2 ./User/imu_quaternion.o
+                0x0000000000003062                switch_motion_pack_quat
  .text.imu_upd2
-                0x00000000000032f6       0x44 ./User/imu_quaternion.o
-                0x00000000000032f6                imu_upd2
+                0x0000000000003314       0x44 ./User/imu_quaternion.o
+                0x0000000000003314                imu_upd2
  .text.button_upd_all
-                0x000000000000333a       0x1e ./User/main.o
-                0x000000000000333a                button_upd_all
+                0x0000000000003358       0x1e ./User/main.o
+                0x0000000000003358                button_upd_all
  .text.get_peripheral_data_handler
-                0x0000000000003358       0x56 ./User/main.o
-                0x0000000000003358                get_peripheral_data_handler
+                0x0000000000003376       0x56 ./User/main.o
+                0x0000000000003376                get_peripheral_data_handler
  .text.joystick_snapback_filter
-                0x00000000000033ae      0x20c ./User/main.o
-                0x00000000000033ae                joystick_snapback_filter
+                0x00000000000033cc      0x20c ./User/main.o
+                0x00000000000033cc                joystick_snapback_filter
  .text.joystick_debounce_task
-                0x00000000000035ba       0x84 ./User/main.o
-                0x00000000000035ba                joystick_debounce_task
+                0x00000000000035d8       0x84 ./User/main.o
+                0x00000000000035d8                joystick_debounce_task
  .text.func_switch_task
-                0x000000000000363e      0x210 ./User/main.o
-                0x000000000000363e                func_switch_task
+                0x000000000000365c      0x210 ./User/main.o
+                0x000000000000365c                func_switch_task
  .text.top_timer
-                0x000000000000384e       0x56 ./User/main.o
-                0x000000000000384e                top_timer
+                0x000000000000386c       0x56 ./User/main.o
+                0x000000000000386c                top_timer
  .text.routine_service
-                0x00000000000038a4       0x52 ./User/main.o
-                0x00000000000038a4                routine_service
+                0x00000000000038c2       0x52 ./User/main.o
+                0x00000000000038c2                routine_service
  .text.set_peripherals_state
-                0x00000000000038f6       0x92 ./User/main.o
-                0x00000000000038f6                set_peripherals_state
+                0x0000000000003914       0x92 ./User/main.o
+                0x0000000000003914                set_peripherals_state
  .text.init_all
-                0x0000000000003988       0xd0 ./User/main.o
-                0x0000000000003988                init_all
+                0x00000000000039a6       0xd0 ./User/main.o
+                0x00000000000039a6                init_all
  .text.startup.main
-                0x0000000000003a58       0xda ./User/main.o
-                0x0000000000003a58                main
+                0x0000000000003a76       0xda ./User/main.o
+                0x0000000000003a76                main
  .text.ns_subcommand_set_hci_state
-                0x0000000000003b32        0x2 ./User/ns_com.o
-                0x0000000000003b32                ns_subcommand_set_hci_state
+                0x0000000000003b50        0x2 ./User/ns_com.o
+                0x0000000000003b50                ns_subcommand_set_hci_state
  .text.ns_subcommand_set_imu_register
-                0x0000000000003b34       0x10 ./User/ns_com.o
-                0x0000000000003b34                ns_subcommand_set_imu_register
+                0x0000000000003b52       0x10 ./User/ns_com.o
+                0x0000000000003b52                ns_subcommand_set_imu_register
  .text.ns_subcommand_reset_mcu
-                0x0000000000003b44        0x2 ./User/ns_com.o
-                0x0000000000003b44                ns_subcommand_reset_mcu
+                0x0000000000003b62        0x2 ./User/ns_com.o
+                0x0000000000003b62                ns_subcommand_reset_mcu
  .text.ns_subcommand_set_home_led
-                0x0000000000003b46        0x2 ./User/ns_com.o
-                0x0000000000003b46                ns_subcommand_set_home_led
+                0x0000000000003b64        0x2 ./User/ns_com.o
+                0x0000000000003b64                ns_subcommand_set_home_led
  .text.ns_subcommand_reset_pairing_info
-                0x0000000000003b48        0x2 ./User/ns_com.o
-                0x0000000000003b48                ns_subcommand_reset_pairing_info
- .text.pkt_clr  0x0000000000003b4a       0x16 ./User/ns_com.o
-                0x0000000000003b4a                pkt_clr
+                0x0000000000003b66        0x2 ./User/ns_com.o
+                0x0000000000003b66                ns_subcommand_reset_pairing_info
+ .text.pkt_clr  0x0000000000003b68       0x16 ./User/ns_com.o
+                0x0000000000003b68                pkt_clr
  .text.ns_subcommand_set_mcu_conf
-                0x0000000000003b60       0x40 ./User/ns_com.o
-                0x0000000000003b60                ns_subcommand_set_mcu_conf
+                0x0000000000003b7e       0x40 ./User/ns_com.o
+                0x0000000000003b7e                ns_subcommand_set_mcu_conf
  .text.ns_subcommand_default
-                0x0000000000003ba0       0x38 ./User/ns_com.o
-                0x0000000000003ba0                ns_subcommand_default
+                0x0000000000003bbe       0x38 ./User/ns_com.o
+                0x0000000000003bbe                ns_subcommand_default
  .text.ns_subcommand_pair_by_wire
-                0x0000000000003bd8       0xa0 ./User/ns_com.o
-                0x0000000000003bd8                ns_subcommand_pair_by_wire
+                0x0000000000003bf6       0xa0 ./User/ns_com.o
+                0x0000000000003bf6                ns_subcommand_pair_by_wire
  .text.ns_subcommand_get_device_info
-                0x0000000000003c78       0x9c ./User/ns_com.o
-                0x0000000000003c78                ns_subcommand_get_device_info
+                0x0000000000003c96       0x9c ./User/ns_com.o
+                0x0000000000003c96                ns_subcommand_get_device_info
  .text.ns_subcommand_set_input_mode
-                0x0000000000003d14       0x4e ./User/ns_com.o
-                0x0000000000003d14                ns_subcommand_set_input_mode
+                0x0000000000003d32       0x4e ./User/ns_com.o
+                0x0000000000003d32                ns_subcommand_set_input_mode
  .text.ns_subcommand_trigger_buttons_elapsed_time
-                0x0000000000003d62       0x46 ./User/ns_com.o
-                0x0000000000003d62                ns_subcommand_trigger_buttons_elapsed_time
+                0x0000000000003d80       0x46 ./User/ns_com.o
+                0x0000000000003d80                ns_subcommand_trigger_buttons_elapsed_time
  .text.ns_subcommand_get_page_list_state
-                0x0000000000003da8       0x3a ./User/ns_com.o
-                0x0000000000003da8                ns_subcommand_get_page_list_state
+                0x0000000000003dc6       0x3a ./User/ns_com.o
+                0x0000000000003dc6                ns_subcommand_get_page_list_state
  .text.ns_subcommand_set_shipping_mode
-                0x0000000000003de2       0x38 ./User/ns_com.o
-                0x0000000000003de2                ns_subcommand_set_shipping_mode
+                0x0000000000003e00       0x38 ./User/ns_com.o
+                0x0000000000003e00                ns_subcommand_set_shipping_mode
  .text.ns_subcommand_spi_erase
-                0x0000000000003e1a        0x4 ./User/ns_com.o
-                0x0000000000003e1a                ns_subcommand_spi_erase
+                0x0000000000003e38        0x4 ./User/ns_com.o
+                0x0000000000003e38                ns_subcommand_spi_erase
  .text.ns_subcommand_enable_mcu_polling
-                0x0000000000003e1e        0x4 ./User/ns_com.o
-                0x0000000000003e1e                ns_subcommand_enable_mcu_polling
+                0x0000000000003e3c        0x4 ./User/ns_com.o
+                0x0000000000003e3c                ns_subcommand_enable_mcu_polling
  .text.ns_subcommand_disable_mcu_polling
-                0x0000000000003e22        0x4 ./User/ns_com.o
-                0x0000000000003e22                ns_subcommand_disable_mcu_polling
+                0x0000000000003e40        0x4 ./User/ns_com.o
+                0x0000000000003e40                ns_subcommand_disable_mcu_polling
  .text.ns_subcommand_spi_read
-                0x0000000000003e26       0x7a ./User/ns_com.o
-                0x0000000000003e26                ns_subcommand_spi_read
+                0x0000000000003e44       0x7a ./User/ns_com.o
+                0x0000000000003e44                ns_subcommand_spi_read
  .text.ns_subcommand_spi_write
-                0x0000000000003ea0       0x60 ./User/ns_com.o
-                0x0000000000003ea0                ns_subcommand_spi_write
+                0x0000000000003ebe       0x60 ./User/ns_com.o
+                0x0000000000003ebe                ns_subcommand_spi_write
  .text.ns_subcommand_set_mcu_state
-                0x0000000000003f00       0x34 ./User/ns_com.o
-                0x0000000000003f00                ns_subcommand_set_mcu_state
+                0x0000000000003f1e       0x34 ./User/ns_com.o
+                0x0000000000003f1e                ns_subcommand_set_mcu_state
  .text.ns_subcommand_attachmend_write
-                0x0000000000003f34        0x4 ./User/ns_com.o
-                0x0000000000003f34                ns_subcommand_attachmend_write
+                0x0000000000003f52        0x4 ./User/ns_com.o
+                0x0000000000003f52                ns_subcommand_attachmend_write
  .text.ns_subcommand_write_charge_setting
-                0x0000000000003f38        0x4 ./User/ns_com.o
-                0x0000000000003f38                ns_subcommand_write_charge_setting
+                0x0000000000003f56        0x4 ./User/ns_com.o
+                0x0000000000003f56                ns_subcommand_write_charge_setting
  .text.ns_subcommand_attachmend_read
-                0x0000000000003f3c       0x36 ./User/ns_com.o
-                0x0000000000003f3c                ns_subcommand_attachmend_read
+                0x0000000000003f5a       0x36 ./User/ns_com.o
+                0x0000000000003f5a                ns_subcommand_attachmend_read
  .text.ns_subcommand_attachment_state
-                0x0000000000003f72       0x30 ./User/ns_com.o
-                0x0000000000003f72                ns_subcommand_attachment_state
+                0x0000000000003f90       0x30 ./User/ns_com.o
+                0x0000000000003f90                ns_subcommand_attachment_state
  .text.ns_subcommand_get_attachment_info
-                0x0000000000003fa2       0x34 ./User/ns_com.o
-                0x0000000000003fa2                ns_subcommand_get_attachment_info
+                0x0000000000003fc0       0x34 ./User/ns_com.o
+                0x0000000000003fc0                ns_subcommand_get_attachment_info
  .text.ns_subcommand_set_indicate_led
-                0x0000000000003fd6       0x46 ./User/ns_com.o
-                0x0000000000003fd6                ns_subcommand_set_indicate_led
+                0x0000000000003ff4       0x46 ./User/ns_com.o
+                0x0000000000003ff4                ns_subcommand_set_indicate_led
  .text.ns_subcommand_get_indicate_led
-                0x000000000000401c       0x3c ./User/ns_com.o
-                0x000000000000401c                ns_subcommand_get_indicate_led
+                0x000000000000403a       0x3c ./User/ns_com.o
+                0x000000000000403a                ns_subcommand_get_indicate_led
  .text.ns_subcommand_set_imu_state
-                0x0000000000004058       0x3e ./User/ns_com.o
-                0x0000000000004058                ns_subcommand_set_imu_state
+                0x0000000000004076       0x3e ./User/ns_com.o
+                0x0000000000004076                ns_subcommand_set_imu_state
  .text.ns_subcommand_set_imu_conf
-                0x0000000000004096       0x72 ./User/ns_com.o
-                0x0000000000004096                ns_subcommand_set_imu_conf
+                0x00000000000040b4       0x72 ./User/ns_com.o
+                0x00000000000040b4                ns_subcommand_set_imu_conf
  .text.ns_subcommand_read_imu_register
-                0x0000000000004108       0x66 ./User/ns_com.o
-                0x0000000000004108                ns_subcommand_read_imu_register
+                0x0000000000004126       0x66 ./User/ns_com.o
+                0x0000000000004126                ns_subcommand_read_imu_register
  .text.ns_subcommand_set_rumble_state
-                0x000000000000416e       0x3e ./User/ns_com.o
-                0x000000000000416e                ns_subcommand_set_rumble_state
+                0x000000000000418c       0x3e ./User/ns_com.o
+                0x000000000000418c                ns_subcommand_set_rumble_state
  .text.ns_subcommand_get_battery_voltage
-                0x00000000000041ac       0x3a ./User/ns_com.o
-                0x00000000000041ac                ns_subcommand_get_battery_voltage
+                0x00000000000041ca       0x3a ./User/ns_com.o
+                0x00000000000041ca                ns_subcommand_get_battery_voltage
  .text.ns_subcommand_read_charge_setting
-                0x00000000000041e6       0x38 ./User/ns_com.o
-                0x00000000000041e6                ns_subcommand_read_charge_setting
+                0x0000000000004204       0x38 ./User/ns_com.o
+                0x0000000000004204                ns_subcommand_read_charge_setting
  .text.ns_subcommand_callback_init
-                0x000000000000421e      0x112 ./User/ns_com.o
-                0x000000000000421e                ns_subcommand_callback_init
+                0x000000000000423c      0x112 ./User/ns_com.o
+                0x000000000000423c                ns_subcommand_callback_init
  .text.ns_rumble_handler
-                0x0000000000004330       0x14 ./User/ns_com_mux.o
-                0x0000000000004330                ns_rumble_handler
+                0x000000000000434e       0x14 ./User/ns_com_mux.o
+                0x000000000000434e                ns_rumble_handler
  .text.ns_cmd_subcommand_dispatcher
-                0x0000000000004344       0x3c ./User/ns_com_mux.o
-                0x0000000000004344                ns_cmd_subcommand_dispatcher
+                0x0000000000004362       0x3c ./User/ns_com_mux.o
+                0x0000000000004362                ns_cmd_subcommand_dispatcher
  .text.ns_mux_usb_handshake_handler
-                0x0000000000004380       0x8e ./User/ns_com_mux.o
-                0x0000000000004380                ns_mux_usb_handshake_handler
+                0x000000000000439e       0x8e ./User/ns_com_mux.o
+                0x000000000000439e                ns_mux_usb_handshake_handler
  .text._calibrate_imu_raw
-                0x000000000000440e       0xac ./User/ns_com_mux.o
-                0x000000000000440e                _calibrate_imu_raw
+                0x000000000000442c       0xac ./User/ns_com_mux.o
+                0x000000000000442c                _calibrate_imu_raw
  .text.calibrate_imu
-                0x00000000000044ba      0x17e ./User/ns_com_mux.o
-                0x00000000000044ba                calibrate_imu
+                0x00000000000044d8      0x17e ./User/ns_com_mux.o
+                0x00000000000044d8                calibrate_imu
  .text.fw_subcommand_reboot
-                0x0000000000004638       0x22 ./User/ns_com_mux.o
-                0x0000000000004638                fw_subcommand_reboot
+                0x0000000000004656       0x22 ./User/ns_com_mux.o
+                0x0000000000004656                fw_subcommand_reboot
  .text.ns_mux_init
-                0x000000000000465a        0x4 ./User/ns_com_mux.o
-                0x000000000000465a                ns_mux_init
+                0x0000000000004678        0x4 ./User/ns_com_mux.o
+                0x0000000000004678                ns_mux_init
  .text.ns_send_report
-                0x000000000000465e        0xe ./User/ns_com_mux.o
-                0x000000000000465e                ns_send_report
+                0x000000000000467c        0xe ./User/ns_com_mux.o
+                0x000000000000467c                ns_send_report
  .text.hid_send_full64byte_report
-                0x000000000000466c        0xc ./User/ns_com_mux.o
-                0x000000000000466c                hid_send_full64byte_report
+                0x000000000000468a        0xc ./User/ns_com_mux.o
+                0x000000000000468a                hid_send_full64byte_report
  .text.fw_snd_pkt
-                0x0000000000004678       0x20 ./User/ns_com_mux.o
-                0x0000000000004678                fw_snd_pkt
+                0x0000000000004696       0x20 ./User/ns_com_mux.o
+                0x0000000000004696                fw_snd_pkt
  .text.fw_subcommand_read_setting
-                0x0000000000004698       0xa6 ./User/ns_com_mux.o
-                0x0000000000004698                fw_subcommand_read_setting
+                0x00000000000046b6       0xa6 ./User/ns_com_mux.o
+                0x00000000000046b6                fw_subcommand_read_setting
  .text.fw_subcommand_write_setting
-                0x000000000000473e       0x8c ./User/ns_com_mux.o
-                0x000000000000473e                fw_subcommand_write_setting
+                0x000000000000475c       0x8c ./User/ns_com_mux.o
+                0x000000000000475c                fw_subcommand_write_setting
  .text.fw_subcommand_read_emulate_rom
-                0x00000000000047ca       0x4c ./User/ns_com_mux.o
-                0x00000000000047ca                fw_subcommand_read_emulate_rom
+                0x00000000000047e8       0x4c ./User/ns_com_mux.o
+                0x00000000000047e8                fw_subcommand_read_emulate_rom
  .text.fw_subcommand_write_emulate_rom
-                0x0000000000004816       0x2e ./User/ns_com_mux.o
-                0x0000000000004816                fw_subcommand_write_emulate_rom
+                0x0000000000004834       0x2e ./User/ns_com_mux.o
+                0x0000000000004834                fw_subcommand_write_emulate_rom
  .text.fw_subcommand_calibrate_imu
-                0x0000000000004844       0x2a ./User/ns_com_mux.o
-                0x0000000000004844                fw_subcommand_calibrate_imu
+                0x0000000000004862       0x2a ./User/ns_com_mux.o
+                0x0000000000004862                fw_subcommand_calibrate_imu
  .text.fw_subcommand_calibrate_js_offset
-                0x000000000000486e       0x6a ./User/ns_com_mux.o
-                0x000000000000486e                fw_subcommand_calibrate_js_offset
+                0x000000000000488c       0x6a ./User/ns_com_mux.o
+                0x000000000000488c                fw_subcommand_calibrate_js_offset
  .text.fw_subcommand_get_status
-                0x00000000000048d8       0x70 ./User/ns_com_mux.o
-                0x00000000000048d8                fw_subcommand_get_status
+                0x00000000000048f6       0x70 ./User/ns_com_mux.o
+                0x00000000000048f6                fw_subcommand_get_status
  .text.fw_subcommand_get_version
-                0x0000000000004948       0x16 ./User/ns_com_mux.o
-                0x0000000000004948                fw_subcommand_get_version
+                0x0000000000004966       0x16 ./User/ns_com_mux.o
+                0x0000000000004966                fw_subcommand_get_version
  .text.fw_subcommand_dispatcher
-                0x000000000000495e       0x96 ./User/ns_com_mux.o
-                0x000000000000495e                fw_subcommand_dispatcher
+                0x000000000000497c       0x96 ./User/ns_com_mux.o
+                0x000000000000497c                fw_subcommand_dispatcher
  .text.hid_dispatch
-                0x00000000000049f4       0x46 ./User/ns_com_mux.o
-                0x00000000000049f4                hid_dispatch
+                0x0000000000004a12       0x46 ./User/ns_com_mux.o
+                0x0000000000004a12                hid_dispatch
  .text.setup_exti
-                0x0000000000004a3a       0x9e ./User/pwr.o
-                0x0000000000004a3a                setup_exti
+                0x0000000000004a58       0x9e ./User/pwr.o
+                0x0000000000004a58                setup_exti
  .text.top_init
-                0x0000000000004ad8       0x2e ./User/pwr.o
-                0x0000000000004ad8                top_init
+                0x0000000000004af6       0x2e ./User/pwr.o
+                0x0000000000004af6                top_init
  .text.set_pwr_mode_stop
-                0x0000000000004b06       0x4a ./User/pwr.o
-                0x0000000000004b06                set_pwr_mode_stop
+                0x0000000000004b24       0x4a ./User/pwr.o
+                0x0000000000004b24                set_pwr_mode_stop
  .text.ring_buffer_init
-                0x0000000000004b50       0x46 ./User/ring_buffer.o
-                0x0000000000004b50                ring_buffer_init
+                0x0000000000004b6e       0x46 ./User/ring_buffer.o
+                0x0000000000004b6e                ring_buffer_init
  .text.ring_buffer_push
-                0x0000000000004b96       0x98 ./User/ring_buffer.o
-                0x0000000000004b96                ring_buffer_push
+                0x0000000000004bb4       0x98 ./User/ring_buffer.o
+                0x0000000000004bb4                ring_buffer_push
  .text.ring_buffer_pop
-                0x0000000000004c2e       0x58 ./User/ring_buffer.o
-                0x0000000000004c2e                ring_buffer_pop
+                0x0000000000004c4c       0x58 ./User/ring_buffer.o
+                0x0000000000004c4c                ring_buffer_pop
  .text.SPI_FullDuplex_Init
-                0x0000000000004c86       0x76 ./User/spi.o
-                0x0000000000004c86                SPI_FullDuplex_Init
+                0x0000000000004ca4       0x76 ./User/spi.o
+                0x0000000000004ca4                SPI_FullDuplex_Init
  .text.spi_DMA_Tx_Init
-                0x0000000000004cfc       0x58 ./User/spi.o
-                0x0000000000004cfc                spi_DMA_Tx_Init
+                0x0000000000004d1a       0x58 ./User/spi.o
+                0x0000000000004d1a                spi_DMA_Tx_Init
  .text.rgb_spi_pkg_gen
-                0x0000000000004d54       0x54 ./User/spi.o
-                0x0000000000004d54                rgb_spi_pkg_gen
+                0x0000000000004d72       0x54 ./User/spi.o
+                0x0000000000004d72                rgb_spi_pkg_gen
  .text.set_led_rgb
-                0x0000000000004da8       0x7e ./User/spi.o
-                0x0000000000004da8                set_led_rgb
+                0x0000000000004dc6       0x7e ./User/spi.o
+                0x0000000000004dc6                set_led_rgb
  .text.flush_spi_tx_seq
-                0x0000000000004e26       0xe6 ./User/spi.o
-                0x0000000000004e26                flush_spi_tx_seq
+                0x0000000000004e44       0xe6 ./User/spi.o
+                0x0000000000004e44                flush_spi_tx_seq
  .text.flush_rgb
-                0x0000000000004f0c       0x44 ./User/spi.o
-                0x0000000000004f0c                flush_rgb
+                0x0000000000004f2a       0x44 ./User/spi.o
+                0x0000000000004f2a                flush_rgb
  .text.spi_init
-                0x0000000000004f50       0x44 ./User/spi.o
-                0x0000000000004f50                spi_init
+                0x0000000000004f6e       0x44 ./User/spi.o
+                0x0000000000004f6e                spi_init
  .text.DMA1_Channel3_IRQHandler
-                0x0000000000004f94       0x2e ./User/spi.o
-                0x0000000000004f94                DMA1_Channel3_IRQHandler
+                0x0000000000004fb2       0x2e ./User/spi.o
+                0x0000000000004fb2                DMA1_Channel3_IRQHandler
  .text.SetSysClockTo72_HSI
-                0x0000000000004fc2       0x86 ./User/system_ch32v10x.o
+                0x0000000000004fe0       0x86 ./User/system_ch32v10x.o
  .text.SystemInit
-                0x0000000000005048       0x44 ./User/system_ch32v10x.o
-                0x0000000000005048                SystemInit
+                0x0000000000005066       0x44 ./User/system_ch32v10x.o
+                0x0000000000005066                SystemInit
  .text.SystemCoreClockUpdate
-                0x000000000000508c       0x76 ./User/system_ch32v10x.o
-                0x000000000000508c                SystemCoreClockUpdate
+                0x00000000000050aa       0x76 ./User/system_ch32v10x.o
+                0x00000000000050aa                SystemCoreClockUpdate
  .text.SetSysClock
-                0x0000000000005102        0x4 ./User/system_ch32v10x.o
-                0x0000000000005102                SetSysClock
+                0x0000000000005120        0x4 ./User/system_ch32v10x.o
+                0x0000000000005120                SetSysClock
  .text.TIM2_IRQHandler
-                0x0000000000005106       0x28 ./User/tick.o
-                0x0000000000005106                TIM2_IRQHandler
+                0x0000000000005124       0x28 ./User/tick.o
+                0x0000000000005124                TIM2_IRQHandler
  .text._systick_init
-                0x000000000000512e       0x66 ./User/tick.o
-                0x000000000000512e                _systick_init
+                0x000000000000514c       0x66 ./User/tick.o
+                0x000000000000514c                _systick_init
  .text.SysTick_Init
-                0x0000000000005194       0x12 ./User/tick.o
-                0x0000000000005194                SysTick_Init
+                0x00000000000051b2       0x12 ./User/tick.o
+                0x00000000000051b2                SysTick_Init
  .text.Get_Systick_US
-                0x00000000000051a6       0x18 ./User/tick.o
-                0x00000000000051a6                Get_Systick_US
+                0x00000000000051c4       0x18 ./User/tick.o
+                0x00000000000051c4                Get_Systick_US
  .text.Get_Systick_MS
-                0x00000000000051be        0x6 ./User/tick.o
-                0x00000000000051be                Get_Systick_MS
+                0x00000000000051dc        0x6 ./User/tick.o
+                0x00000000000051dc                Get_Systick_MS
  .text.HighPrecisionTimer_Init
-                0x00000000000051c4       0x16 ./User/tick.o
-                0x00000000000051c4                HighPrecisionTimer_Init
+                0x00000000000051e2       0x16 ./User/tick.o
+                0x00000000000051e2                HighPrecisionTimer_Init
  .text.wait_nonblocking_us
-                0x00000000000051da       0x3c ./User/tick.o
-                0x00000000000051da                wait_nonblocking_us
+                0x00000000000051f8       0x3c ./User/tick.o
+                0x00000000000051f8                wait_nonblocking_us
  .text.Delay_Us
-                0x0000000000005216       0x20 ./User/tick.o
-                0x0000000000005216                Delay_Us
+                0x0000000000005234       0x20 ./User/tick.o
+                0x0000000000005234                Delay_Us
  .text.Delay_Ms
-                0x0000000000005236       0x18 ./User/tick.o
-                0x0000000000005236                Delay_Ms
+                0x0000000000005254       0x18 ./User/tick.o
+                0x0000000000005254                Delay_Ms
  .text.decode_uart_pkt.part.0
-                0x000000000000524e       0x52 ./User/uart.o
+                0x000000000000526c       0x52 ./User/uart.o
  .text.UART1_DMA_Init
-                0x00000000000052a0       0xae ./User/uart.o
-                0x00000000000052a0                UART1_DMA_Init
+                0x00000000000052be       0xae ./User/uart.o
+                0x00000000000052be                UART1_DMA_Init
  .text.UART1_Init
-                0x000000000000534e       0xce ./User/uart.o
-                0x000000000000534e                UART1_Init
+                0x000000000000536c       0xce ./User/uart.o
+                0x000000000000536c                UART1_Init
  .text.UART1_DMA_Tx
-                0x000000000000541c       0x48 ./User/uart.o
-                0x000000000000541c                UART1_DMA_Tx
+                0x000000000000543a       0x48 ./User/uart.o
+                0x000000000000543a                UART1_DMA_Tx
  .text.UART1_Tx_Service
-                0x0000000000005464       0xb6 ./User/uart.o
-                0x0000000000005464                UART1_Tx_Service
+                0x0000000000005482       0xb6 ./User/uart.o
+                0x0000000000005482                UART1_Tx_Service
  .text.encode_uart_pkt
-                0x000000000000551a       0xae ./User/uart.o
-                0x000000000000551a                encode_uart_pkt
+                0x0000000000005538       0xae ./User/uart.o
+                0x0000000000005538                encode_uart_pkt
  .text.check_uart_pkt
-                0x00000000000055c8       0x34 ./User/uart.o
-                0x00000000000055c8                check_uart_pkt
+                0x00000000000055e6       0x34 ./User/uart.o
+                0x00000000000055e6                check_uart_pkt
  .text.UART1_Rx_Service
-                0x00000000000055fc      0x14c ./User/uart.o
-                0x00000000000055fc                UART1_Rx_Service
+                0x000000000000561a      0x14c ./User/uart.o
+                0x000000000000561a                UART1_Rx_Service
  .text.send_uart_pkt
-                0x0000000000005748       0x4c ./User/uart.o
-                0x0000000000005748                send_uart_pkt
+                0x0000000000005766       0x4c ./User/uart.o
+                0x0000000000005766                send_uart_pkt
  .text.uart_conf_write
-                0x0000000000005794       0x6a ./User/uart_com.o
-                0x0000000000005794                uart_conf_write
- .text.uart_update_config
-                0x00000000000057fe       0x60 ./User/uart_com.o
-                0x00000000000057fe                uart_update_config
+                0x00000000000057b2       0x6a ./User/uart_com.o
+                0x00000000000057b2                uart_conf_write
  .text.send_input_with_uart
-                0x000000000000585e       0x40 ./User/uart_com.o
-                0x000000000000585e                send_input_with_uart
+                0x000000000000581c       0x40 ./User/uart_com.o
+                0x000000000000581c                send_input_with_uart
  .text.start_connect
-                0x000000000000589e       0x6e ./User/uart_com.o
-                0x000000000000589e                start_connect
+                0x000000000000585c       0x6e ./User/uart_com.o
+                0x000000000000585c                start_connect
  .text.wake_esp32
-                0x000000000000590c       0x38 ./User/uart_com.o
-                0x000000000000590c                wake_esp32
+                0x00000000000058ca       0x38 ./User/uart_com.o
+                0x00000000000058ca                wake_esp32
  .text.recv_esp32_connect_control
-                0x0000000000005944       0xe2 ./User/uart_com.o
-                0x0000000000005944                recv_esp32_connect_control
+                0x0000000000005902       0xe2 ./User/uart_com.o
+                0x0000000000005902                recv_esp32_connect_control
  .text.recv_rumble_frame
-                0x0000000000005a26       0x24 ./User/uart_com.o
-                0x0000000000005a26                recv_rumble_frame
+                0x00000000000059e4       0x24 ./User/uart_com.o
+                0x00000000000059e4                recv_rumble_frame
  .text.recv_pwr_control
-                0x0000000000005a4a       0x58 ./User/uart_com.o
-                0x0000000000005a4a                recv_pwr_control
+                0x0000000000005a08       0x58 ./User/uart_com.o
+                0x0000000000005a08                recv_pwr_control
  .text.recv_flash_operation
-                0x0000000000005aa2      0x106 ./User/uart_com.o
-                0x0000000000005aa2                recv_flash_operation
+                0x0000000000005a60       0xf2 ./User/uart_com.o
+                0x0000000000005a60                recv_flash_operation
  .text.recv_esp32_pkg
-                0x0000000000005ba8       0x4c ./User/uart_com.o
-                0x0000000000005ba8                recv_esp32_pkg
+                0x0000000000005b52       0x4c ./User/uart_com.o
+                0x0000000000005b52                recv_esp32_pkg
  .text.connection_state_handler
-                0x0000000000005bf4      0x12e ./User/uart_com.o
-                0x0000000000005bf4                connection_state_handler
+                0x0000000000005b9e      0x12e ./User/uart_com.o
+                0x0000000000005b9e                connection_state_handler
  .text.uart_com_task
-                0x0000000000005d22       0x62 ./User/uart_com.o
-                0x0000000000005d22                uart_com_task
+                0x0000000000005ccc       0x62 ./User/uart_com.o
+                0x0000000000005ccc                uart_com_task
  .text.ns_set_peripheral_data_getter
-                0x0000000000005d84        0x6 ./User/usbd_compatibility_hid.o
-                0x0000000000005d84                ns_set_peripheral_data_getter
+                0x0000000000005d2e        0x6 ./User/usbd_compatibility_hid.o
+                0x0000000000005d2e                ns_set_peripheral_data_getter
  .text.ns_hid_get_packet_timer
-                0x0000000000005d8a       0x3e ./User/usbd_compatibility_hid.o
-                0x0000000000005d8a                ns_hid_get_packet_timer
+                0x0000000000005d34       0x3e ./User/usbd_compatibility_hid.o
+                0x0000000000005d34                ns_hid_get_packet_timer
  .text.rpt_warpper
-                0x0000000000005dc8       0x66 ./User/usbd_compatibility_hid.o
-                0x0000000000005dc8                rpt_warpper
+                0x0000000000005d72       0x66 ./User/usbd_compatibility_hid.o
+                0x0000000000005d72                rpt_warpper
  .text.set_imu_available
-                0x0000000000005e2e        0x6 ./User/usbd_compatibility_hid.o
-                0x0000000000005e2e                set_imu_available
+                0x0000000000005dd8        0x6 ./User/usbd_compatibility_hid.o
+                0x0000000000005dd8                set_imu_available
  .text.hid_init
-                0x0000000000005e34        0xe ./User/usbd_compatibility_hid.o
-                0x0000000000005e34                hid_init
+                0x0000000000005dde        0xe ./User/usbd_compatibility_hid.o
+                0x0000000000005dde                hid_init
  .text.hid_tx_service
-                0x0000000000005e42      0x10c ./User/usbd_compatibility_hid.o
-                0x0000000000005e42                hid_tx_service
+                0x0000000000005dec      0x10c ./User/usbd_compatibility_hid.o
+                0x0000000000005dec                hid_tx_service
  .text.hid_rx_service
-                0x0000000000005f4e       0x56 ./User/usbd_compatibility_hid.o
-                0x0000000000005f4e                hid_rx_service
+                0x0000000000005ef8       0x56 ./User/usbd_compatibility_hid.o
+                0x0000000000005ef8                hid_rx_service
  .text.soft_watchdog_feed
-                0x0000000000005fa4       0x10 ./User/watchdog.o
-                0x0000000000005fa4                soft_watchdog_feed
+                0x0000000000005f4e       0x10 ./User/watchdog.o
+                0x0000000000005f4e                soft_watchdog_feed
  .text.TIM4_IRQHandler
-                0x0000000000005fb4       0x58 ./User/watchdog.o
-                0x0000000000005fb4                TIM4_IRQHandler
+                0x0000000000005f5e       0x58 ./User/watchdog.o
+                0x0000000000005f5e                TIM4_IRQHandler
  .text.vector_handler
-                0x000000000000600c        0x2 ./Startup/startup_ch32v10x.o
-                0x000000000000600c                EXTI2_IRQHandler
-                0x000000000000600c                TIM1_CC_IRQHandler
-                0x000000000000600c                SysTick_Handler
-                0x000000000000600c                PVD_IRQHandler
-                0x000000000000600c                EXTI3_IRQHandler
-                0x000000000000600c                EXTI0_IRQHandler
-                0x000000000000600c                I2C2_EV_IRQHandler
-                0x000000000000600c                ADC1_2_IRQHandler
-                0x000000000000600c                SPI1_IRQHandler
-                0x000000000000600c                TAMPER_IRQHandler
-                0x000000000000600c                DMA1_Channel4_IRQHandler
-                0x000000000000600c                USART3_IRQHandler
-                0x000000000000600c                RTC_IRQHandler
-                0x000000000000600c                DMA1_Channel7_IRQHandler
-                0x000000000000600c                I2C1_EV_IRQHandler
-                0x000000000000600c                DMA1_Channel6_IRQHandler
-                0x000000000000600c                RCC_IRQHandler
-                0x000000000000600c                TIM1_TRG_COM_IRQHandler
-                0x000000000000600c                DMA1_Channel1_IRQHandler
-                0x000000000000600c                EXTI15_10_IRQHandler
-                0x000000000000600c                EXTI9_5_IRQHandler
-                0x000000000000600c                SPI2_IRQHandler
-                0x000000000000600c                DMA1_Channel5_IRQHandler
-                0x000000000000600c                EXTI4_IRQHandler
-                0x000000000000600c                TIM1_UP_IRQHandler
-                0x000000000000600c                WWDG_IRQHandler
-                0x000000000000600c                SW_Handler
-                0x000000000000600c                TIM1_BRK_IRQHandler
-                0x000000000000600c                EXTI1_IRQHandler
-                0x000000000000600c                RTCAlarm_IRQHandler
-                0x000000000000600c                USART2_IRQHandler
-                0x000000000000600c                DMA1_Channel2_IRQHandler
-                0x000000000000600c                FLASH_IRQHandler
-                0x000000000000600c                USART1_IRQHandler
-                0x000000000000600c                I2C1_ER_IRQHandler
-                0x000000000000600c                USBWakeUp_IRQHandler
+                0x0000000000005fb6        0x2 ./Startup/startup_ch32v10x.o
+                0x0000000000005fb6                EXTI2_IRQHandler
+                0x0000000000005fb6                TIM1_CC_IRQHandler
+                0x0000000000005fb6                SysTick_Handler
+                0x0000000000005fb6                PVD_IRQHandler
+                0x0000000000005fb6                EXTI3_IRQHandler
+                0x0000000000005fb6                EXTI0_IRQHandler
+                0x0000000000005fb6                I2C2_EV_IRQHandler
+                0x0000000000005fb6                ADC1_2_IRQHandler
+                0x0000000000005fb6                SPI1_IRQHandler
+                0x0000000000005fb6                TAMPER_IRQHandler
+                0x0000000000005fb6                DMA1_Channel4_IRQHandler
+                0x0000000000005fb6                USART3_IRQHandler
+                0x0000000000005fb6                RTC_IRQHandler
+                0x0000000000005fb6                DMA1_Channel7_IRQHandler
+                0x0000000000005fb6                I2C1_EV_IRQHandler
+                0x0000000000005fb6                DMA1_Channel6_IRQHandler
+                0x0000000000005fb6                RCC_IRQHandler
+                0x0000000000005fb6                TIM1_TRG_COM_IRQHandler
+                0x0000000000005fb6                DMA1_Channel1_IRQHandler
+                0x0000000000005fb6                EXTI15_10_IRQHandler
+                0x0000000000005fb6                EXTI9_5_IRQHandler
+                0x0000000000005fb6                SPI2_IRQHandler
+                0x0000000000005fb6                DMA1_Channel5_IRQHandler
+                0x0000000000005fb6                EXTI4_IRQHandler
+                0x0000000000005fb6                TIM1_UP_IRQHandler
+                0x0000000000005fb6                WWDG_IRQHandler
+                0x0000000000005fb6                SW_Handler
+                0x0000000000005fb6                TIM1_BRK_IRQHandler
+                0x0000000000005fb6                EXTI1_IRQHandler
+                0x0000000000005fb6                RTCAlarm_IRQHandler
+                0x0000000000005fb6                USART2_IRQHandler
+                0x0000000000005fb6                DMA1_Channel2_IRQHandler
+                0x0000000000005fb6                FLASH_IRQHandler
+                0x0000000000005fb6                USART1_IRQHandler
+                0x0000000000005fb6                I2C1_ER_IRQHandler
+                0x0000000000005fb6                USBWakeUp_IRQHandler
  .text.handle_reset
-                0x000000000000600e       0x7e ./Startup/startup_ch32v10x.o
-                0x000000000000600e                handle_reset
+                0x0000000000005fb8       0x7e ./Startup/startup_ch32v10x.o
+                0x0000000000005fb8                handle_reset
  .text.ADC_DeInit
-                0x000000000000608c       0x2a ./Peripheral/src/ch32v10x_adc.o
-                0x000000000000608c                ADC_DeInit
+                0x0000000000006036       0x2a ./Peripheral/src/ch32v10x_adc.o
+                0x0000000000006036                ADC_DeInit
  .text.ADC_Init
-                0x00000000000060b6       0x50 ./Peripheral/src/ch32v10x_adc.o
-                0x00000000000060b6                ADC_Init
- .text.ADC_Cmd  0x0000000000006106       0x10 ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006106                ADC_Cmd
+                0x0000000000006060       0x50 ./Peripheral/src/ch32v10x_adc.o
+                0x0000000000006060                ADC_Init
+ .text.ADC_Cmd  0x00000000000060b0       0x10 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060b0                ADC_Cmd
  .text.ADC_DMACmd
-                0x0000000000006116       0x12 ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006116                ADC_DMACmd
+                0x00000000000060c0       0x12 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060c0                ADC_DMACmd
  .text.ADC_ResetCalibration
-                0x0000000000006128        0xa ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006128                ADC_ResetCalibration
+                0x00000000000060d2        0xa ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060d2                ADC_ResetCalibration
  .text.ADC_GetResetCalibrationStatus
-                0x0000000000006132        0x8 ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006132                ADC_GetResetCalibrationStatus
+                0x00000000000060dc        0x8 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060dc                ADC_GetResetCalibrationStatus
  .text.ADC_StartCalibration
-                0x000000000000613a        0xa ./Peripheral/src/ch32v10x_adc.o
-                0x000000000000613a                ADC_StartCalibration
+                0x00000000000060e4        0xa ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060e4                ADC_StartCalibration
  .text.ADC_GetCalibrationStatus
-                0x0000000000006144        0x8 ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006144                ADC_GetCalibrationStatus
+                0x00000000000060ee        0x8 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060ee                ADC_GetCalibrationStatus
  .text.ADC_SoftwareStartConvCmd
-                0x000000000000614c       0x18 ./Peripheral/src/ch32v10x_adc.o
-                0x000000000000614c                ADC_SoftwareStartConvCmd
+                0x00000000000060f6       0x18 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000060f6                ADC_SoftwareStartConvCmd
  .text.ADC_RegularChannelConfig
-                0x0000000000006164       0xb8 ./Peripheral/src/ch32v10x_adc.o
-                0x0000000000006164                ADC_RegularChannelConfig
+                0x000000000000610e       0xb8 ./Peripheral/src/ch32v10x_adc.o
+                0x000000000000610e                ADC_RegularChannelConfig
  .text.Get_CalibrationValue
-                0x000000000000621c      0x182 ./Peripheral/src/ch32v10x_adc.o
-                0x000000000000621c                Get_CalibrationValue
+                0x00000000000061c6      0x182 ./Peripheral/src/ch32v10x_adc.o
+                0x00000000000061c6                Get_CalibrationValue
  .text.DMA_DeInit
-                0x000000000000639e       0xe0 ./Peripheral/src/ch32v10x_dma.o
-                0x000000000000639e                DMA_DeInit
+                0x0000000000006348       0xe0 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000006348                DMA_DeInit
  .text.DMA_Init
-                0x000000000000647e       0x38 ./Peripheral/src/ch32v10x_dma.o
-                0x000000000000647e                DMA_Init
- .text.DMA_Cmd  0x00000000000064b6       0x14 ./Peripheral/src/ch32v10x_dma.o
-                0x00000000000064b6                DMA_Cmd
+                0x0000000000006428       0x38 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000006428                DMA_Init
+ .text.DMA_Cmd  0x0000000000006460       0x14 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000006460                DMA_Cmd
  .text.DMA_GetCurrDataCounter
-                0x00000000000064ca        0x8 ./Peripheral/src/ch32v10x_dma.o
-                0x00000000000064ca                DMA_GetCurrDataCounter
+                0x0000000000006474        0x8 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000006474                DMA_GetCurrDataCounter
  .text.DMA_GetFlagStatus
-                0x00000000000064d2       0x20 ./Peripheral/src/ch32v10x_dma.o
-                0x00000000000064d2                DMA_GetFlagStatus
+                0x000000000000647c       0x20 ./Peripheral/src/ch32v10x_dma.o
+                0x000000000000647c                DMA_GetFlagStatus
  .text.DMA_ClearFlag
-                0x00000000000064f2       0x1a ./Peripheral/src/ch32v10x_dma.o
-                0x00000000000064f2                DMA_ClearFlag
+                0x000000000000649c       0x1a ./Peripheral/src/ch32v10x_dma.o
+                0x000000000000649c                DMA_ClearFlag
  .text.DMA_GetITStatus
-                0x000000000000650c        0x4 ./Peripheral/src/ch32v10x_dma.o
-                0x000000000000650c                DMA_GetITStatus
+                0x00000000000064b6        0x4 ./Peripheral/src/ch32v10x_dma.o
+                0x00000000000064b6                DMA_GetITStatus
  .text.DMA_ClearITPendingBit
-                0x0000000000006510        0x4 ./Peripheral/src/ch32v10x_dma.o
-                0x0000000000006510                DMA_ClearITPendingBit
+                0x00000000000064ba        0x4 ./Peripheral/src/ch32v10x_dma.o
+                0x00000000000064ba                DMA_ClearITPendingBit
  .text.EXTI_Init
-                0x0000000000006514       0x62 ./Peripheral/src/ch32v10x_exti.o
-                0x0000000000006514                EXTI_Init
+                0x00000000000064be       0x62 ./Peripheral/src/ch32v10x_exti.o
+                0x00000000000064be                EXTI_Init
  .text.ROM_ERASE
-                0x0000000000006576       0x80 ./Peripheral/src/ch32v10x_flash.o
+                0x0000000000006520       0x80 ./Peripheral/src/ch32v10x_flash.o
  .text.FLASH_ROM_ERASE
-                0x00000000000065f6      0x11a ./Peripheral/src/ch32v10x_flash.o
-                0x00000000000065f6                FLASH_ROM_ERASE
+                0x00000000000065a0      0x11a ./Peripheral/src/ch32v10x_flash.o
+                0x00000000000065a0                FLASH_ROM_ERASE
  .text.FLASH_ROM_WRITE
-                0x0000000000006710      0x11a ./Peripheral/src/ch32v10x_flash.o
-                0x0000000000006710                FLASH_ROM_WRITE
+                0x00000000000066ba      0x11a ./Peripheral/src/ch32v10x_flash.o
+                0x00000000000066ba                FLASH_ROM_WRITE
  .text.GPIO_Init
-                0x000000000000682a       0xbe ./Peripheral/src/ch32v10x_gpio.o
-                0x000000000000682a                GPIO_Init
+                0x00000000000067d4       0xbe ./Peripheral/src/ch32v10x_gpio.o
+                0x00000000000067d4                GPIO_Init
  .text.GPIO_ReadInputDataBit
-                0x00000000000068e8        0xc ./Peripheral/src/ch32v10x_gpio.o
-                0x00000000000068e8                GPIO_ReadInputDataBit
+                0x0000000000006892        0xc ./Peripheral/src/ch32v10x_gpio.o
+                0x0000000000006892                GPIO_ReadInputDataBit
  .text.GPIO_SetBits
-                0x00000000000068f4        0x4 ./Peripheral/src/ch32v10x_gpio.o
-                0x00000000000068f4                GPIO_SetBits
+                0x000000000000689e        0x4 ./Peripheral/src/ch32v10x_gpio.o
+                0x000000000000689e                GPIO_SetBits
  .text.GPIO_ResetBits
-                0x00000000000068f8        0x4 ./Peripheral/src/ch32v10x_gpio.o
-                0x00000000000068f8                GPIO_ResetBits
+                0x00000000000068a2        0x4 ./Peripheral/src/ch32v10x_gpio.o
+                0x00000000000068a2                GPIO_ResetBits
  .text.GPIO_EXTILineConfig
-                0x00000000000068fc       0x2c ./Peripheral/src/ch32v10x_gpio.o
-                0x00000000000068fc                GPIO_EXTILineConfig
+                0x00000000000068a6       0x2c ./Peripheral/src/ch32v10x_gpio.o
+                0x00000000000068a6                GPIO_EXTILineConfig
  .text.I2C_DeInit
-                0x0000000000006928       0x32 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006928                I2C_DeInit
+                0x00000000000068d2       0x32 ./Peripheral/src/ch32v10x_i2c.o
+                0x00000000000068d2                I2C_DeInit
  .text.I2C_Init
-                0x000000000000695a      0x112 ./Peripheral/src/ch32v10x_i2c.o
-                0x000000000000695a                I2C_Init
- .text.I2C_Cmd  0x0000000000006a6c       0x1c ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006a6c                I2C_Cmd
+                0x0000000000006904      0x112 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006904                I2C_Init
+ .text.I2C_Cmd  0x0000000000006a16       0x1c ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a16                I2C_Cmd
  .text.I2C_GenerateSTART
-                0x0000000000006a88       0x1e ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006a88                I2C_GenerateSTART
+                0x0000000000006a32       0x1e ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a32                I2C_GenerateSTART
  .text.I2C_GenerateSTOP
-                0x0000000000006aa6       0x1e ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006aa6                I2C_GenerateSTOP
+                0x0000000000006a50       0x1e ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a50                I2C_GenerateSTOP
  .text.I2C_AcknowledgeConfig
-                0x0000000000006ac4       0x1e ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006ac4                I2C_AcknowledgeConfig
+                0x0000000000006a6e       0x1e ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a6e                I2C_AcknowledgeConfig
  .text.I2C_SendData
-                0x0000000000006ae2        0x6 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006ae2                I2C_SendData
+                0x0000000000006a8c        0x6 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a8c                I2C_SendData
  .text.I2C_ReceiveData
-                0x0000000000006ae8        0xa ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006ae8                I2C_ReceiveData
+                0x0000000000006a92        0xa ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a92                I2C_ReceiveData
  .text.I2C_Send7bitAddress
-                0x0000000000006af2       0x10 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006af2                I2C_Send7bitAddress
+                0x0000000000006a9c       0x10 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006a9c                I2C_Send7bitAddress
  .text.I2C_SoftwareResetCmd
-                0x0000000000006b02       0x16 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006b02                I2C_SoftwareResetCmd
+                0x0000000000006aac       0x16 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006aac                I2C_SoftwareResetCmd
  .text.I2C_NACKPositionConfig
-                0x0000000000006b18       0x26 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006b18                I2C_NACKPositionConfig
+                0x0000000000006ac2       0x26 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006ac2                I2C_NACKPositionConfig
  .text.I2C_CheckEvent
-                0x0000000000006b3e       0x1a ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006b3e                I2C_CheckEvent
+                0x0000000000006ae8       0x1a ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006ae8                I2C_CheckEvent
  .text.I2C_GetFlagStatus
-                0x0000000000006b58       0x32 ./Peripheral/src/ch32v10x_i2c.o
-                0x0000000000006b58                I2C_GetFlagStatus
+                0x0000000000006b02       0x32 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000006b02                I2C_GetFlagStatus
  .text.NVIC_PriorityGroupConfig
-                0x0000000000006b8a       0x10 ./Peripheral/src/ch32v10x_misc.o
-                0x0000000000006b8a                NVIC_PriorityGroupConfig
+                0x0000000000006b34       0x10 ./Peripheral/src/ch32v10x_misc.o
+                0x0000000000006b34                NVIC_PriorityGroupConfig
  .text.NVIC_Init
-                0x0000000000006b9a       0x6e ./Peripheral/src/ch32v10x_misc.o
-                0x0000000000006b9a                NVIC_Init
+                0x0000000000006b44       0x6e ./Peripheral/src/ch32v10x_misc.o
+                0x0000000000006b44                NVIC_Init
  .text.PWR_PVDCmd
-                0x0000000000006c08       0x14 ./Peripheral/src/ch32v10x_pwr.o
-                0x0000000000006c08                PWR_PVDCmd
+                0x0000000000006bb2       0x14 ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000006bb2                PWR_PVDCmd
  .text.PWR_PVDLevelConfig
-                0x0000000000006c1c       0x10 ./Peripheral/src/ch32v10x_pwr.o
-                0x0000000000006c1c                PWR_PVDLevelConfig
+                0x0000000000006bc6       0x10 ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000006bc6                PWR_PVDLevelConfig
  .text.PWR_EnterSTOPMode
-                0x0000000000006c2c       0x62 ./Peripheral/src/ch32v10x_pwr.o
-                0x0000000000006c2c                PWR_EnterSTOPMode
+                0x0000000000006bd6       0x62 ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000006bd6                PWR_EnterSTOPMode
  .text.PWR_GetFlagStatus
-                0x0000000000006c8e        0xe ./Peripheral/src/ch32v10x_pwr.o
-                0x0000000000006c8e                PWR_GetFlagStatus
+                0x0000000000006c38        0xe ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000006c38                PWR_GetFlagStatus
  .text.PWR_VDD_SupplyVoltage
-                0x0000000000006c9c       0x42 ./Peripheral/src/ch32v10x_pwr.o
-                0x0000000000006c9c                PWR_VDD_SupplyVoltage
+                0x0000000000006c46       0x42 ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000006c46                PWR_VDD_SupplyVoltage
  .text.RCC_USBCLKConfig
-                0x0000000000006cde       0x24 ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006cde                RCC_USBCLKConfig
+                0x0000000000006c88       0x24 ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006c88                RCC_USBCLKConfig
  .text.RCC_ADCCLKConfig
-                0x0000000000006d02       0x12 ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006d02                RCC_ADCCLKConfig
+                0x0000000000006cac       0x12 ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006cac                RCC_ADCCLKConfig
  .text.RCC_LSICmd
-                0x0000000000006d14       0x14 ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006d14                RCC_LSICmd
+                0x0000000000006cbe       0x14 ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006cbe                RCC_LSICmd
  .text.RCC_GetClocksFreq
-                0x0000000000006d28       0xb0 ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006d28                RCC_GetClocksFreq
+                0x0000000000006cd2       0xb0 ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006cd2                RCC_GetClocksFreq
  .text.RCC_AHBPeriphClockCmd
-                0x0000000000006dd8       0x1e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006dd8                RCC_AHBPeriphClockCmd
+                0x0000000000006d82       0x1e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006d82                RCC_AHBPeriphClockCmd
  .text.RCC_APB2PeriphClockCmd
-                0x0000000000006df6       0x1e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006df6                RCC_APB2PeriphClockCmd
+                0x0000000000006da0       0x1e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006da0                RCC_APB2PeriphClockCmd
  .text.RCC_APB1PeriphClockCmd
-                0x0000000000006e14       0x1e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006e14                RCC_APB1PeriphClockCmd
+                0x0000000000006dbe       0x1e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006dbe                RCC_APB1PeriphClockCmd
  .text.RCC_APB2PeriphResetCmd
-                0x0000000000006e32       0x1e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006e32                RCC_APB2PeriphResetCmd
+                0x0000000000006ddc       0x1e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006ddc                RCC_APB2PeriphResetCmd
  .text.RCC_APB1PeriphResetCmd
-                0x0000000000006e50       0x1e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006e50                RCC_APB1PeriphResetCmd
+                0x0000000000006dfa       0x1e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006dfa                RCC_APB1PeriphResetCmd
  .text.RCC_GetFlagStatus
-                0x0000000000006e6e       0x2e ./Peripheral/src/ch32v10x_rcc.o
-                0x0000000000006e6e                RCC_GetFlagStatus
+                0x0000000000006e18       0x2e ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000006e18                RCC_GetFlagStatus
  .text.SPI_Init
-                0x0000000000006e9c       0x5a ./Peripheral/src/ch32v10x_spi.o
-                0x0000000000006e9c                SPI_Init
- .text.SPI_Cmd  0x0000000000006ef6       0x1e ./Peripheral/src/ch32v10x_spi.o
-                0x0000000000006ef6                SPI_Cmd
+                0x0000000000006e46       0x5a ./Peripheral/src/ch32v10x_spi.o
+                0x0000000000006e46                SPI_Init
+ .text.SPI_Cmd  0x0000000000006ea0       0x1e ./Peripheral/src/ch32v10x_spi.o
+                0x0000000000006ea0                SPI_Cmd
  .text.SPI_I2S_DMACmd
-                0x0000000000006f14       0x16 ./Peripheral/src/ch32v10x_spi.o
-                0x0000000000006f14                SPI_I2S_DMACmd
+                0x0000000000006ebe       0x16 ./Peripheral/src/ch32v10x_spi.o
+                0x0000000000006ebe                SPI_I2S_DMACmd
  .text.TIM_TimeBaseInit
-                0x0000000000006f2a       0x78 ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000006f2a                TIM_TimeBaseInit
+                0x0000000000006ed4       0x78 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000006ed4                TIM_TimeBaseInit
  .text.TIM_OC1Init
-                0x0000000000006fa2       0x88 ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000006fa2                TIM_OC1Init
+                0x0000000000006f4c       0x88 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000006f4c                TIM_OC1Init
  .text.TIM_OC3Init
-                0x000000000000702a       0xb0 ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000702a                TIM_OC3Init
+                0x0000000000006fd4       0xb0 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000006fd4                TIM_OC3Init
  .text.TIM_OC4Init
-                0x00000000000070da       0x80 ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000070da                TIM_OC4Init
- .text.TIM_Cmd  0x000000000000715a       0x1c ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000715a                TIM_Cmd
+                0x0000000000007084       0x80 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007084                TIM_OC4Init
+ .text.TIM_Cmd  0x0000000000007104       0x1c ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007104                TIM_Cmd
  .text.TIM_CtrlPWMOutputs
-                0x0000000000007176       0x16 ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000007176                TIM_CtrlPWMOutputs
+                0x0000000000007120       0x16 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007120                TIM_CtrlPWMOutputs
  .text.TIM_ITConfig
-                0x000000000000718c       0x16 ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000718c                TIM_ITConfig
+                0x0000000000007136       0x16 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007136                TIM_ITConfig
  .text.TIM_ARRPreloadConfig
-                0x00000000000071a2       0x1e ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000071a2                TIM_ARRPreloadConfig
+                0x000000000000714c       0x1e ./Peripheral/src/ch32v10x_tim.o
+                0x000000000000714c                TIM_ARRPreloadConfig
  .text.TIM_OC1PreloadConfig
-                0x00000000000071c0       0x12 ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000071c0                TIM_OC1PreloadConfig
+                0x000000000000716a       0x12 ./Peripheral/src/ch32v10x_tim.o
+                0x000000000000716a                TIM_OC1PreloadConfig
  .text.TIM_OC2PreloadConfig
-                0x00000000000071d2       0x1a ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000071d2                TIM_OC2PreloadConfig
+                0x000000000000717c       0x1a ./Peripheral/src/ch32v10x_tim.o
+                0x000000000000717c                TIM_OC2PreloadConfig
  .text.TIM_OC3PreloadConfig
-                0x00000000000071ec       0x12 ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000071ec                TIM_OC3PreloadConfig
+                0x0000000000007196       0x12 ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007196                TIM_OC3PreloadConfig
  .text.TIM_OC4PreloadConfig
-                0x00000000000071fe       0x1a ./Peripheral/src/ch32v10x_tim.o
-                0x00000000000071fe                TIM_OC4PreloadConfig
+                0x00000000000071a8       0x1a ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071a8                TIM_OC4PreloadConfig
  .text.TIM_SetCompare1
-                0x0000000000007218        0x6 ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000007218                TIM_SetCompare1
+                0x00000000000071c2        0x6 ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071c2                TIM_SetCompare1
  .text.TIM_SetCompare2
-                0x000000000000721e        0x6 ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000721e                TIM_SetCompare2
+                0x00000000000071c8        0x6 ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071c8                TIM_SetCompare2
  .text.TIM_SetCompare3
-                0x0000000000007224        0x6 ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000007224                TIM_SetCompare3
+                0x00000000000071ce        0x6 ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071ce                TIM_SetCompare3
  .text.TIM_SetCompare4
-                0x000000000000722a        0x6 ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000722a                TIM_SetCompare4
+                0x00000000000071d4        0x6 ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071d4                TIM_SetCompare4
  .text.TIM_GetFlagStatus
-                0x0000000000007230        0xc ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000007230                TIM_GetFlagStatus
+                0x00000000000071da        0xc ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071da                TIM_GetFlagStatus
  .text.TIM_GetITStatus
-                0x000000000000723c       0x1c ./Peripheral/src/ch32v10x_tim.o
-                0x000000000000723c                TIM_GetITStatus
+                0x00000000000071e6       0x1c ./Peripheral/src/ch32v10x_tim.o
+                0x00000000000071e6                TIM_GetITStatus
  .text.TIM_ClearITPendingBit
-                0x0000000000007258        0xe ./Peripheral/src/ch32v10x_tim.o
-                0x0000000000007258                TIM_ClearITPendingBit
+                0x0000000000007202        0xe ./Peripheral/src/ch32v10x_tim.o
+                0x0000000000007202                TIM_ClearITPendingBit
  .text.USART_Init
-                0x0000000000007266       0xa6 ./Peripheral/src/ch32v10x_usart.o
-                0x0000000000007266                USART_Init
+                0x0000000000007210       0xa6 ./Peripheral/src/ch32v10x_usart.o
+                0x0000000000007210                USART_Init
  .text.USART_Cmd
-                0x000000000000730c       0x18 ./Peripheral/src/ch32v10x_usart.o
-                0x000000000000730c                USART_Cmd
+                0x00000000000072b6       0x18 ./Peripheral/src/ch32v10x_usart.o
+                0x00000000000072b6                USART_Cmd
  .text.USART_DMACmd
-                0x0000000000007324       0x16 ./Peripheral/src/ch32v10x_usart.o
-                0x0000000000007324                USART_DMACmd
+                0x00000000000072ce       0x16 ./Peripheral/src/ch32v10x_usart.o
+                0x00000000000072ce                USART_DMACmd
  .text.USART_GetFlagStatus
-                0x000000000000733a        0xc ./Peripheral/src/ch32v10x_usart.o
-                0x000000000000733a                USART_GetFlagStatus
+                0x00000000000072e4        0xc ./Peripheral/src/ch32v10x_usart.o
+                0x00000000000072e4                USART_GetFlagStatus
  .text.USART_ClearFlag
-                0x0000000000007346        0xe ./Peripheral/src/ch32v10x_usart.o
-                0x0000000000007346                USART_ClearFlag
+                0x00000000000072f0        0xe ./Peripheral/src/ch32v10x_usart.o
+                0x00000000000072f0                USART_ClearFlag
  .text.USART_printf_Init
-                0x0000000000007354        0x2 ./Debug/debug.o
-                0x0000000000007354                USART_printf_Init
- .text._write   0x0000000000007356        0x4 ./Debug/debug.o
-                0x0000000000007356                _write
- .text._sbrk    0x000000000000735a       0x2a ./Debug/debug.o
-                0x000000000000735a                _sbrk
- .text.sqrtf    0x0000000000007384       0x48 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libm_nano.a(lib_a-wf_sqrt.o)
-                0x0000000000007384                sqrtf
+                0x00000000000072fe        0x2 ./Debug/debug.o
+                0x00000000000072fe                USART_printf_Init
+ .text._write   0x0000000000007300        0x4 ./Debug/debug.o
+                0x0000000000007300                _write
+ .text._sbrk    0x0000000000007304       0x2a ./Debug/debug.o
+                0x0000000000007304                _sbrk
+ .text.sqrtf    0x000000000000732e       0x48 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libm_nano.a(lib_a-wf_sqrt.o)
+                0x000000000000732e                sqrtf
  .text.__ieee754_sqrtf
-                0x00000000000073cc      0x114 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libm_nano.a(lib_a-ef_sqrt.o)
-                0x00000000000073cc                __ieee754_sqrtf
+                0x0000000000007376      0x114 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libm_nano.a(lib_a-ef_sqrt.o)
+                0x0000000000007376                __ieee754_sqrtf
  .text.__udivdi3
-                0x00000000000074e0      0x3b0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_udivdi3.o)
-                0x00000000000074e0                __udivdi3
+                0x000000000000748a      0x3b0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_udivdi3.o)
+                0x000000000000748a                __udivdi3
  .text.__adddf3
-                0x0000000000007890      0x6e8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(adddf3.o)
-                0x0000000000007890                __adddf3
+                0x000000000000783a      0x6e8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(adddf3.o)
+                0x000000000000783a                __adddf3
  .text.__divdf3
-                0x0000000000007f78      0x5ae d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divdf3.o)
-                0x0000000000007f78                __divdf3
+                0x0000000000007f22      0x5ae d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divdf3.o)
+                0x0000000000007f22                __divdf3
  .text.__muldf3
-                0x0000000000008526      0x54a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(muldf3.o)
-                0x0000000000008526                __muldf3
+                0x00000000000084d0      0x54a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(muldf3.o)
+                0x00000000000084d0                __muldf3
  .text.__subdf3
-                0x0000000000008a70      0x736 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(subdf3.o)
-                0x0000000000008a70                __subdf3
+                0x0000000000008a1a      0x736 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(subdf3.o)
+                0x0000000000008a1a                __subdf3
  .text.__floatsidf
-                0x00000000000091a6       0x70 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatsidf.o)
-                0x00000000000091a6                __floatsidf
+                0x0000000000009150       0x70 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatsidf.o)
+                0x0000000000009150                __floatsidf
  .text.__floatunsidf
-                0x0000000000009216       0x70 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatunsidf.o)
-                0x0000000000009216                __floatunsidf
+                0x00000000000091c0       0x70 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatunsidf.o)
+                0x00000000000091c0                __floatunsidf
  .text.__addsf3
-                0x0000000000009286      0x368 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(addsf3.o)
-                0x0000000000009286                __addsf3
+                0x0000000000009230      0x368 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(addsf3.o)
+                0x0000000000009230                __addsf3
  .text.__divsf3
-                0x00000000000095ee      0x2ea d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divsf3.o)
-                0x00000000000095ee                __divsf3
- .text.__gesf2  0x00000000000098d8       0x96 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(gesf2.o)
-                0x00000000000098d8                __gesf2
-                0x00000000000098d8                __gtsf2
- .text.__lesf2  0x000000000000996e       0x98 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(lesf2.o)
-                0x000000000000996e                __ltsf2
-                0x000000000000996e                __lesf2
+                0x0000000000009598      0x2ea d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divsf3.o)
+                0x0000000000009598                __divsf3
+ .text.__gesf2  0x0000000000009882       0x96 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(gesf2.o)
+                0x0000000000009882                __gesf2
+                0x0000000000009882                __gtsf2
+ .text.__lesf2  0x0000000000009918       0x98 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(lesf2.o)
+                0x0000000000009918                __ltsf2
+                0x0000000000009918                __lesf2
  .text.__mulsf3
-                0x0000000000009a06      0x2d8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(mulsf3.o)
-                0x0000000000009a06                __mulsf3
+                0x00000000000099b0      0x2d8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(mulsf3.o)
+                0x00000000000099b0                __mulsf3
  .text.__subsf3
-                0x0000000000009cde      0x38c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(subsf3.o)
-                0x0000000000009cde                __subsf3
+                0x0000000000009c88      0x38c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(subsf3.o)
+                0x0000000000009c88                __subsf3
  .text.__unordsf2
-                0x000000000000a06a       0x3c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(unordsf2.o)
-                0x000000000000a06a                __unordsf2
+                0x000000000000a014       0x3c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(unordsf2.o)
+                0x000000000000a014                __unordsf2
  .text.__fixsfsi
-                0x000000000000a0a6       0x60 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(fixsfsi.o)
-                0x000000000000a0a6                __fixsfsi
+                0x000000000000a050       0x60 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(fixsfsi.o)
+                0x000000000000a050                __fixsfsi
  .text.__floatsisf
-                0x000000000000a106       0xcc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatsisf.o)
-                0x000000000000a106                __floatsisf
+                0x000000000000a0b0       0xcc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(floatsisf.o)
+                0x000000000000a0b0                __floatsisf
  .text.__truncdfsf2
-                0x000000000000a1d2      0x16c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(truncdfsf2.o)
-                0x000000000000a1d2                __truncdfsf2
+                0x000000000000a17c      0x16c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(truncdfsf2.o)
+                0x000000000000a17c                __truncdfsf2
  .text.__clzsi2
-                0x000000000000a33e       0x6e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_clzsi2.o)
-                0x000000000000a33e                __clzsi2
- .text.__errno  0x000000000000a3ac        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-errno.o)
-                0x000000000000a3ac                __errno
- .text.printf   0x000000000000a3b2       0x3a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-printf.o)
-                0x000000000000a3b2                iprintf
-                0x000000000000a3b2                printf
- .text._puts_r  0x000000000000a3ec      0x10e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-puts.o)
-                0x000000000000a3ec                _puts_r
- .text.puts     0x000000000000a4fa        0xa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-puts.o)
-                0x000000000000a4fa                puts
+                0x000000000000a2e8       0x6e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_clzsi2.o)
+                0x000000000000a2e8                __clzsi2
+ .text.__errno  0x000000000000a356        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-errno.o)
+                0x000000000000a356                __errno
+ .text.printf   0x000000000000a35c       0x3a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-printf.o)
+                0x000000000000a35c                iprintf
+                0x000000000000a35c                printf
+ .text._puts_r  0x000000000000a396      0x10e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-puts.o)
+                0x000000000000a396                _puts_r
+ .text.puts     0x000000000000a4a4        0xa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-puts.o)
+                0x000000000000a4a4                puts
  .text.__swbuf_r
-                0x000000000000a504       0xc0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-wbuf.o)
-                0x000000000000a504                __swbuf_r
+                0x000000000000a4ae       0xc0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-wbuf.o)
+                0x000000000000a4ae                __swbuf_r
  .text.__swsetup_r
-                0x000000000000a5c4       0xfa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-wsetup.o)
-                0x000000000000a5c4                __swsetup_r
+                0x000000000000a56e       0xfa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-wsetup.o)
+                0x000000000000a56e                __swsetup_r
  .text.__sflush_r
-                0x000000000000a6be      0x138 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fflush.o)
-                0x000000000000a6be                __sflush_r
+                0x000000000000a668      0x138 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fflush.o)
+                0x000000000000a668                __sflush_r
  .text._fflush_r
-                0x000000000000a7f6       0x8a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fflush.o)
-                0x000000000000a7f6                _fflush_r
- .text.std      0x000000000000a880       0x6a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a7a0       0x8a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fflush.o)
+                0x000000000000a7a0                _fflush_r
+ .text.std      0x000000000000a82a       0x6a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
  .text._cleanup_r
-                0x000000000000a8ea        0xa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a8ea                _cleanup_r
+                0x000000000000a894        0xa d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a894                _cleanup_r
  .text.__sfmoreglue
-                0x000000000000a8f4       0x46 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a8f4                __sfmoreglue
+                0x000000000000a89e       0x46 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a89e                __sfmoreglue
  .text.__sfp_lock_acquire
-                0x000000000000a93a        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a93a                __sfp_lock_acquire
+                0x000000000000a8e4        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a8e4                __sfp_lock_acquire
  .text.__sfp_lock_release
-                0x000000000000a940        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a940                __sfp_lock_release
+                0x000000000000a8ea        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a8ea                __sfp_lock_release
  .text.__sinit_lock_acquire
-                0x000000000000a946        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a946                __sinit_lock_acquire
+                0x000000000000a8f0        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a8f0                __sinit_lock_acquire
  .text.__sinit_lock_release
-                0x000000000000a94c        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a94c                __sinit_lock_release
- .text.__sinit  0x000000000000a952       0x72 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a952                __sinit
- .text.__sfp    0x000000000000a9c4       0xb0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000a9c4                __sfp
+                0x000000000000a8f6        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a8f6                __sinit_lock_release
+ .text.__sinit  0x000000000000a8fc       0x72 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a8fc                __sinit
+ .text.__sfp    0x000000000000a96e       0xb0 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000a96e                __sfp
  .text._fwalk_reent
-                0x000000000000aa74       0x6a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fwalk.o)
-                0x000000000000aa74                _fwalk_reent
+                0x000000000000aa1e       0x6a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fwalk.o)
+                0x000000000000aa1e                _fwalk_reent
  .text.__retarget_lock_init_recursive
-                0x000000000000aade        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
-                0x000000000000aade                __retarget_lock_init_recursive
+                0x000000000000aa88        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
+                0x000000000000aa88                __retarget_lock_init_recursive
  .text.__retarget_lock_acquire_recursive
-                0x000000000000aae0        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
-                0x000000000000aae0                __retarget_lock_acquire_recursive
+                0x000000000000aa8a        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
+                0x000000000000aa8a                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x000000000000aae2        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
-                0x000000000000aae2                __retarget_lock_release_recursive
+                0x000000000000aa8c        0x2 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lock.o)
+                0x000000000000aa8c                __retarget_lock_release_recursive
  .text.__swhatbuf_r
-                0x000000000000aae4       0x5c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-makebuf.o)
-                0x000000000000aae4                __swhatbuf_r
+                0x000000000000aa8e       0x5c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-makebuf.o)
+                0x000000000000aa8e                __swhatbuf_r
  .text.__smakebuf_r
-                0x000000000000ab40       0xa4 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-makebuf.o)
-                0x000000000000ab40                __smakebuf_r
- .text._free_r  0x000000000000abe4       0x9e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-freer.o)
-                0x000000000000abe4                _free_r
+                0x000000000000aaea       0xa4 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-makebuf.o)
+                0x000000000000aaea                __smakebuf_r
+ .text._free_r  0x000000000000ab8e       0x9e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-freer.o)
+                0x000000000000ab8e                _free_r
  .text.sbrk_aligned
-                0x000000000000ac82       0x54 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-mallocr.o)
+                0x000000000000ac2c       0x54 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-mallocr.o)
  .text._malloc_r
-                0x000000000000acd6      0x10c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-mallocr.o)
-                0x000000000000acd6                _malloc_r
+                0x000000000000ac80      0x10c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-mallocr.o)
+                0x000000000000ac80                _malloc_r
  .text.__sfputc_r
-                0x000000000000ade2       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000000ad8c       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
  .text.__sfputs_r
-                0x000000000000ae0c       0x44 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
-                0x000000000000ae0c                __sfputs_r
+                0x000000000000adb6       0x44 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000000adb6                __sfputs_r
  .text._vfprintf_r
-                0x000000000000ae50      0x2da d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
-                0x000000000000ae50                _vfprintf_r
-                0x000000000000ae50                _vfiprintf_r
- .text._sbrk_r  0x000000000000b12a       0x28 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-sbrkr.o)
-                0x000000000000b12a                _sbrk_r
- .text.__sread  0x000000000000b152       0x30 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
-                0x000000000000b152                __sread
+                0x000000000000adfa      0x2da d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
+                0x000000000000adfa                _vfprintf_r
+                0x000000000000adfa                _vfiprintf_r
+ .text._sbrk_r  0x000000000000b0d4       0x28 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-sbrkr.o)
+                0x000000000000b0d4                _sbrk_r
+ .text.__sread  0x000000000000b0fc       0x30 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
+                0x000000000000b0fc                __sread
  .text.__swrite
-                0x000000000000b182       0x4e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
-                0x000000000000b182                __swrite
- .text.__sseek  0x000000000000b1d0       0x36 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
-                0x000000000000b1d0                __sseek
+                0x000000000000b12c       0x4e d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
+                0x000000000000b12c                __swrite
+ .text.__sseek  0x000000000000b17a       0x36 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
+                0x000000000000b17a                __sseek
  .text.__sclose
-                0x000000000000b206        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
-                0x000000000000b206                __sclose
+                0x000000000000b1b0        0x6 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-stdio.o)
+                0x000000000000b1b0                __sclose
  .text._write_r
-                0x000000000000b20c       0x2c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-writer.o)
-                0x000000000000b20c                _write_r
+                0x000000000000b1b6       0x2c d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-writer.o)
+                0x000000000000b1b6                _write_r
  .text._close_r
-                0x000000000000b238       0x26 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-closer.o)
-                0x000000000000b238                _close_r
+                0x000000000000b1e2       0x26 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-closer.o)
+                0x000000000000b1e2                _close_r
  .text._fstat_r
-                0x000000000000b25e       0x28 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fstatr.o)
-                0x000000000000b25e                _fstat_r
+                0x000000000000b208       0x28 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-fstatr.o)
+                0x000000000000b208                _fstat_r
  .text._isatty_r
-                0x000000000000b286       0x26 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-isattyr.o)
-                0x000000000000b286                _isatty_r
+                0x000000000000b230       0x26 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-isattyr.o)
+                0x000000000000b230                _isatty_r
  .text._lseek_r
-                0x000000000000b2ac       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lseekr.o)
-                0x000000000000b2ac                _lseek_r
- .text.memchr   0x000000000000b2d6       0x1a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-memchr.o)
-                0x000000000000b2d6                memchr
+                0x000000000000b256       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-lseekr.o)
+                0x000000000000b256                _lseek_r
+ .text.memchr   0x000000000000b280       0x1a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-memchr.o)
+                0x000000000000b280                memchr
  .text.__malloc_lock
-                0x000000000000b2f0        0x8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-mlock.o)
-                0x000000000000b2f0                __malloc_lock
+                0x000000000000b29a        0x8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-mlock.o)
+                0x000000000000b29a                __malloc_lock
  .text.__malloc_unlock
-                0x000000000000b2f8        0x8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-mlock.o)
-                0x000000000000b2f8                __malloc_unlock
+                0x000000000000b2a2        0x8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-mlock.o)
+                0x000000000000b2a2                __malloc_unlock
  .text._printf_common
-                0x000000000000b300      0x110 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x000000000000b300                _printf_common
+                0x000000000000b2aa      0x110 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x000000000000b2aa                _printf_common
  .text._printf_i
-                0x000000000000b410      0x286 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
-                0x000000000000b410                _printf_i
- .text._read_r  0x000000000000b696       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-readr.o)
-                0x000000000000b696                _read_r
- .text._close   0x000000000000b6c0        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(close.o)
-                0x000000000000b6c0                _close
- .text._fstat   0x000000000000b6cc        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(fstat.o)
-                0x000000000000b6cc                _fstat
- .text._isatty  0x000000000000b6d8        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(isatty.o)
-                0x000000000000b6d8                _isatty
- .text._lseek   0x000000000000b6e4        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(lseek.o)
-                0x000000000000b6e4                _lseek
- .text._read    0x000000000000b6f0        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(read.o)
-                0x000000000000b6f0                _read
+                0x000000000000b3ba      0x286 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x000000000000b3ba                _printf_i
+ .text._read_r  0x000000000000b640       0x2a d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-readr.o)
+                0x000000000000b640                _read_r
+ .text._close   0x000000000000b66a        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(close.o)
+                0x000000000000b66a                _close
+ .text._fstat   0x000000000000b676        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(fstat.o)
+                0x000000000000b676                _fstat
+ .text._isatty  0x000000000000b682        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(isatty.o)
+                0x000000000000b682                _isatty
+ .text._lseek   0x000000000000b68e        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(lseek.o)
+                0x000000000000b68e                _lseek
+ .text._read    0x000000000000b69a        0xc d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(read.o)
+                0x000000000000b69a                _read
  *(.rodata)
- *fill*         0x000000000000b6fc        0x0 
- .rodata        0x000000000000b6fc       0x18 ./User/ns_com.o
+ *fill*         0x000000000000b6a6        0x2 
+ .rodata        0x000000000000b6a8       0x18 ./User/ns_com.o
  *(.rodata*)
  .rodata.USBFS_IRQHandler
-                0x000000000000b714       0x5c ./User/ch32v10x_usbfs_device.o
+                0x000000000000b6c0       0x5c ./User/ch32v10x_usbfs_device.o
  .rodata.top_timer.str1.4
-                0x000000000000b770        0xd ./User/main.o
- *fill*         0x000000000000b77d        0x3 
+                0x000000000000b71c        0xd ./User/main.o
+ *fill*         0x000000000000b729        0x3 
  .rodata.init_all.str1.4
-                0x000000000000b780       0x14 ./User/main.o
+                0x000000000000b72c       0x14 ./User/main.o
  .rodata.main.str1.4
-                0x000000000000b794        0xf ./User/main.o
- *fill*         0x000000000000b7a3        0x1 
+                0x000000000000b740        0xf ./User/main.o
+ *fill*         0x000000000000b74f        0x1 
  .rodata.ns_mux_usb_handshake_handler
-                0x000000000000b7a4       0x18 ./User/ns_com_mux.o
+                0x000000000000b750       0x18 ./User/ns_com_mux.o
  .rodata.fw_subcommand_dispatcher
-                0x000000000000b7bc       0x1c ./User/ns_com_mux.o
+                0x000000000000b768       0x1c ./User/ns_com_mux.o
  .rodata.recv_esp32_connect_control
-                0x000000000000b7d8       0x40 ./User/uart_com.o
+                0x000000000000b784       0x40 ./User/uart_com.o
  .rodata.MySerNumInfo
-                0x000000000000b818       0x16 ./User/usb_desc.o
-                0x000000000000b818                MySerNumInfo
- *fill*         0x000000000000b82e        0x2 
+                0x000000000000b7c4       0x16 ./User/usb_desc.o
+                0x000000000000b7c4                MySerNumInfo
+ *fill*         0x000000000000b7da        0x2 
  .rodata.MyProdInfo
-                0x000000000000b830       0x2a ./User/usb_desc.o
-                0x000000000000b830                MyProdInfo
- *fill*         0x000000000000b85a        0x2 
+                0x000000000000b7dc       0x2a ./User/usb_desc.o
+                0x000000000000b7dc                MyProdInfo
+ *fill*         0x000000000000b806        0x2 
  .rodata.MyManuInfo
-                0x000000000000b85c        0xa ./User/usb_desc.o
-                0x000000000000b85c                MyManuInfo
- *fill*         0x000000000000b866        0x2 
+                0x000000000000b808        0xa ./User/usb_desc.o
+                0x000000000000b808                MyManuInfo
+ *fill*         0x000000000000b812        0x2 
  .rodata.MyHIDReportDesc
-                0x000000000000b868       0xdf ./User/usb_desc.o
-                0x000000000000b868                MyHIDReportDesc
- *fill*         0x000000000000b947        0x1 
+                0x000000000000b814       0xdf ./User/usb_desc.o
+                0x000000000000b814                MyHIDReportDesc
+ *fill*         0x000000000000b8f3        0x1 
  .rodata.MyDevDescr
-                0x000000000000b948       0x12 ./User/usb_desc.o
-                0x000000000000b948                MyDevDescr
- *fill*         0x000000000000b95a        0x2 
+                0x000000000000b8f4       0x12 ./User/usb_desc.o
+                0x000000000000b8f4                MyDevDescr
+ *fill*         0x000000000000b906        0x2 
  .rodata.__divdf3
-                0x000000000000b95c       0x40 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divdf3.o)
+                0x000000000000b908       0x40 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divdf3.o)
  .rodata.__divsf3
-                0x000000000000b99c       0xa8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divsf3.o)
+                0x000000000000b948       0xa8 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(divsf3.o)
  .rodata.__clz_tab
-                0x000000000000ba44      0x100 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_clz.o)
-                0x000000000000ba44                __clz_tab
+                0x000000000000b9f0      0x100 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0\libgcc.a(_clz.o)
+                0x000000000000b9f0                __clz_tab
  .rodata.__sf_fake_stderr
-                0x000000000000bb44       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000bb44                __sf_fake_stderr
+                0x000000000000baf0       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000baf0                __sf_fake_stderr
  .rodata.__sf_fake_stdout
-                0x000000000000bb64       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000bb64                __sf_fake_stdout
+                0x000000000000bb10       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000bb10                __sf_fake_stdout
  .rodata.__sf_fake_stdin
-                0x000000000000bb84       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
-                0x000000000000bb84                __sf_fake_stdin
+                0x000000000000bb30       0x20 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-findfp.o)
+                0x000000000000bb30                __sf_fake_stdin
  .rodata._vfprintf_r.str1.4
-                0x000000000000bba4       0x13 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
- *fill*         0x000000000000bbb7        0x1 
+                0x000000000000bb50       0x13 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf.o)
+ *fill*         0x000000000000bb63        0x1 
  .rodata._printf_i.str1.4
-                0x000000000000bbb8       0x25 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
- *fill*         0x000000000000bbdd        0x3 
+                0x000000000000bb64       0x25 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
+ *fill*         0x000000000000bb89        0x3 
  .rodata._printf_i
-                0x000000000000bbe0       0x58 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
+                0x000000000000bb8c       0x58 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libg_nano.a(lib_a-nano-vfprintf_i.o)
  *(.gnu.linkonce.t.*)
-                0x000000000000bc38                . = ALIGN (0x4)
+                0x000000000000bbe4                . = ALIGN (0x4)
 
-.rela.dyn       0x000000000000bc38        0x0
- .rela.init     0x000000000000bc38        0x0 ./User/ch32v10x_it.o
- .rela.vector   0x000000000000bc38        0x0 ./User/ch32v10x_it.o
+.rela.dyn       0x000000000000bbe4        0x0
+ .rela.init     0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
+ .rela.vector   0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
  .rela.text.handle_reset
-                0x000000000000bc38        0x0 ./User/ch32v10x_it.o
+                0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
  .rela.text._sbrk
-                0x000000000000bc38        0x0 ./User/ch32v10x_it.o
+                0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
  .rela.sdata.curbrk.0
-                0x000000000000bc38        0x0 ./User/ch32v10x_it.o
+                0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
  .rela.text._vfprintf_r
-                0x000000000000bc38        0x0 ./User/ch32v10x_it.o
+                0x000000000000bbe4        0x0 ./User/ch32v10x_it.o
 
-.fini           0x000000000000bc38        0x0
+.fini           0x000000000000bbe4        0x0
  *(SORT_NONE(.fini))
-                0x000000000000bc38                . = ALIGN (0x4)
+                0x000000000000bbe4                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (_eitcm = .)
 
-.preinit_array  0x000000000000bc38        0x0
+.preinit_array  0x000000000000bbe4        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x000000000000bc38        0x0
+.init_array     0x000000000000bbe4        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x000000000000bc38        0x0
+.fini_array     0x000000000000bbe4        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -2807,15 +2806,15 @@ END GROUP
  *(SORT_BY_NAME(.dtors.*))
  *(.dtors)
 
-.dalign         0x0000000020000000        0x0 load address 0x000000000000bc38
+.dalign         0x0000000020000000        0x0 load address 0x000000000000bbe4
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                PROVIDE (_data_vma = .)
 
-.dlalign        0x000000000000bc38        0x0
-                0x000000000000bc38                . = ALIGN (0x4)
-                0x000000000000bc38                PROVIDE (_data_lma = .)
+.dlalign        0x000000000000bbe4        0x0
+                0x000000000000bbe4                . = ALIGN (0x4)
+                0x000000000000bbe4                PROVIDE (_data_lma = .)
 
-.data           0x0000000020000000     0x1930 load address 0x000000000000bc38
+.data           0x0000000020000000     0x1930 load address 0x000000000000bbe4
  *(.gnu.linkonce.r.*)
  *(.data .data.*)
  .data.CommandTable
@@ -2910,7 +2909,7 @@ END GROUP
                 0x0000000020001930                . = ALIGN (0x4)
                 0x0000000020001930                PROVIDE (_edata = .)
 
-.bss            0x0000000020001930     0x2a4c load address 0x000000000000d568
+.bss            0x0000000020001930     0x298c load address 0x000000000000d514
                 0x0000000020001930                . = ALIGN (0x4)
                 0x0000000020001930                PROVIDE (_sbss = .)
  *(.sbss*)
@@ -3283,107 +3282,107 @@ END GROUP
                 0x0000000020002b84       0x18 ./User/hd_rumble2.o
                 0x0000000020002b84                linear_samples
  .bss.right_low_rb_buf
-                0x0000000020002b9c      0x200 ./User/hd_rumble_high_accuracy.o
+                0x0000000020002b9c      0x100 ./User/hd_rumble_high_accuracy.o
                 0x0000000020002b9c                right_low_rb_buf
  .bss.right_high_rb_buf
-                0x0000000020002d9c      0x200 ./User/hd_rumble_high_accuracy.o
-                0x0000000020002d9c                right_high_rb_buf
+                0x0000000020002c9c      0x100 ./User/hd_rumble_high_accuracy.o
+                0x0000000020002c9c                right_high_rb_buf
  .bss.left_low_rb_buf
-                0x0000000020002f9c      0x200 ./User/hd_rumble_high_accuracy.o
-                0x0000000020002f9c                left_low_rb_buf
+                0x0000000020002d9c      0x100 ./User/hd_rumble_high_accuracy.o
+                0x0000000020002d9c                left_low_rb_buf
  .bss.left_high_rb_buf
-                0x000000002000319c      0x200 ./User/hd_rumble_high_accuracy.o
-                0x000000002000319c                left_high_rb_buf
+                0x0000000020002e9c      0x100 ./User/hd_rumble_high_accuracy.o
+                0x0000000020002e9c                left_high_rb_buf
  .bss.right_low_rb
-                0x000000002000339c       0x90 ./User/hd_rumble_high_accuracy.o
-                0x000000002000339c                right_low_rb
+                0x0000000020002f9c       0x90 ./User/hd_rumble_high_accuracy.o
+                0x0000000020002f9c                right_low_rb
  .bss.right_high_rb
-                0x000000002000342c       0x90 ./User/hd_rumble_high_accuracy.o
-                0x000000002000342c                right_high_rb
+                0x000000002000302c       0x90 ./User/hd_rumble_high_accuracy.o
+                0x000000002000302c                right_high_rb
  .bss.left_low_rb
-                0x00000000200034bc       0x90 ./User/hd_rumble_high_accuracy.o
-                0x00000000200034bc                left_low_rb
+                0x00000000200030bc       0x90 ./User/hd_rumble_high_accuracy.o
+                0x00000000200030bc                left_low_rb
  .bss.left_high_rb
-                0x000000002000354c       0x90 ./User/hd_rumble_high_accuracy.o
-                0x000000002000354c                left_high_rb
+                0x000000002000314c       0x90 ./User/hd_rumble_high_accuracy.o
+                0x000000002000314c                left_high_rb
  .bss.imu_pack_buf
-                0x00000000200035dc       0x4a ./User/imu.o
-                0x00000000200035dc                imu_pack_buf
- *fill*         0x0000000020003626        0x2 
- .bss.imu_res   0x0000000020003628        0xc ./User/imu.o
-                0x0000000020003628                imu_res
+                0x00000000200031dc       0x4a ./User/imu.o
+                0x00000000200031dc                imu_pack_buf
+ *fill*         0x0000000020003226        0x2 
+ .bss.imu_res   0x0000000020003228        0xc ./User/imu.o
+                0x0000000020003228                imu_res
  .bss.imu_raw_buf
-                0x0000000020003634        0xc ./User/imu.o
-                0x0000000020003634                imu_raw_buf
- .bss.imu_sum   0x0000000020003640       0x18 ./User/imu.o
+                0x0000000020003234        0xc ./User/imu.o
+                0x0000000020003234                imu_raw_buf
+ .bss.imu_sum   0x0000000020003240       0x18 ./User/imu.o
  .bss.quaternion_30bit_components.0
-                0x0000000020003658        0xc ./User/imu_quaternion.o
+                0x0000000020003258        0xc ./User/imu_quaternion.o
  .bss.gyo_samples.3
-                0x0000000020003664       0x12 ./User/imu_quaternion.o
- *fill*         0x0000000020003676        0x2 
- .bss.pkt       0x0000000020003678        0xd ./User/main.o
- *fill*         0x0000000020003685        0x3 
+                0x0000000020003264       0x12 ./User/imu_quaternion.o
+ *fill*         0x0000000020003276        0x2 
+ .bss.pkt       0x0000000020003278        0xd ./User/main.o
+ *fill*         0x0000000020003285        0x3 
  .bss.js_snapback_samples
-                0x0000000020003688       0x30 ./User/main.o
-                0x0000000020003688                js_snapback_samples
+                0x0000000020003288       0x30 ./User/main.o
+                0x0000000020003288                js_snapback_samples
  .bss.adc_debounce
-                0x00000000200036b8       0x10 ./User/main.o
-                0x00000000200036b8                adc_debounce
- .bss.pkt       0x00000000200036c8       0x34 ./User/ns_com.o
+                0x00000000200032b8       0x10 ./User/main.o
+                0x00000000200032b8                adc_debounce
+ .bss.pkt       0x00000000200032c8       0x34 ./User/ns_com.o
  .bss.ns_cmd_subcommand_cb_tb
-                0x00000000200036fc      0x400 ./User/ns_com.o
-                0x00000000200036fc                ns_cmd_subcommand_cb_tb
+                0x00000000200032fc      0x400 ./User/ns_com.o
+                0x00000000200032fc                ns_cmd_subcommand_cb_tb
  .bss.calibrate_imu_raw_buf
-                0x0000000020003afc       0x18 ./User/ns_com_mux.o
+                0x00000000200036fc       0x18 ./User/ns_com_mux.o
  .bss.fw_buf_raw
-                0x0000000020003b14       0x40 ./User/ns_com_mux.o
+                0x0000000020003714       0x40 ./User/ns_com_mux.o
  .bss.usb_handshake_buf
-                0x0000000020003b54       0x40 ./User/ns_com_mux.o
+                0x0000000020003754       0x40 ./User/ns_com_mux.o
  .bss.connection_state
-                0x0000000020003b94       0x25 ./User/ns_com_mux.o
-                0x0000000020003b94                connection_state
- *fill*         0x0000000020003bb9        0x3 
+                0x0000000020003794       0x25 ./User/ns_com_mux.o
+                0x0000000020003794                connection_state
+ *fill*         0x00000000200037b9        0x3 
  .bss.spi_tx_buf
-                0x0000000020003bbc      0x123 ./User/spi.o
-                0x0000000020003bbc                spi_tx_buf
- *fill*         0x0000000020003cdf        0x1 
- .bss.send_buf  0x0000000020003ce0        0xd ./User/uart.o
- *fill*         0x0000000020003ced        0x3 
+                0x00000000200037bc      0x123 ./User/spi.o
+                0x00000000200037bc                spi_tx_buf
+ *fill*         0x00000000200038df        0x1 
+ .bss.send_buf  0x00000000200038e0        0xd ./User/uart.o
+ *fill*         0x00000000200038ed        0x3 
  .bss.rx_filter_buf
-                0x0000000020003cf0        0xd ./User/uart.o
-                0x0000000020003cf0                rx_filter_buf
- *fill*         0x0000000020003cfd        0x3 
+                0x00000000200038f0        0xd ./User/uart.o
+                0x00000000200038f0                rx_filter_buf
+ *fill*         0x00000000200038fd        0x3 
  .bss.uart_tx_rb
-                0x0000000020003d00       0x90 ./User/uart.o
-                0x0000000020003d00                uart_tx_rb
+                0x0000000020003900       0x90 ./User/uart.o
+                0x0000000020003900                uart_tx_rb
  .bss.uart_rx_rb
-                0x0000000020003d90       0x90 ./User/uart.o
-                0x0000000020003d90                uart_rx_rb
+                0x0000000020003990       0x90 ./User/uart.o
+                0x0000000020003990                uart_rx_rb
  .bss.uart_tx_rb_buf
-                0x0000000020003e20      0x1a0 ./User/uart.o
-                0x0000000020003e20                uart_tx_rb_buf
+                0x0000000020003a20      0x340 ./User/uart.o
+                0x0000000020003a20                uart_tx_rb_buf
  .bss.uart_rx_rb_buf
-                0x0000000020003fc0      0x1a0 ./User/uart.o
-                0x0000000020003fc0                uart_rx_rb_buf
+                0x0000000020003d60      0x340 ./User/uart.o
+                0x0000000020003d60                uart_rx_rb_buf
  .bss.UART1_RxBuffer
-                0x0000000020004160      0x180 ./User/uart.o
-                0x0000000020004160                UART1_RxBuffer
- .bss.pkt       0x00000000200042e0        0xd ./User/uart_com.o
- *fill*         0x00000000200042ed        0x3 
+                0x00000000200040a0      0x180 ./User/uart.o
+                0x00000000200040a0                UART1_RxBuffer
+ .bss.pkt       0x0000000020004220        0xd ./User/uart_com.o
+ *fill*         0x000000002000422d        0x3 
  .bss.usb_rx_buf
-                0x00000000200042f0       0x40 ./User/usbd_compatibility_hid.o
+                0x0000000020004230       0x40 ./User/usbd_compatibility_hid.o
  .bss.global_input_data
-                0x0000000020004330        0x9 ./User/usbd_compatibility_hid.o
-                0x0000000020004330                global_input_data
- *fill*         0x0000000020004339        0x3 
+                0x0000000020004270        0x9 ./User/usbd_compatibility_hid.o
+                0x0000000020004270                global_input_data
+ *fill*         0x0000000020004279        0x3 
  .bss.HID_Report_Buffer
-                0x000000002000433c       0x40 ./User/usbd_compatibility_hid.o
-                0x000000002000433c                HID_Report_Buffer
+                0x000000002000427c       0x40 ./User/usbd_compatibility_hid.o
+                0x000000002000427c                HID_Report_Buffer
  *(.gnu.linkonce.b.*)
  *(COMMON*)
-                0x000000002000437c                . = ALIGN (0x4)
-                0x000000002000437c                PROVIDE (_ebss = .)
-                0x000000002000437c                PROVIDE (_end = _ebss)
+                0x00000000200042bc                . = ALIGN (0x4)
+                0x00000000200042bc                PROVIDE (_ebss = .)
+                0x00000000200042bc                PROVIDE (_end = _ebss)
                 [!provide]                        PROVIDE (end = .)
 
 .stack          0x0000000020004600      0xa00
@@ -3395,91 +3394,91 @@ END GROUP
                 0x0000000020005000                PROVIDE (_eusrstack = .)
 OUTPUT(CH32V103C8T6_USB.elf elf32-littleriscv)
 
-.debug_info     0x0000000000000000    0x1e480
+.debug_info     0x0000000000000000    0x1e4b1
  .debug_info    0x0000000000000000      0x6fd ./User/ch32v10x_it.o
  .debug_info    0x00000000000006fd      0xd5d ./User/ch32v10x_usbfs_device.o
- .debug_info    0x000000000000145a     0x1278 ./User/conf.o
- .debug_info    0x00000000000026d2      0x4a8 ./User/flash.o
- .debug_info    0x0000000000002b7a      0x35f ./User/global_api.o
- .debug_info    0x0000000000002ed9      0xa46 ./User/gpio_adc.o
- .debug_info    0x000000000000391f      0x670 ./User/gpio_digit.o
- .debug_info    0x0000000000003f8f      0xe19 ./User/hd_rumble.o
- .debug_info    0x0000000000004da8     0x1187 ./User/hd_rumble2.o
- .debug_info    0x0000000000005f2f      0xe4b ./User/hd_rumble_high_accuracy.o
- .debug_info    0x0000000000006d7a     0x1618 ./User/i2c.o
- .debug_info    0x0000000000008392      0xd7b ./User/imu.o
- .debug_info    0x000000000000910d      0xa62 ./User/imu_quaternion.o
- .debug_info    0x0000000000009b6f     0x1dbe ./User/main.o
- .debug_info    0x000000000000b92d     0x2054 ./User/ns_com.o
- .debug_info    0x000000000000d981     0x2216 ./User/ns_com_mux.o
- .debug_info    0x000000000000fb97      0x9c4 ./User/pwr.o
- .debug_info    0x000000000001055b      0x327 ./User/ring_buffer.o
- .debug_info    0x0000000000010882      0xfe0 ./User/spi.o
- .debug_info    0x0000000000011862      0x2f3 ./User/system_ch32v10x.o
- .debug_info    0x0000000000011b55      0xd9a ./User/tick.o
- .debug_info    0x00000000000128ef     0x1066 ./User/uart.o
- .debug_info    0x0000000000013955     0x113f ./User/uart_com.o
- .debug_info    0x0000000000014a94      0x1f6 ./User/usb_desc.o
- .debug_info    0x0000000000014c8a      0xdcd ./User/usbd_compatibility_hid.o
- .debug_info    0x0000000000015a57      0xa15 ./User/watchdog.o
- .debug_info    0x000000000001646c       0x23 ./Startup/startup_ch32v10x.o
- .debug_info    0x000000000001648f      0xd24 ./Peripheral/src/ch32v10x_adc.o
- .debug_info    0x00000000000171b3      0x40b ./Peripheral/src/ch32v10x_dma.o
- .debug_info    0x00000000000175be      0x332 ./Peripheral/src/ch32v10x_exti.o
- .debug_info    0x00000000000178f0      0xc47 ./Peripheral/src/ch32v10x_flash.o
- .debug_info    0x0000000000018537      0x816 ./Peripheral/src/ch32v10x_gpio.o
- .debug_info    0x0000000000018d4d      0xb10 ./Peripheral/src/ch32v10x_i2c.o
- .debug_info    0x000000000001985d      0x57a ./Peripheral/src/ch32v10x_misc.o
- .debug_info    0x0000000000019dd7      0x695 ./Peripheral/src/ch32v10x_pwr.o
- .debug_info    0x000000000001a46c      0x88c ./Peripheral/src/ch32v10x_rcc.o
- .debug_info    0x000000000001acf8      0x96c ./Peripheral/src/ch32v10x_spi.o
- .debug_info    0x000000000001b664     0x1ea7 ./Peripheral/src/ch32v10x_tim.o
- .debug_info    0x000000000001d50b      0xa16 ./Peripheral/src/ch32v10x_usart.o
- .debug_info    0x000000000001df21      0x267 ./Peripheral/src/ch32v10x_usb.o
- .debug_info    0x000000000001e188      0x2f8 ./Debug/debug.o
+ .debug_info    0x000000000000145a     0x129e ./User/conf.o
+ .debug_info    0x00000000000026f8      0x4a8 ./User/flash.o
+ .debug_info    0x0000000000002ba0      0x35f ./User/global_api.o
+ .debug_info    0x0000000000002eff      0xa46 ./User/gpio_adc.o
+ .debug_info    0x0000000000003945      0x670 ./User/gpio_digit.o
+ .debug_info    0x0000000000003fb5      0xe19 ./User/hd_rumble.o
+ .debug_info    0x0000000000004dce     0x1187 ./User/hd_rumble2.o
+ .debug_info    0x0000000000005f55      0xe4a ./User/hd_rumble_high_accuracy.o
+ .debug_info    0x0000000000006d9f     0x1618 ./User/i2c.o
+ .debug_info    0x00000000000083b7      0xd7b ./User/imu.o
+ .debug_info    0x0000000000009132      0xa62 ./User/imu_quaternion.o
+ .debug_info    0x0000000000009b94     0x1dc4 ./User/main.o
+ .debug_info    0x000000000000b958     0x2054 ./User/ns_com.o
+ .debug_info    0x000000000000d9ac     0x2216 ./User/ns_com_mux.o
+ .debug_info    0x000000000000fbc2      0x9c4 ./User/pwr.o
+ .debug_info    0x0000000000010586      0x327 ./User/ring_buffer.o
+ .debug_info    0x00000000000108ad      0xfe0 ./User/spi.o
+ .debug_info    0x000000000001188d      0x2f3 ./User/system_ch32v10x.o
+ .debug_info    0x0000000000011b80      0xd9a ./User/tick.o
+ .debug_info    0x000000000001291a     0x1066 ./User/uart.o
+ .debug_info    0x0000000000013980     0x1145 ./User/uart_com.o
+ .debug_info    0x0000000000014ac5      0x1f6 ./User/usb_desc.o
+ .debug_info    0x0000000000014cbb      0xdcd ./User/usbd_compatibility_hid.o
+ .debug_info    0x0000000000015a88      0xa15 ./User/watchdog.o
+ .debug_info    0x000000000001649d       0x23 ./Startup/startup_ch32v10x.o
+ .debug_info    0x00000000000164c0      0xd24 ./Peripheral/src/ch32v10x_adc.o
+ .debug_info    0x00000000000171e4      0x40b ./Peripheral/src/ch32v10x_dma.o
+ .debug_info    0x00000000000175ef      0x332 ./Peripheral/src/ch32v10x_exti.o
+ .debug_info    0x0000000000017921      0xc47 ./Peripheral/src/ch32v10x_flash.o
+ .debug_info    0x0000000000018568      0x816 ./Peripheral/src/ch32v10x_gpio.o
+ .debug_info    0x0000000000018d7e      0xb10 ./Peripheral/src/ch32v10x_i2c.o
+ .debug_info    0x000000000001988e      0x57a ./Peripheral/src/ch32v10x_misc.o
+ .debug_info    0x0000000000019e08      0x695 ./Peripheral/src/ch32v10x_pwr.o
+ .debug_info    0x000000000001a49d      0x88c ./Peripheral/src/ch32v10x_rcc.o
+ .debug_info    0x000000000001ad29      0x96c ./Peripheral/src/ch32v10x_spi.o
+ .debug_info    0x000000000001b695     0x1ea7 ./Peripheral/src/ch32v10x_tim.o
+ .debug_info    0x000000000001d53c      0xa16 ./Peripheral/src/ch32v10x_usart.o
+ .debug_info    0x000000000001df52      0x267 ./Peripheral/src/ch32v10x_usb.o
+ .debug_info    0x000000000001e1b9      0x2f8 ./Debug/debug.o
 
-.debug_abbrev   0x0000000000000000     0x6ef5
+.debug_abbrev   0x0000000000000000     0x6efe
  .debug_abbrev  0x0000000000000000      0x20f ./User/ch32v10x_it.o
  .debug_abbrev  0x000000000000020f      0x3f2 ./User/ch32v10x_usbfs_device.o
- .debug_abbrev  0x0000000000000601      0x346 ./User/conf.o
- .debug_abbrev  0x0000000000000947      0x20d ./User/flash.o
- .debug_abbrev  0x0000000000000b54      0x136 ./User/global_api.o
- .debug_abbrev  0x0000000000000c8a      0x20c ./User/gpio_adc.o
- .debug_abbrev  0x0000000000000e96      0x2b5 ./User/gpio_digit.o
- .debug_abbrev  0x000000000000114b      0x29f ./User/hd_rumble.o
- .debug_abbrev  0x00000000000013ea      0x330 ./User/hd_rumble2.o
- .debug_abbrev  0x000000000000171a      0x38a ./User/hd_rumble_high_accuracy.o
- .debug_abbrev  0x0000000000001aa4      0x47b ./User/i2c.o
- .debug_abbrev  0x0000000000001f1f      0x344 ./User/imu.o
- .debug_abbrev  0x0000000000002263      0x27b ./User/imu_quaternion.o
- .debug_abbrev  0x00000000000024de      0x5be ./User/main.o
- .debug_abbrev  0x0000000000002a9c      0x4c6 ./User/ns_com.o
- .debug_abbrev  0x0000000000002f62      0x529 ./User/ns_com_mux.o
- .debug_abbrev  0x000000000000348b      0x29b ./User/pwr.o
- .debug_abbrev  0x0000000000003726      0x196 ./User/ring_buffer.o
- .debug_abbrev  0x00000000000038bc      0x30d ./User/spi.o
- .debug_abbrev  0x0000000000003bc9      0x191 ./User/system_ch32v10x.o
- .debug_abbrev  0x0000000000003d5a      0x403 ./User/tick.o
- .debug_abbrev  0x000000000000415d      0x3ff ./User/uart.o
- .debug_abbrev  0x000000000000455c      0x45a ./User/uart_com.o
- .debug_abbrev  0x00000000000049b6       0x79 ./User/usb_desc.o
- .debug_abbrev  0x0000000000004a2f      0x3a3 ./User/usbd_compatibility_hid.o
- .debug_abbrev  0x0000000000004dd2      0x285 ./User/watchdog.o
- .debug_abbrev  0x0000000000005057       0x12 ./Startup/startup_ch32v10x.o
- .debug_abbrev  0x0000000000005069      0x272 ./Peripheral/src/ch32v10x_adc.o
- .debug_abbrev  0x00000000000052db      0x208 ./Peripheral/src/ch32v10x_dma.o
- .debug_abbrev  0x00000000000054e3      0x1ad ./Peripheral/src/ch32v10x_exti.o
- .debug_abbrev  0x0000000000005690      0x328 ./Peripheral/src/ch32v10x_flash.o
- .debug_abbrev  0x00000000000059b8      0x256 ./Peripheral/src/ch32v10x_gpio.o
- .debug_abbrev  0x0000000000005c0e      0x28a ./Peripheral/src/ch32v10x_i2c.o
- .debug_abbrev  0x0000000000005e98      0x1da ./Peripheral/src/ch32v10x_misc.o
- .debug_abbrev  0x0000000000006072      0x28c ./Peripheral/src/ch32v10x_pwr.o
- .debug_abbrev  0x00000000000062fe      0x252 ./Peripheral/src/ch32v10x_rcc.o
- .debug_abbrev  0x0000000000006550      0x21a ./Peripheral/src/ch32v10x_spi.o
- .debug_abbrev  0x000000000000676a      0x321 ./Peripheral/src/ch32v10x_tim.o
- .debug_abbrev  0x0000000000006a8b      0x20b ./Peripheral/src/ch32v10x_usart.o
- .debug_abbrev  0x0000000000006c96       0xba ./Peripheral/src/ch32v10x_usb.o
- .debug_abbrev  0x0000000000006d50      0x1a5 ./Debug/debug.o
+ .debug_abbrev  0x0000000000000601      0x34f ./User/conf.o
+ .debug_abbrev  0x0000000000000950      0x20d ./User/flash.o
+ .debug_abbrev  0x0000000000000b5d      0x136 ./User/global_api.o
+ .debug_abbrev  0x0000000000000c93      0x20c ./User/gpio_adc.o
+ .debug_abbrev  0x0000000000000e9f      0x2b5 ./User/gpio_digit.o
+ .debug_abbrev  0x0000000000001154      0x29f ./User/hd_rumble.o
+ .debug_abbrev  0x00000000000013f3      0x330 ./User/hd_rumble2.o
+ .debug_abbrev  0x0000000000001723      0x38a ./User/hd_rumble_high_accuracy.o
+ .debug_abbrev  0x0000000000001aad      0x47b ./User/i2c.o
+ .debug_abbrev  0x0000000000001f28      0x344 ./User/imu.o
+ .debug_abbrev  0x000000000000226c      0x27b ./User/imu_quaternion.o
+ .debug_abbrev  0x00000000000024e7      0x5be ./User/main.o
+ .debug_abbrev  0x0000000000002aa5      0x4c6 ./User/ns_com.o
+ .debug_abbrev  0x0000000000002f6b      0x529 ./User/ns_com_mux.o
+ .debug_abbrev  0x0000000000003494      0x29b ./User/pwr.o
+ .debug_abbrev  0x000000000000372f      0x196 ./User/ring_buffer.o
+ .debug_abbrev  0x00000000000038c5      0x30d ./User/spi.o
+ .debug_abbrev  0x0000000000003bd2      0x191 ./User/system_ch32v10x.o
+ .debug_abbrev  0x0000000000003d63      0x403 ./User/tick.o
+ .debug_abbrev  0x0000000000004166      0x3ff ./User/uart.o
+ .debug_abbrev  0x0000000000004565      0x45a ./User/uart_com.o
+ .debug_abbrev  0x00000000000049bf       0x79 ./User/usb_desc.o
+ .debug_abbrev  0x0000000000004a38      0x3a3 ./User/usbd_compatibility_hid.o
+ .debug_abbrev  0x0000000000004ddb      0x285 ./User/watchdog.o
+ .debug_abbrev  0x0000000000005060       0x12 ./Startup/startup_ch32v10x.o
+ .debug_abbrev  0x0000000000005072      0x272 ./Peripheral/src/ch32v10x_adc.o
+ .debug_abbrev  0x00000000000052e4      0x208 ./Peripheral/src/ch32v10x_dma.o
+ .debug_abbrev  0x00000000000054ec      0x1ad ./Peripheral/src/ch32v10x_exti.o
+ .debug_abbrev  0x0000000000005699      0x328 ./Peripheral/src/ch32v10x_flash.o
+ .debug_abbrev  0x00000000000059c1      0x256 ./Peripheral/src/ch32v10x_gpio.o
+ .debug_abbrev  0x0000000000005c17      0x28a ./Peripheral/src/ch32v10x_i2c.o
+ .debug_abbrev  0x0000000000005ea1      0x1da ./Peripheral/src/ch32v10x_misc.o
+ .debug_abbrev  0x000000000000607b      0x28c ./Peripheral/src/ch32v10x_pwr.o
+ .debug_abbrev  0x0000000000006307      0x252 ./Peripheral/src/ch32v10x_rcc.o
+ .debug_abbrev  0x0000000000006559      0x21a ./Peripheral/src/ch32v10x_spi.o
+ .debug_abbrev  0x0000000000006773      0x321 ./Peripheral/src/ch32v10x_tim.o
+ .debug_abbrev  0x0000000000006a94      0x20b ./Peripheral/src/ch32v10x_usart.o
+ .debug_abbrev  0x0000000000006c9f       0xba ./Peripheral/src/ch32v10x_usb.o
+ .debug_abbrev  0x0000000000006d59      0x1a5 ./Debug/debug.o
 
 .debug_aranges  0x0000000000000000     0x15d8
  .debug_aranges
@@ -3566,211 +3565,211 @@ OUTPUT(CH32V103C8T6_USB.elf elf32-littleriscv)
                 0x00000000000015a0       0x38 ./Debug/debug.o
 
 .debug_rnglists
-                0x0000000000000000     0x1c05
+                0x0000000000000000     0x1c18
  .debug_rnglists
                 0x0000000000000000       0x1f ./User/ch32v10x_it.o
  .debug_rnglists
                 0x000000000000001f       0x69 ./User/ch32v10x_usbfs_device.o
  .debug_rnglists
-                0x0000000000000088       0x8c ./User/conf.o
+                0x0000000000000088       0x9f ./User/conf.o
  .debug_rnglists
-                0x0000000000000114       0x3a ./User/flash.o
+                0x0000000000000127       0x3a ./User/flash.o
  .debug_rnglists
-                0x000000000000014e       0x67 ./User/global_api.o
+                0x0000000000000161       0x67 ./User/global_api.o
  .debug_rnglists
-                0x00000000000001b5       0x31 ./User/gpio_adc.o
+                0x00000000000001c8       0x31 ./User/gpio_adc.o
  .debug_rnglists
-                0x00000000000001e6       0x8f ./User/gpio_digit.o
+                0x00000000000001f9       0x8f ./User/gpio_digit.o
  .debug_rnglists
-                0x0000000000000275       0x1f ./User/hd_rumble.o
+                0x0000000000000288       0x1f ./User/hd_rumble.o
  .debug_rnglists
-                0x0000000000000294       0xa8 ./User/hd_rumble2.o
+                0x00000000000002a7       0xa8 ./User/hd_rumble2.o
  .debug_rnglists
-                0x000000000000033c       0x43 ./User/hd_rumble_high_accuracy.o
+                0x000000000000034f       0x43 ./User/hd_rumble_high_accuracy.o
  .debug_rnglists
-                0x000000000000037f      0x118 ./User/i2c.o
+                0x0000000000000392      0x118 ./User/i2c.o
  .debug_rnglists
-                0x0000000000000497       0x72 ./User/imu.o
+                0x00000000000004aa       0x72 ./User/imu.o
  .debug_rnglists
-                0x0000000000000509       0x69 ./User/imu_quaternion.o
+                0x000000000000051c       0x69 ./User/imu_quaternion.o
  .debug_rnglists
-                0x0000000000000572      0x121 ./User/main.o
+                0x0000000000000585      0x121 ./User/main.o
  .debug_rnglists
-                0x0000000000000693      0x34d ./User/ns_com.o
+                0x00000000000006a6      0x34d ./User/ns_com.o
  .debug_rnglists
-                0x00000000000009e0      0x10b ./User/ns_com_mux.o
+                0x00000000000009f3      0x10b ./User/ns_com_mux.o
  .debug_rnglists
-                0x0000000000000aeb       0x31 ./User/pwr.o
+                0x0000000000000afe       0x31 ./User/pwr.o
  .debug_rnglists
-                0x0000000000000b1c       0x28 ./User/ring_buffer.o
+                0x0000000000000b2f       0x28 ./User/ring_buffer.o
  .debug_rnglists
-                0x0000000000000b44       0x84 ./User/spi.o
+                0x0000000000000b57       0x84 ./User/spi.o
  .debug_rnglists
-                0x0000000000000bc8       0x31 ./User/system_ch32v10x.o
+                0x0000000000000bdb       0x31 ./User/system_ch32v10x.o
  .debug_rnglists
-                0x0000000000000bf9       0xc2 ./User/tick.o
+                0x0000000000000c0c       0xc2 ./User/tick.o
  .debug_rnglists
-                0x0000000000000cbb       0x96 ./User/uart.o
+                0x0000000000000cce       0x96 ./User/uart.o
  .debug_rnglists
-                0x0000000000000d51       0xb2 ./User/uart_com.o
+                0x0000000000000d64       0xb2 ./User/uart_com.o
  .debug_rnglists
-                0x0000000000000e03       0x71 ./User/usbd_compatibility_hid.o
+                0x0000000000000e16       0x71 ./User/usbd_compatibility_hid.o
  .debug_rnglists
-                0x0000000000000e74       0x28 ./User/watchdog.o
+                0x0000000000000e87       0x28 ./User/watchdog.o
  .debug_rnglists
-                0x0000000000000e9c       0x27 ./Startup/startup_ch32v10x.o
+                0x0000000000000eaf       0x27 ./Startup/startup_ch32v10x.o
  .debug_rnglists
-                0x0000000000000ec3      0x163 ./Peripheral/src/ch32v10x_adc.o
+                0x0000000000000ed6      0x163 ./Peripheral/src/ch32v10x_adc.o
  .debug_rnglists
-                0x0000000000001026       0x70 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000001039       0x70 ./Peripheral/src/ch32v10x_dma.o
  .debug_rnglists
-                0x0000000000001096       0x55 ./Peripheral/src/ch32v10x_exti.o
+                0x00000000000010a9       0x55 ./Peripheral/src/ch32v10x_exti.o
  .debug_rnglists
-                0x00000000000010eb      0x15a ./Peripheral/src/ch32v10x_flash.o
+                0x00000000000010fe      0x15a ./Peripheral/src/ch32v10x_flash.o
  .debug_rnglists
-                0x0000000000001245       0xaf ./Peripheral/src/ch32v10x_gpio.o
+                0x0000000000001258       0xaf ./Peripheral/src/ch32v10x_gpio.o
  .debug_rnglists
-                0x00000000000012f4      0x136 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000001307      0x136 ./Peripheral/src/ch32v10x_i2c.o
  .debug_rnglists
-                0x000000000000142a       0x45 ./Peripheral/src/ch32v10x_misc.o
+                0x000000000000143d       0x45 ./Peripheral/src/ch32v10x_misc.o
  .debug_rnglists
-                0x000000000000146f       0xb3 ./Peripheral/src/ch32v10x_pwr.o
+                0x0000000000001482       0xb3 ./Peripheral/src/ch32v10x_pwr.o
  .debug_rnglists
-                0x0000000000001522      0x12d ./Peripheral/src/ch32v10x_rcc.o
+                0x0000000000001535      0x12d ./Peripheral/src/ch32v10x_rcc.o
  .debug_rnglists
-                0x000000000000164f       0xdc ./Peripheral/src/ch32v10x_spi.o
+                0x0000000000001662       0xdc ./Peripheral/src/ch32v10x_spi.o
  .debug_rnglists
-                0x000000000000172b      0x354 ./Peripheral/src/ch32v10x_tim.o
+                0x000000000000173e      0x354 ./Peripheral/src/ch32v10x_tim.o
  .debug_rnglists
-                0x0000000000001a7f      0x100 ./Peripheral/src/ch32v10x_usart.o
+                0x0000000000001a92      0x100 ./Peripheral/src/ch32v10x_usart.o
  .debug_rnglists
-                0x0000000000001b7f       0x55 ./Peripheral/src/ch32v10x_usb.o
+                0x0000000000001b92       0x55 ./Peripheral/src/ch32v10x_usb.o
  .debug_rnglists
-                0x0000000000001bd4       0x31 ./Debug/debug.o
+                0x0000000000001be7       0x31 ./Debug/debug.o
 
-.debug_line     0x0000000000000000    0x1aab1
+.debug_line     0x0000000000000000    0x1aaa3
  .debug_line    0x0000000000000000      0x1ff ./User/ch32v10x_it.o
  .debug_line    0x00000000000001ff     0x141e ./User/ch32v10x_usbfs_device.o
- .debug_line    0x000000000000161d      0xb7a ./User/conf.o
- .debug_line    0x0000000000002197      0x2b7 ./User/flash.o
- .debug_line    0x000000000000244e      0x258 ./User/global_api.o
- .debug_line    0x00000000000026a6      0x40f ./User/gpio_adc.o
- .debug_line    0x0000000000002ab5      0x65c ./User/gpio_digit.o
- .debug_line    0x0000000000003111      0x31c ./User/hd_rumble.o
- .debug_line    0x000000000000342d     0x1260 ./User/hd_rumble2.o
- .debug_line    0x000000000000468d      0xa72 ./User/hd_rumble_high_accuracy.o
- .debug_line    0x00000000000050ff      0xeae ./User/i2c.o
- .debug_line    0x0000000000005fad      0x8f5 ./User/imu.o
- .debug_line    0x00000000000068a2      0xa5c ./User/imu_quaternion.o
- .debug_line    0x00000000000072fe     0x11d7 ./User/main.o
- .debug_line    0x00000000000084d5     0x1734 ./User/ns_com.o
- .debug_line    0x0000000000009c09      0xf16 ./User/ns_com_mux.o
- .debug_line    0x000000000000ab1f      0x4af ./User/pwr.o
- .debug_line    0x000000000000afce      0x3da ./User/ring_buffer.o
- .debug_line    0x000000000000b3a8      0x791 ./User/spi.o
- .debug_line    0x000000000000bb39      0x49a ./User/system_ch32v10x.o
- .debug_line    0x000000000000bfd3      0x853 ./User/tick.o
- .debug_line    0x000000000000c826      0xe3b ./User/uart.o
- .debug_line    0x000000000000d661      0xb6d ./User/uart_com.o
- .debug_line    0x000000000000e1ce       0x51 ./User/usb_desc.o
- .debug_line    0x000000000000e21f      0x619 ./User/usbd_compatibility_hid.o
- .debug_line    0x000000000000e838      0x225 ./User/watchdog.o
- .debug_line    0x000000000000ea5d      0x21a ./Startup/startup_ch32v10x.o
- .debug_line    0x000000000000ec77     0x1555 ./Peripheral/src/ch32v10x_adc.o
- .debug_line    0x00000000000101cc      0x6a8 ./Peripheral/src/ch32v10x_dma.o
- .debug_line    0x0000000000010874      0x408 ./Peripheral/src/ch32v10x_exti.o
- .debug_line    0x0000000000010c7c     0x1e5f ./Peripheral/src/ch32v10x_flash.o
- .debug_line    0x0000000000012adb      0xb5c ./Peripheral/src/ch32v10x_gpio.o
- .debug_line    0x0000000000013637      0xf9f ./Peripheral/src/ch32v10x_i2c.o
- .debug_line    0x00000000000145d6      0x251 ./Peripheral/src/ch32v10x_misc.o
- .debug_line    0x0000000000014827      0x50f ./Peripheral/src/ch32v10x_pwr.o
- .debug_line    0x0000000000014d36      0xf4b ./Peripheral/src/ch32v10x_rcc.o
- .debug_line    0x0000000000015c81      0xb2a ./Peripheral/src/ch32v10x_spi.o
- .debug_line    0x00000000000167ab     0x301c ./Peripheral/src/ch32v10x_tim.o
- .debug_line    0x00000000000197c7      0xcd2 ./Peripheral/src/ch32v10x_usart.o
- .debug_line    0x000000000001a499      0x45a ./Peripheral/src/ch32v10x_usb.o
- .debug_line    0x000000000001a8f3      0x1be ./Debug/debug.o
+ .debug_line    0x000000000000161d      0xb90 ./User/conf.o
+ .debug_line    0x00000000000021ad      0x2b7 ./User/flash.o
+ .debug_line    0x0000000000002464      0x258 ./User/global_api.o
+ .debug_line    0x00000000000026bc      0x40f ./User/gpio_adc.o
+ .debug_line    0x0000000000002acb      0x65c ./User/gpio_digit.o
+ .debug_line    0x0000000000003127      0x31c ./User/hd_rumble.o
+ .debug_line    0x0000000000003443     0x1260 ./User/hd_rumble2.o
+ .debug_line    0x00000000000046a3      0xa72 ./User/hd_rumble_high_accuracy.o
+ .debug_line    0x0000000000005115      0xeae ./User/i2c.o
+ .debug_line    0x0000000000005fc3      0x8f5 ./User/imu.o
+ .debug_line    0x00000000000068b8      0xa5c ./User/imu_quaternion.o
+ .debug_line    0x0000000000007314     0x11d7 ./User/main.o
+ .debug_line    0x00000000000084eb     0x1734 ./User/ns_com.o
+ .debug_line    0x0000000000009c1f      0xf16 ./User/ns_com_mux.o
+ .debug_line    0x000000000000ab35      0x4af ./User/pwr.o
+ .debug_line    0x000000000000afe4      0x3da ./User/ring_buffer.o
+ .debug_line    0x000000000000b3be      0x791 ./User/spi.o
+ .debug_line    0x000000000000bb4f      0x49a ./User/system_ch32v10x.o
+ .debug_line    0x000000000000bfe9      0x853 ./User/tick.o
+ .debug_line    0x000000000000c83c      0xe3b ./User/uart.o
+ .debug_line    0x000000000000d677      0xb49 ./User/uart_com.o
+ .debug_line    0x000000000000e1c0       0x51 ./User/usb_desc.o
+ .debug_line    0x000000000000e211      0x619 ./User/usbd_compatibility_hid.o
+ .debug_line    0x000000000000e82a      0x225 ./User/watchdog.o
+ .debug_line    0x000000000000ea4f      0x21a ./Startup/startup_ch32v10x.o
+ .debug_line    0x000000000000ec69     0x1555 ./Peripheral/src/ch32v10x_adc.o
+ .debug_line    0x00000000000101be      0x6a8 ./Peripheral/src/ch32v10x_dma.o
+ .debug_line    0x0000000000010866      0x408 ./Peripheral/src/ch32v10x_exti.o
+ .debug_line    0x0000000000010c6e     0x1e5f ./Peripheral/src/ch32v10x_flash.o
+ .debug_line    0x0000000000012acd      0xb5c ./Peripheral/src/ch32v10x_gpio.o
+ .debug_line    0x0000000000013629      0xf9f ./Peripheral/src/ch32v10x_i2c.o
+ .debug_line    0x00000000000145c8      0x251 ./Peripheral/src/ch32v10x_misc.o
+ .debug_line    0x0000000000014819      0x50f ./Peripheral/src/ch32v10x_pwr.o
+ .debug_line    0x0000000000014d28      0xf4b ./Peripheral/src/ch32v10x_rcc.o
+ .debug_line    0x0000000000015c73      0xb2a ./Peripheral/src/ch32v10x_spi.o
+ .debug_line    0x000000000001679d     0x301c ./Peripheral/src/ch32v10x_tim.o
+ .debug_line    0x00000000000197b9      0xcd2 ./Peripheral/src/ch32v10x_usart.o
+ .debug_line    0x000000000001a48b      0x45a ./Peripheral/src/ch32v10x_usb.o
+ .debug_line    0x000000000001a8e5      0x1be ./Debug/debug.o
 
-.debug_str      0x0000000000000000     0x6677
+.debug_str      0x0000000000000000     0x6698
  .debug_str     0x0000000000000000      0x588 ./User/ch32v10x_it.o
                                         0x6d5 (size before relaxing)
  .debug_str     0x0000000000000588      0x685 ./User/ch32v10x_usbfs_device.o
                                         0x8f0 (size before relaxing)
- .debug_str     0x0000000000000c0d      0x82d ./User/conf.o
-                                        0xf3d (size before relaxing)
- .debug_str     0x000000000000143a      0x12d ./User/flash.o
+ .debug_str     0x0000000000000c0d      0x82a ./User/conf.o
+                                        0xf3a (size before relaxing)
+ .debug_str     0x0000000000001437      0x12d ./User/flash.o
                                         0x344 (size before relaxing)
- .debug_str     0x0000000000001567       0x64 ./User/global_api.o
+ .debug_str     0x0000000000001564       0x64 ./User/global_api.o
                                         0x213 (size before relaxing)
- .debug_str     0x00000000000015cb      0x4c6 ./User/gpio_adc.o
+ .debug_str     0x00000000000015c8      0x4c6 ./User/gpio_adc.o
                                         0x6cb (size before relaxing)
- .debug_str     0x0000000000001a91       0x69 ./User/gpio_digit.o
+ .debug_str     0x0000000000001a8e       0x69 ./User/gpio_digit.o
                                         0x55d (size before relaxing)
- .debug_str     0x0000000000001afa      0x447 ./User/hd_rumble.o
+ .debug_str     0x0000000000001af7      0x447 ./User/hd_rumble.o
                                         0xabc (size before relaxing)
- .debug_str     0x0000000000001f41      0x55c ./User/hd_rumble2.o
+ .debug_str     0x0000000000001f3e      0x55c ./User/hd_rumble2.o
                                         0xaa2 (size before relaxing)
- .debug_str     0x000000000000249d      0x2c4 ./User/hd_rumble_high_accuracy.o
+ .debug_str     0x000000000000249a      0x2c4 ./User/hd_rumble_high_accuracy.o
                                         0x8e3 (size before relaxing)
- .debug_str     0x0000000000002761      0x317 ./User/i2c.o
+ .debug_str     0x000000000000275e      0x317 ./User/i2c.o
                                         0xdad (size before relaxing)
- .debug_str     0x0000000000002a78      0x24a ./User/imu.o
+ .debug_str     0x0000000000002a75      0x24a ./User/imu.o
                                         0x6fd (size before relaxing)
- .debug_str     0x0000000000002cc2      0x1a0 ./User/imu_quaternion.o
+ .debug_str     0x0000000000002cbf      0x1a0 ./User/imu_quaternion.o
                                         0x503 (size before relaxing)
- .debug_str     0x0000000000002e62      0x5b2 ./User/main.o
-                                       0x127b (size before relaxing)
- .debug_str     0x0000000000003414      0x704 ./User/ns_com.o
+ .debug_str     0x0000000000002e5f      0x5d3 ./User/main.o
+                                       0x129c (size before relaxing)
+ .debug_str     0x0000000000003432      0x6f4 ./User/ns_com.o
                                         0xd5b (size before relaxing)
- .debug_str     0x0000000000003b18      0x2a8 ./User/ns_com_mux.o
+ .debug_str     0x0000000000003b26      0x2a8 ./User/ns_com_mux.o
                                        0x18d8 (size before relaxing)
- .debug_str     0x0000000000003dc0      0x190 ./User/pwr.o
+ .debug_str     0x0000000000003dce      0x190 ./User/pwr.o
                                         0x682 (size before relaxing)
- .debug_str     0x0000000000003f50       0x12 ./User/ring_buffer.o
+ .debug_str     0x0000000000003f5e       0x12 ./User/ring_buffer.o
                                         0x22b (size before relaxing)
- .debug_str     0x0000000000003f62      0x191 ./User/spi.o
+ .debug_str     0x0000000000003f70      0x191 ./User/spi.o
                                         0xc40 (size before relaxing)
- .debug_str     0x00000000000040f3       0x5e ./User/system_ch32v10x.o
+ .debug_str     0x0000000000004101       0x5e ./User/system_ch32v10x.o
                                         0x299 (size before relaxing)
- .debug_str     0x0000000000004151      0x1d4 ./User/tick.o
+ .debug_str     0x000000000000415f      0x1d4 ./User/tick.o
                                         0x97f (size before relaxing)
- .debug_str     0x0000000000004325      0x1fc ./User/uart.o
+ .debug_str     0x0000000000004333      0x1fc ./User/uart.o
                                         0x811 (size before relaxing)
- .debug_str     0x0000000000004521       0xd1 ./User/uart_com.o
-                                        0x90c (size before relaxing)
- .debug_str     0x00000000000045f2      0x1b2 ./User/usb_desc.o
- .debug_str     0x00000000000045f2       0xd6 ./User/usbd_compatibility_hid.o
+ .debug_str     0x000000000000452f       0xe4 ./User/uart_com.o
+                                        0x92d (size before relaxing)
+ .debug_str     0x0000000000004613      0x1b2 ./User/usb_desc.o
+ .debug_str     0x0000000000004613       0xd6 ./User/usbd_compatibility_hid.o
                                         0x8a5 (size before relaxing)
- .debug_str     0x00000000000046c8       0x3d ./User/watchdog.o
+ .debug_str     0x00000000000046e9       0x3d ./User/watchdog.o
                                         0xb1e (size before relaxing)
- .debug_str     0x0000000000004705       0x46 ./Startup/startup_ch32v10x.o
- .debug_str     0x000000000000474b      0x3ab ./Peripheral/src/ch32v10x_adc.o
+ .debug_str     0x0000000000004726       0x46 ./Startup/startup_ch32v10x.o
+ .debug_str     0x000000000000476c      0x3ab ./Peripheral/src/ch32v10x_adc.o
                                         0x7ac (size before relaxing)
- .debug_str     0x0000000000004af6       0xa7 ./Peripheral/src/ch32v10x_dma.o
+ .debug_str     0x0000000000004b17       0xa7 ./Peripheral/src/ch32v10x_dma.o
                                         0x3af (size before relaxing)
- .debug_str     0x0000000000004b9d       0xb5 ./Peripheral/src/ch32v10x_exti.o
+ .debug_str     0x0000000000004bbe       0xb5 ./Peripheral/src/ch32v10x_exti.o
                                         0x348 (size before relaxing)
- .debug_str     0x0000000000004c52      0x421 ./Peripheral/src/ch32v10x_flash.o
+ .debug_str     0x0000000000004c73      0x421 ./Peripheral/src/ch32v10x_flash.o
                                         0x712 (size before relaxing)
- .debug_str     0x0000000000005073      0x199 ./Peripheral/src/ch32v10x_gpio.o
+ .debug_str     0x0000000000005094      0x199 ./Peripheral/src/ch32v10x_gpio.o
                                         0x535 (size before relaxing)
- .debug_str     0x000000000000520c      0x23b ./Peripheral/src/ch32v10x_i2c.o
+ .debug_str     0x000000000000522d      0x23b ./Peripheral/src/ch32v10x_i2c.o
                                         0x69c (size before relaxing)
- .debug_str     0x0000000000005447       0x47 ./Peripheral/src/ch32v10x_misc.o
+ .debug_str     0x0000000000005468       0x47 ./Peripheral/src/ch32v10x_misc.o
                                         0x5a4 (size before relaxing)
- .debug_str     0x000000000000548e       0xc7 ./Peripheral/src/ch32v10x_pwr.o
+ .debug_str     0x00000000000054af       0xc7 ./Peripheral/src/ch32v10x_pwr.o
                                         0x3dc (size before relaxing)
- .debug_str     0x0000000000005555      0x275 ./Peripheral/src/ch32v10x_rcc.o
+ .debug_str     0x0000000000005576      0x275 ./Peripheral/src/ch32v10x_rcc.o
                                         0x639 (size before relaxing)
- .debug_str     0x00000000000057ca      0x257 ./Peripheral/src/ch32v10x_spi.o
+ .debug_str     0x00000000000057eb      0x257 ./Peripheral/src/ch32v10x_spi.o
                                         0x63c (size before relaxing)
- .debug_str     0x0000000000005a21      0x858 ./Peripheral/src/ch32v10x_tim.o
+ .debug_str     0x0000000000005a42      0x858 ./Peripheral/src/ch32v10x_tim.o
                                         0xe37 (size before relaxing)
- .debug_str     0x0000000000006279      0x2ec ./Peripheral/src/ch32v10x_usart.o
+ .debug_str     0x000000000000629a      0x2ec ./Peripheral/src/ch32v10x_usart.o
                                         0x6a4 (size before relaxing)
- .debug_str     0x0000000000006565       0xda ./Peripheral/src/ch32v10x_usb.o
+ .debug_str     0x0000000000006586       0xda ./Peripheral/src/ch32v10x_usb.o
                                         0x259 (size before relaxing)
- .debug_str     0x000000000000663f       0x38 ./Debug/debug.o
+ .debug_str     0x0000000000006660       0x38 ./Debug/debug.o
                                         0x380 (size before relaxing)
 
 .debug_line_str
@@ -4189,118 +4188,118 @@ OUTPUT(CH32V103C8T6_USB.elf elf32-littleriscv)
  .riscv.attributes
                 0x0000000000001344       0x34 d:/mounriver_studio/toolchain/risc-v embedded gcc12/bin/../lib/gcc/riscv-none-elf/12.2.0/../../../../riscv-none-elf/lib\libnosys.a(read.o)
 
-.debug_frame    0x0000000000000000     0x3520
+.debug_frame    0x0000000000000000     0x3528
  .debug_frame   0x0000000000000000       0x44 ./User/ch32v10x_it.o
  .debug_frame   0x0000000000000044       0xdc ./User/ch32v10x_usbfs_device.o
- .debug_frame   0x0000000000000120      0x134 ./User/conf.o
- .debug_frame   0x0000000000000254       0x94 ./User/flash.o
- .debug_frame   0x00000000000002e8       0xc8 ./User/global_api.o
- .debug_frame   0x00000000000003b0       0xa4 ./User/gpio_adc.o
- .debug_frame   0x0000000000000454       0xac ./User/gpio_digit.o
- .debug_frame   0x0000000000000500       0x44 ./User/hd_rumble.o
- .debug_frame   0x0000000000000544      0x16c ./User/hd_rumble2.o
- .debug_frame   0x00000000000006b0       0xe4 ./User/hd_rumble_high_accuracy.o
- .debug_frame   0x0000000000000794      0x20c ./User/i2c.o
- .debug_frame   0x00000000000009a0      0x108 ./User/imu.o
- .debug_frame   0x0000000000000aa8      0x114 ./User/imu_quaternion.o
- .debug_frame   0x0000000000000bbc      0x1c8 ./User/main.o
- .debug_frame   0x0000000000000d84      0x3d4 ./User/ns_com.o
- .debug_frame   0x0000000000001158      0x280 ./User/ns_com_mux.o
- .debug_frame   0x00000000000013d8       0x94 ./User/pwr.o
- .debug_frame   0x000000000000146c       0x70 ./User/ring_buffer.o
- .debug_frame   0x00000000000014dc      0x114 ./User/spi.o
- .debug_frame   0x00000000000015f0       0x50 ./User/system_ch32v10x.o
- .debug_frame   0x0000000000001640      0x1d8 ./User/tick.o
- .debug_frame   0x0000000000001818      0x164 ./User/uart.o
- .debug_frame   0x000000000000197c      0x1b8 ./User/uart_com.o
- .debug_frame   0x0000000000001b34       0xec ./User/usbd_compatibility_hid.o
- .debug_frame   0x0000000000001c20       0x60 ./User/watchdog.o
- .debug_frame   0x0000000000001c80      0x2a4 ./Peripheral/src/ch32v10x_adc.o
- .debug_frame   0x0000000000001f24       0xc0 ./Peripheral/src/ch32v10x_dma.o
- .debug_frame   0x0000000000001fe4       0x90 ./Peripheral/src/ch32v10x_exti.o
- .debug_frame   0x0000000000002074      0x358 ./Peripheral/src/ch32v10x_flash.o
- .debug_frame   0x00000000000023cc      0x158 ./Peripheral/src/ch32v10x_gpio.o
- .debug_frame   0x0000000000002524      0x25c ./Peripheral/src/ch32v10x_i2c.o
- .debug_frame   0x0000000000002780       0x30 ./Peripheral/src/ch32v10x_misc.o
- .debug_frame   0x00000000000027b0       0xcc ./Peripheral/src/ch32v10x_pwr.o
- .debug_frame   0x000000000000287c      0x224 ./Peripheral/src/ch32v10x_rcc.o
- .debug_frame   0x0000000000002aa0      0x1ac ./Peripheral/src/ch32v10x_spi.o
- .debug_frame   0x0000000000002c4c      0x610 ./Peripheral/src/ch32v10x_tim.o
- .debug_frame   0x000000000000325c      0x1e4 ./Peripheral/src/ch32v10x_usart.o
- .debug_frame   0x0000000000003440       0x90 ./Peripheral/src/ch32v10x_usb.o
- .debug_frame   0x00000000000034d0       0x50 ./Debug/debug.o
+ .debug_frame   0x0000000000000120      0x13c ./User/conf.o
+ .debug_frame   0x000000000000025c       0x94 ./User/flash.o
+ .debug_frame   0x00000000000002f0       0xc8 ./User/global_api.o
+ .debug_frame   0x00000000000003b8       0xa4 ./User/gpio_adc.o
+ .debug_frame   0x000000000000045c       0xac ./User/gpio_digit.o
+ .debug_frame   0x0000000000000508       0x44 ./User/hd_rumble.o
+ .debug_frame   0x000000000000054c      0x16c ./User/hd_rumble2.o
+ .debug_frame   0x00000000000006b8       0xe4 ./User/hd_rumble_high_accuracy.o
+ .debug_frame   0x000000000000079c      0x20c ./User/i2c.o
+ .debug_frame   0x00000000000009a8      0x108 ./User/imu.o
+ .debug_frame   0x0000000000000ab0      0x114 ./User/imu_quaternion.o
+ .debug_frame   0x0000000000000bc4      0x1c8 ./User/main.o
+ .debug_frame   0x0000000000000d8c      0x3d4 ./User/ns_com.o
+ .debug_frame   0x0000000000001160      0x280 ./User/ns_com_mux.o
+ .debug_frame   0x00000000000013e0       0x94 ./User/pwr.o
+ .debug_frame   0x0000000000001474       0x70 ./User/ring_buffer.o
+ .debug_frame   0x00000000000014e4      0x114 ./User/spi.o
+ .debug_frame   0x00000000000015f8       0x50 ./User/system_ch32v10x.o
+ .debug_frame   0x0000000000001648      0x1d8 ./User/tick.o
+ .debug_frame   0x0000000000001820      0x164 ./User/uart.o
+ .debug_frame   0x0000000000001984      0x1b8 ./User/uart_com.o
+ .debug_frame   0x0000000000001b3c       0xec ./User/usbd_compatibility_hid.o
+ .debug_frame   0x0000000000001c28       0x60 ./User/watchdog.o
+ .debug_frame   0x0000000000001c88      0x2a4 ./Peripheral/src/ch32v10x_adc.o
+ .debug_frame   0x0000000000001f2c       0xc0 ./Peripheral/src/ch32v10x_dma.o
+ .debug_frame   0x0000000000001fec       0x90 ./Peripheral/src/ch32v10x_exti.o
+ .debug_frame   0x000000000000207c      0x358 ./Peripheral/src/ch32v10x_flash.o
+ .debug_frame   0x00000000000023d4      0x158 ./Peripheral/src/ch32v10x_gpio.o
+ .debug_frame   0x000000000000252c      0x25c ./Peripheral/src/ch32v10x_i2c.o
+ .debug_frame   0x0000000000002788       0x30 ./Peripheral/src/ch32v10x_misc.o
+ .debug_frame   0x00000000000027b8       0xcc ./Peripheral/src/ch32v10x_pwr.o
+ .debug_frame   0x0000000000002884      0x224 ./Peripheral/src/ch32v10x_rcc.o
+ .debug_frame   0x0000000000002aa8      0x1ac ./Peripheral/src/ch32v10x_spi.o
+ .debug_frame   0x0000000000002c54      0x610 ./Peripheral/src/ch32v10x_tim.o
+ .debug_frame   0x0000000000003264      0x1e4 ./Peripheral/src/ch32v10x_usart.o
+ .debug_frame   0x0000000000003448       0x90 ./Peripheral/src/ch32v10x_usb.o
+ .debug_frame   0x00000000000034d8       0x50 ./Debug/debug.o
 
 .debug_loclists
-                0x0000000000000000     0x7b95
+                0x0000000000000000     0x7b49
  .debug_loclists
                 0x0000000000000000      0x390 ./User/ch32v10x_usbfs_device.o
  .debug_loclists
-                0x0000000000000390      0x245 ./User/conf.o
+                0x0000000000000390      0x1f9 ./User/conf.o
  .debug_loclists
-                0x00000000000005d5      0x1a8 ./User/flash.o
+                0x0000000000000589      0x1a8 ./User/flash.o
  .debug_loclists
-                0x000000000000077d       0xf2 ./User/global_api.o
+                0x0000000000000731       0xf2 ./User/global_api.o
  .debug_loclists
-                0x000000000000086f       0x85 ./User/gpio_adc.o
+                0x0000000000000823       0x85 ./User/gpio_adc.o
  .debug_loclists
-                0x00000000000008f4       0xea ./User/gpio_digit.o
+                0x00000000000008a8       0xea ./User/gpio_digit.o
  .debug_loclists
-                0x00000000000009de       0x74 ./User/hd_rumble.o
+                0x0000000000000992       0x74 ./User/hd_rumble.o
  .debug_loclists
-                0x0000000000000a52      0x3f2 ./User/hd_rumble2.o
+                0x0000000000000a06      0x3f2 ./User/hd_rumble2.o
  .debug_loclists
-                0x0000000000000e44      0x269 ./User/hd_rumble_high_accuracy.o
+                0x0000000000000df8      0x269 ./User/hd_rumble_high_accuracy.o
  .debug_loclists
-                0x00000000000010ad      0x379 ./User/i2c.o
+                0x0000000000001061      0x379 ./User/i2c.o
  .debug_loclists
-                0x0000000000001426      0x1c0 ./User/imu.o
+                0x00000000000013da      0x1c0 ./User/imu.o
  .debug_loclists
-                0x00000000000015e6      0x2d0 ./User/imu_quaternion.o
+                0x000000000000159a      0x2d0 ./User/imu_quaternion.o
  .debug_loclists
-                0x00000000000018b6      0x2b4 ./User/main.o
+                0x000000000000186a      0x2b4 ./User/main.o
  .debug_loclists
-                0x0000000000001b6a      0xa92 ./User/ns_com.o
+                0x0000000000001b1e      0xa92 ./User/ns_com.o
  .debug_loclists
-                0x00000000000025fc      0x5a2 ./User/ns_com_mux.o
+                0x00000000000025b0      0x5a2 ./User/ns_com_mux.o
  .debug_loclists
-                0x0000000000002b9e       0x26 ./User/pwr.o
+                0x0000000000002b52       0x26 ./User/pwr.o
  .debug_loclists
-                0x0000000000002bc4      0x18f ./User/ring_buffer.o
+                0x0000000000002b78      0x18f ./User/ring_buffer.o
  .debug_loclists
-                0x0000000000002d53      0x15b ./User/spi.o
+                0x0000000000002d07      0x15b ./User/spi.o
  .debug_loclists
-                0x0000000000002eae       0xbe ./User/system_ch32v10x.o
+                0x0000000000002e62       0xbe ./User/system_ch32v10x.o
  .debug_loclists
-                0x0000000000002f6c      0x1c4 ./User/tick.o
+                0x0000000000002f20      0x1c4 ./User/tick.o
  .debug_loclists
-                0x0000000000003130      0x355 ./User/uart.o
+                0x00000000000030e4      0x355 ./User/uart.o
  .debug_loclists
-                0x0000000000003485      0x172 ./User/uart_com.o
+                0x0000000000003439      0x172 ./User/uart_com.o
  .debug_loclists
-                0x00000000000035f7       0x8d ./User/usbd_compatibility_hid.o
+                0x00000000000035ab       0x8d ./User/usbd_compatibility_hid.o
  .debug_loclists
-                0x0000000000003684      0x8b6 ./Peripheral/src/ch32v10x_adc.o
+                0x0000000000003638      0x8b6 ./Peripheral/src/ch32v10x_adc.o
  .debug_loclists
-                0x0000000000003f3a      0x141 ./Peripheral/src/ch32v10x_dma.o
+                0x0000000000003eee      0x141 ./Peripheral/src/ch32v10x_dma.o
  .debug_loclists
-                0x000000000000407b      0x118 ./Peripheral/src/ch32v10x_exti.o
+                0x000000000000402f      0x118 ./Peripheral/src/ch32v10x_exti.o
  .debug_loclists
-                0x0000000000004193      0xa15 ./Peripheral/src/ch32v10x_flash.o
+                0x0000000000004147      0xa15 ./Peripheral/src/ch32v10x_flash.o
  .debug_loclists
-                0x0000000000004ba8      0x5c9 ./Peripheral/src/ch32v10x_gpio.o
+                0x0000000000004b5c      0x5c9 ./Peripheral/src/ch32v10x_gpio.o
  .debug_loclists
-                0x0000000000005171      0x653 ./Peripheral/src/ch32v10x_i2c.o
+                0x0000000000005125      0x653 ./Peripheral/src/ch32v10x_i2c.o
  .debug_loclists
-                0x00000000000057c4       0x57 ./Peripheral/src/ch32v10x_misc.o
+                0x0000000000005778       0x57 ./Peripheral/src/ch32v10x_misc.o
  .debug_loclists
-                0x000000000000581b       0xfb ./Peripheral/src/ch32v10x_pwr.o
+                0x00000000000057cf       0xfb ./Peripheral/src/ch32v10x_pwr.o
  .debug_loclists
-                0x0000000000005916      0x56e ./Peripheral/src/ch32v10x_rcc.o
+                0x00000000000058ca      0x56e ./Peripheral/src/ch32v10x_rcc.o
  .debug_loclists
-                0x0000000000005e84      0x4e3 ./Peripheral/src/ch32v10x_spi.o
+                0x0000000000005e38      0x4e3 ./Peripheral/src/ch32v10x_spi.o
  .debug_loclists
-                0x0000000000006367     0x11cc ./Peripheral/src/ch32v10x_tim.o
+                0x000000000000631b     0x11cc ./Peripheral/src/ch32v10x_tim.o
  .debug_loclists
-                0x0000000000007533      0x617 ./Peripheral/src/ch32v10x_usart.o
+                0x00000000000074e7      0x617 ./Peripheral/src/ch32v10x_usart.o
  .debug_loclists
-                0x0000000000007b4a       0x4b ./Debug/debug.o
+                0x0000000000007afe       0x4b ./Debug/debug.o

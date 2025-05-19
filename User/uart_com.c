@@ -23,8 +23,8 @@ static uart_packet pkt;
 static uint32_t input_update_tick;
 void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size)
 {
-   pkt.typ=UART_PKG_CH32_FLASH_WRITE;
-   pkt.id=addr>>24;
+   pkt.typ=UART_PKG_CH32_FLASH_READ;
+   pkt.id=addr>>12;
    addr&=0xff;
    for(int i=0;i<size;i+=8){
        pkt.load[0]=i+addr;
@@ -166,7 +166,7 @@ void recv_pwr_control(){
 void recv_flash_operation(){
     if(pkt.typ!=UART_PKG_CH32_FLASH_READ&&pkt.typ!=UART_PKG_CH32_FLASH_WRITE)return;
     if(pkt.typ==UART_PKG_CH32_FLASH_READ){
-        pkt.typ=UART_PKG_CH32_FLASH_WRITE;
+        //pkt.typ=UART_PKG_CH32_FLASH_READ;
         switch(pkt.id){
             case 0xF://user config
                 conf_read(0xF000|(pkt.load[0]), pkt.load+1, 8);
@@ -181,7 +181,7 @@ void recv_flash_operation(){
                 break;
         }
     }else{//write
-        pkt.typ=UART_PKG_CH32_FLASH_READ;
+        //pkt.typ=UART_PKG_CH32_FLASH_WRITE;
         switch(pkt.id){
             case 0xF://user config
                 conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_config)-pkt.load[0]));

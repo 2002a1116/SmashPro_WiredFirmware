@@ -52,7 +52,7 @@ void HardFault_Handler(void)
                     "=r"(EXC_PC): : "memory");
     user_calibration.mcause=EXC_CAUSE;
     user_calibration.mepc=EXC_PC;
-    flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+    //flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
     //HighPrecisionTimerDelayUs(2000);
     //Delay_Ms(2);
     //conf_write(addr, buf, size)

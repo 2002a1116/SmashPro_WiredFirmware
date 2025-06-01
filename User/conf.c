@@ -13,46 +13,94 @@
 #include "imu.h"
 #include "gpio_digit.h"
 #include <string.h>
-
+//#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
 user_config_data user_config;
+//#pragma pack(pop)
+//we need these structure 4-byte align as flash api requiring an u32*
 uint32_t joystick_snapback_deadzone_sq[2];
-static factory_configuration_flash_pack* fac;
+//static factory_configuration_flash_pack* fac;
 #define JOYSTICK_RANGE_FACTOR_LEFT (0.6f)
 #define JOYSTICK_RANGE_FACTOR_RIGHT (0.6f)
 void conf_init()
 {
     memset(&factory_configuration,-1,sizeof(factory_configuration));
-    fac=get_raw_flash_buf();
+    //fac=get_raw_flash_buf();
     fac_conf_read();
+    if(factory_configuration.nonexist){
+        factory_configuration.IdentificationCode[0]=0x80;//no sn
+        factory_configuration.DeviceType=0x03;
+        factory_configuration.BoardRevision=0xA0;
+        factory_configuration.FormatVersion=0x1;//use custom color/
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXPositive=
+                2048*JOYSTICK_RANGE_FACTOR_LEFT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYPositive=
+                2048*JOYSTICK_RANGE_FACTOR_LEFT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXNegative=
+                2048*JOYSTICK_RANGE_FACTOR_LEFT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYNegative=
+                2048*JOYSTICK_RANGE_FACTOR_LEFT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0=
+                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=2048;
+        /*factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue=
+                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;*/
+        memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
+               &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
+               sizeof(joystick_calibration_data));
+        factory_configuration.Design.ControllerColor.MainColor.r=0x32;
+        factory_configuration.Design.ControllerColor.MainColor.g=0x31;
+        factory_configuration.Design.ControllerColor.MainColor.b=0x32;
+        factory_configuration.Design.ControllerColor.SubColor.r=0xff;
+        factory_configuration.Design.ControllerColor.SubColor.g=0xff;
+        factory_configuration.Design.ControllerColor.SubColor.b=0xff;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelNoise=0x00F;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelTypicalStroke=0x613;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x0AE;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCircuitDeadZoneScale=0xD99;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYPositive=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXNegative=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYNegative=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXPositive=0x9C7;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYPositive=0x9C7;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXNegative=0x633;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYNegative=0x633;
+        factory_configuration.AnalogStickSubModelValue=factory_configuration.Model.AnalogStickMainModelValue;
+        //5B008BFF96010040004000401D00BEFFEEFF3B343B343B34
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetX=0x005B;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetY=0xFF8B;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetZ=0X0196;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleX=0X4000;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleY=0X4000;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleZ=0X4000;
+        /*factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X0001;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0X0001;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0X0001;*/
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X001D;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0XFFBE;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0XFFEE;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0X343B;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0X343B;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0X343B;
+        //50FD0000C60F0F30
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
+        factory_configuration.nonexist=0;
+        fac_conf_write();
+    }
     factory_configuration.IdentificationCode[0]=0x80;//no sn
     factory_configuration.DeviceType=0x03;
     factory_configuration.BoardRevision=0xA0;
     factory_configuration.FormatVersion=0x1;//use custom color/
 
-    flash_read(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+    //flash_read(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+    read_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)&user_calibration, sizeof(user_calibration));
     if(user_calibration.nonexist){
         for(int i=0;i<4;++i)
             user_calibration.internal_center[i]=2048;
     }
-
-/*    //printf("user cali magic:%d\r\n",user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber);
-    for(int i=0;i<9;++i)
-    {
-        //printf("0x%02x ",*(((uint8_t*)&user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserCalibrationValue)+i));
-    }
-    //printf("\r\n");*/
-    //0xb2 0xa1 0xf0 0x07 0x74 0x00 0x08 0x8b 0xf0 0x07 0x8a
-    /*if(user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber!=0xa1b2)
-    {
-        memset((uint8_t*)&user_calibration, 0, sizeof(user_calibration));
-        //user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserCalibrationValue=factory_configuration.Model.AnalogStickMainModelValue;
-        //user_calibration.UserJoystickCalibrationValue.AnalogStickRightUserCalibrationValue=factory_configuration.Model.AnalogStickMainModelValue;
-        user_calibration.UserJoystickCalibrationValue.AnalogStickLeftUserMagicNumber=0xa1b2;
-        user_calibration.UserJoystickCalibrationValue.AnalogStickRightUserMagicNumber=0xa1b2;
-        flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
-    }*/
     //xenoblade?
     memset(&user_config,-1,sizeof(user_config));
     custom_conf_read();
@@ -69,7 +117,7 @@ void conf_init()
         user_config.joystick_snapback_deadzone[0]=1400;
         user_config.joystick_snapback_deadzone[1]=1400;
         user_config.dead_zone_mode=1;
-        user_config.rgb_cnt=27;
+        user_config.rgb_cnt=31;
         user_config.imu_sample_gap=1750;
         for(int i=0;i<user_config.rgb_cnt;++i){
             user_config.rgb_data[i].load=0xffffff;
@@ -85,12 +133,6 @@ void conf_init()
     conf_flush();
     MyCfgDescr[33]=user_config.out_interval;
     MyCfgDescr[40]=user_config.in_interval;
-    /*//printf("interval %d %d \r\n",user_config.out_interval,user_config.in_interval);
-    //printf("jsratio %d %d %d %d\r\n",user_config.joystick_ratio[0],
-            user_config.joystick_ratio[1],user_config.joystick_ratio[2],user_config.joystick_ratio[3]);
-    //printf("ampratio %d %d %d %d\r\n",user_config.hd_rumble_amp_ratio[0],
-            user_config.hd_rumble_amp_ratio[1],user_config.hd_rumble_amp_ratio[2],user_config.hd_rumble_amp_ratio[3]);
-    */
     memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
 }
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
@@ -100,13 +142,6 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     case 0x6000:
         memcpy(buf,((uint8_t*)&factory_configuration)+(addr&0xff),size);
-        /*if(addr==0x6080)
-        {
-            buf[0]=size;
-            //buf[0]=factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX;
-            buf[1]=factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX;
-            buf[2]=factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX>>8;
-        }*/
         break;
     case 0x8000:
         memcpy(buf,((uint8_t*)&user_calibration)+(addr&0xff),size);
@@ -126,12 +161,14 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     case 0x6000:
         memcpy(((uint8_t*)&factory_configuration)+(addr&0xff),(uint8_t*)buf,size);
-        flash_res=fac_conf_write();
+        //flash_res=fac_conf_write();
+        flash_res=write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)buf, size);
         uart_conf_write(addr, ((uint8_t*)&factory_configuration)+(addr&0xff), size);
         break;
     case 0x8000:
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
-        flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+        //flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
+        flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)buf, size);
         uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:
@@ -146,124 +183,129 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
 }
 void custom_conf_read()
 {
-    flash_read(1, (uint8_t*)&user_config, sizeof(user_config));
+    read_flash(FLASH_ADDR_USER_CONFIG, (uint8_t*)&user_config, sizeof(user_config));
+    //flash_read(1, (uint8_t*)&user_config, sizeof(user_config));
 }
 uint8_t custom_conf_write()
 {
-    return flash_write(1, (uint8_t*)&user_config, sizeof(user_config));
-}
+    return write_flash(FLASH_ADDR_USER_CONFIG,(uint8_t*)&user_config, sizeof(user_config));
+    //return flash_write(1, (uint8_t*)&user_config, sizeof(user_config));
+}/*
 void unpack_fac_conf()
 {
     if(!fac)return;
-    //fac->nonexist=1;
-    if(fac->nonexist){
-        /*fac->DeviceType=0x03;
-        fac->BoardRevision=0xA0;
-        fac->FormatVersion=0x1;//use custom color/*/
-        fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXPositive=
+    //factory_configuration.nonexist=1;
+    if(factory_configuration.nonexist){
+        //factory_configuration.DeviceType=0x03;
+        //factory_configuration.BoardRevision=0xA0;
+        //factory_configuration.FormatVersion=0x1;//use custom color/
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXPositive=
                 2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYPositive=
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYPositive=
                 2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXNegative=
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXNegative=
                 2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYNegative=
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYNegative=
                 2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0=
-                fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=2048;
-        /*fac->JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue=
-                fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;*/
-        memcpy(&fac->JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
-               &fac->JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
+        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0=
+                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=2048;
+        /*factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue=
+                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;/
+        memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
+               &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
                sizeof(joystick_calibration_data));
 
-        fac->Design.ControllerColor.MainColor.r=0x32;
-        fac->Design.ControllerColor.MainColor.g=0x31;
-        fac->Design.ControllerColor.MainColor.b=0x32;
-        fac->Design.ControllerColor.SubColor.r=0xff;
-        fac->Design.ControllerColor.SubColor.g=0xff;
-        fac->Design.ControllerColor.SubColor.b=0xff;
+        factory_configuration.Design.ControllerColor.MainColor.r=0x32;
+        factory_configuration.Design.ControllerColor.MainColor.g=0x31;
+        factory_configuration.Design.ControllerColor.MainColor.b=0x32;
+        factory_configuration.Design.ControllerColor.SubColor.r=0xff;
+        factory_configuration.Design.ControllerColor.SubColor.g=0xff;
+        factory_configuration.Design.ControllerColor.SubColor.b=0xff;
 
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelNoise=0x00F;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelTypicalStroke=0x613;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x0AE;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCircuitDeadZoneScale=0xD99;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYPositive=0x541;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXNegative=0x541;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYNegative=0x541;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXPositive=0x9C7;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYPositive=0x9C7;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXNegative=0x633;
-        fac->Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYNegative=0x633;
-        fac->AnalogStickSubModelValue=fac->Model.AnalogStickMainModelValue;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelNoise=0x00F;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelTypicalStroke=0x613;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x0AE;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCircuitDeadZoneScale=0xD99;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYPositive=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXNegative=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYNegative=0x541;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXPositive=0x9C7;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYPositive=0x9C7;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXNegative=0x633;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYNegative=0x633;
+        factory_configuration.AnalogStickSubModelValue=factory_configuration.Model.AnalogStickMainModelValue;
         //5B008BFF96010040004000401D00BEFFEEFF3B343B343B34
-        fac->SixAxisSensorCalibrationValue.Accelerometer0OffsetX=0x005B;
-        fac->SixAxisSensorCalibrationValue.Accelerometer0OffsetY=0xFF8B;
-        fac->SixAxisSensorCalibrationValue.Accelerometer0OffsetZ=0X0196;
-        fac->SixAxisSensorCalibrationValue.Accelerometer1gScaleX=0X4000;
-        fac->SixAxisSensorCalibrationValue.Accelerometer1gScaleY=0X4000;
-        fac->SixAxisSensorCalibrationValue.Accelerometer1gScaleZ=0X4000;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetX=0x005B;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetY=0xFF8B;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetZ=0X0196;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleX=0X4000;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleY=0X4000;
+        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleZ=0X4000;
         /*factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X0001;
         factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0X0001;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0X0001;*/
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0X0001;/
 
-        fac->SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X001D;
-        fac->SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0XFFBE;
-        fac->SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0XFFEE;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X001D;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0XFFBE;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0XFFEE;
 
-        fac->SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0X343B;
-        fac->SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0X343B;
-        fac->SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0X343B;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0X343B;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0X343B;
+        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0X343B;
         //50FD0000C60F0F30
-        fac->Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
-        fac->Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
-        fac->Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
-        //fac->nonexist=0;
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
+        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
+        //factory_configuration.nonexist=0;
     }
     memcpy(&factory_configuration.SixAxisSensorCalibrationValue,
-            &(fac->SixAxisSensorCalibrationValue),sizeof(imu_calibration_data));
+            &(factory_configuration.SixAxisSensorCalibrationValue),sizeof(imu_calibration_data));
     //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0x343B;
     //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0x343B;
     //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0x343B;
     memcpy(&factory_configuration.JoystickCalibrationValue,
-            &(fac->JoystickCalibrationValue),sizeof(factory_joystick_calibration_data));
-    memcpy(&factory_configuration.Design,&(fac->Design),sizeof(device_design_data));
-    memcpy(&factory_configuration.Model,&(fac->Model),sizeof(model_data));
+            &(factory_configuration.JoystickCalibrationValue),sizeof(factory_joystick_calibration_data));
+    memcpy(&factory_configuration.Design,&(factory_configuration.Design),sizeof(device_design_data));
+    memcpy(&factory_configuration.Model,&(factory_configuration.Model),sizeof(model_data));
     memcpy(&factory_configuration.AnalogStickSubModelValue,
-            &(fac->AnalogStickSubModelValue),sizeof(joystick_model_value));
+            &(factory_configuration.AnalogStickSubModelValue),sizeof(joystick_model_value));
     //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
     //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
     //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
-    if(fac->nonexist)
+    if(factory_configuration.nonexist)
     {
-        fac->nonexist=0;
+        factory_configuration.nonexist=0;
         fac_conf_write();
     }
-}
+}*/
+/*
 void pack_fac_conf()
 {
     if(!fac)return;
     memset(fac,-1,128);
-    memcpy(&(fac->SixAxisSensorCalibrationValue),
+    memcpy(&(factory_configuration.SixAxisSensorCalibrationValue),
             &factory_configuration.SixAxisSensorCalibrationValue,sizeof(imu_calibration_data));
-    memcpy(&(fac->JoystickCalibrationValue),
+    memcpy(&(factory_configuration.JoystickCalibrationValue),
             &factory_configuration.JoystickCalibrationValue,sizeof(factory_joystick_calibration_data));
-    memcpy(&(fac->Design),&factory_configuration.Design,sizeof(device_design_data));
-    memcpy(&(fac->Model),&factory_configuration.Model,sizeof(model_data));
-    memcpy(&(fac->AnalogStickSubModelValue),&factory_configuration.AnalogStickSubModelValue,sizeof(joystick_model_value));
-    fac->nonexist=0;
-    /*fac->DeviceType=factory_configuration.DeviceType;
-    fac->BoardRevision=factory_configuration.BoardRevision;
-    fac->FormatVersion=factory_configuration.FormatVersion;//use custom color/*/
-}
+    memcpy(&(factory_configuration.Design),&factory_configuration.Design,sizeof(device_design_data));
+    memcpy(&(factory_configuration.Model),&factory_configuration.Model,sizeof(model_data));
+    memcpy(&(factory_configuration.AnalogStickSubModelValue),&factory_configuration.AnalogStickSubModelValue,sizeof(joystick_model_value));
+    factory_configuration.nonexist=0;
+    /*factory_configuration.DeviceType=factory_configuration.DeviceType;
+    factory_configuration.BoardRevision=factory_configuration.BoardRevision;
+    factory_configuration.FormatVersion=factory_configuration.FormatVersion;//use custom color//
+}*/
 void fac_conf_read(){
-    flash_read(2, fac, sizeof(factory_configuration_flash_pack));
-    unpack_fac_conf(fac);
+    //flash_read(2, fac, sizeof(factory_configuration_flash_pack));
+    //unpack_fac_conf(fac);
+    read_flash(FLASH_ADDR_FACTORY_CONFIG,(uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 uint8_t fac_conf_write(){
-    pack_fac_conf(fac);
-    return raw_flash_write(2);
+    //pack_fac_conf(fac);
+    //return raw_flash_write(2);
     //flash_write(2, (uint8_t*)&factory_configuration_flash, sizeof(factory_configuration_flash));
+    return write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 void conf_flush(){
     flush_rgb(ENABLE);

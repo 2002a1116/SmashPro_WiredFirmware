@@ -11,12 +11,12 @@
 #include "ns_com_mux.h"
 
 #define FW_VERSION_HIGH (0)
-#define FW_VERSION_LOW (3)
+#define FW_VERSION_LOW (4)
 
 #define NS_SPI_USER_JOYSTICK_CALIBRATION_ADDR (0x8010)
 #define NS_SPI_USER_IMU_CALIBRATION_ADDR (0X8026)
 
-#define RGB_MAX_CNT (29)
+#define RGB_MAX_CNT (31)
 
 #define CONF_PCB_TYPE_LARGE (0)
 #define CONF_PCB_TYPE_SMALL (1)
@@ -158,7 +158,10 @@ typedef struct _model_data{
 }model_data;
 typedef struct _factory_configuration_data{
     uint8_t IdentificationCode[16];//sn code
-    uint8_t Reserved1[2];
+    union{
+        uint8_t nonexist;
+        uint8_t Reserved1[2];
+    };
     uint8_t DeviceType;//0x03 to be a pro controller
     uint8_t BoardRevision;
     uint8_t Reserved2[7];
@@ -226,6 +229,16 @@ typedef struct _user_config_data{
             uint8_t imu_disabled:1;
         };
     };
+    union{
+            uint8_t config_bitmap2;
+            struct{
+                uint8_t pcb_typ:2;
+                uint8_t rgb_typ:2;
+                uint8_t input_typ:1;//0:raw 1:scan
+                uint8_t reserved:3;
+            };
+        };
+    uint8_t config_bitmap_reserved[2];
     uint8_t in_interval;
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
@@ -248,21 +261,21 @@ typedef struct _user_config_data{
     uint8_t dead_zone_mode;
     uint8_t rgb_cnt;
     rgb_data_complete rgb_data[RGB_MAX_CNT];
-    union{
-        uint8_t config_bitmap2;
-        struct{
-            uint8_t pcb_typ:2;
-            uint8_t rgb_typ:2;
-            uint8_t input_typ:1;//0:raw 1:scan
-            uint8_t reserved:3;
-        };
-    };
 }user_config_data;
 //118 byte now
+/*
+ * 0~255 user_config
+ * 256~511 factory_config
+ * 512~767 user_calibration
+ */
 #pragma pack(pop)
 
 #define JOYSITCK_FITTING_PARAM_RATIO (255)
 #define JOYSITCK_FITTING_PARAM_RATIO_SHIFT (8)
+
+#define FLASH_ADDR_USER_CONFIG (0x0)
+#define FLASH_ADDR_FACTORY_CONFIG (0x100)
+#define FLASH_ADDR_USER_CALIBRATION (0x200)
 
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;

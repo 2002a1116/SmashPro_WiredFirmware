@@ -38,8 +38,11 @@ u32 buf[Fsize];
  *
  * @return  none
  */
-#define FLASH_BLOCK_SIZE (128)
+//#define FLASH_BLOCK_SIZE (128)
 #define FADDR (0x0800F000)
+#define FLASH_ADDR_MAX (0x8010000)
+#define FLASH_BLOCK_SIZE (0x100)
+/*
 static uint8_t flash_buf[FLASH_BLOCK_SIZE];
 uint8_t _flash_write(uint8_t id){
     if(id>3)return 1;
@@ -80,4 +83,29 @@ uint8_t flash_read(uint8_t id,uint8_t* data,uint8_t len)
     memcpy(data,FADDR+(id*FLASH_BLOCK_SIZE),len);
     return 0;
 }
-
+*/
+uint8_t flash_buffer[FLASH_BLOCK_SIZE];
+uint8_t write_flash(uint32_t addr,uint8_t* data,uint32_t size)
+{
+    addr+=FADDR;
+    if(addr+size>=FLASH_ADDR_MAX)return 1;
+    FLASH_Status s;
+    s = FLASH_ROM_ERASE(addr,FLASH_BLOCK_SIZE);
+    if(s!=FLASH_COMPLETE)
+        return 2;
+    memset(flash_buffer,-1,FLASH_BLOCK_SIZE);
+    memcpy(flash_buffer,data,size);
+    s=FLASH_ROM_WRITE(addr,flash_buffer,FLASH_BLOCK_SIZE);
+    if(s!=FLASH_COMPLETE)
+        return 3;
+    return 0;
+}
+uint8_t read_flash(uint32_t addr,uint8_t* data,uint32_t size)
+{
+    addr+=FADDR;
+    if(addr+size>=FLASH_ADDR_MAX)return 1;
+    if(!data)return 2;
+    //memset(buf,0,FLASH_BLOCK_SIZE);
+    memcpy(data,addr,size);
+    return 0;
+}

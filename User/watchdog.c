@@ -42,7 +42,7 @@ void TIM4_IRQHandler(void){
         if(Get_Systick_MS()-last_feed_ms>1000){//timeout
             if(watchdog_pos){
                 user_calibration.tag=watchdog_pos;
-                flash_write(0, &user_calibration, 128);
+                //flash_write(0, &user_calibration, 128);
             }
         }
         TIM_ClearITPendingBit(TIM4, TIM_FLAG_Update); //清除定时器2更新标志位

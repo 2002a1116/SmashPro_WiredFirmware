@@ -161,14 +161,15 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     case 0x6000:
         memcpy(((uint8_t*)&factory_configuration)+(addr&0xff),(uint8_t*)buf,size);
-        //flash_res=fac_conf_write();
-        flash_res=write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)buf, size);
+        flash_res=fac_conf_write();
+        //flash_res=write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)buf, size);
         uart_conf_write(addr, ((uint8_t*)&factory_configuration)+(addr&0xff), size);
         break;
     case 0x8000:
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
         //flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
-        flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)buf, size);
+        //flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)buf, size);
+        flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION,(uint8_t*)&user_calibration,sizeof(user_calibration));
         uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:

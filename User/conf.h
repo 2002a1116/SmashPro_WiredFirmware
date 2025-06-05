@@ -18,8 +18,8 @@
 
 #define RGB_MAX_CNT (31)
 
-#define CONF_PCB_TYPE_LARGE (0)
-#define CONF_PCB_TYPE_SMALL (1)
+#define CONF_PCB_TYPE_LARGE (1)
+#define CONF_PCB_TYPE_SMALL (0)
 
 /*
 Firmware

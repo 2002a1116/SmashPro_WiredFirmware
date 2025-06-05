@@ -1,14 +1,3 @@
-/********************************** (C) COPYRIGHT *******************************
- * File Name          : main.c
- * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2020/04/30
- * Description        : Main program body.
-*********************************************************************************
-* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
-* Attention: This software (modified or not) and binary are used for 
-* microcontroller manufactured by Nanjing Qinheng Microelectronics.
-*******************************************************************************/
 #include <stdlib.h>
 #include <math.h>
 #include "debug.h"
@@ -85,10 +74,10 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     //snapback deadzone is influenced by joystick ratio,as its value is set by output x & y
     x=(x*user_config.joystick_ratio[id*2])>>5;
     y=(y*user_config.joystick_ratio[id*2+1])>>5;
-#if (PCB_TYPE==PCB_TYPE_MICRO)
+/*#if (PCB_TYPE==PCB_TYPE_MICRO)
     x=-x;
     y=-y;
-#endif
+#endif*/
     if(user_config.joystick_snapback_filter_max_delay){
         set=0;
         int32_t len_sq=x*x+y*y;

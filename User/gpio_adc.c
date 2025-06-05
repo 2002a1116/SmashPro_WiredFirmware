@@ -10,39 +10,12 @@
 #include "ch32v10x_rcc.h"
 #include "gpio_adc.h"
 
-/********************************** (C) COPYRIGHT *******************************
- * File Name          : main.c
- * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2020/04/30
- * Description        : Main program body.
- *********************************************************************************
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * Attention: This software (modified or not) and binary are used for
- * microcontroller manufactured by Nanjing Qinheng Microelectronics.
- *******************************************************************************/
-
-/*
- *@Note
- *ADC uses DMA sampling routine:
- *ADC channel 2 (PA2), the rule group channel obtains ADC conversion data
- *for 1024 consecutive times through DMA.
- *  Note: Take 3.3V as an example.
- */
-
 #include "debug.h"
 
 /* Global Variable */
 uint16_t adc_data[4];
 s16 Calibrattion_Val = 0;
 
-/*********************************************************************
- * @fn      ADC_Function_Init
- *
- * @brief   Initializes ADC collection.
- *
- * @return  none
- */
 void ADC_Function_Init(void)
 {
     ADC_InitTypeDef  ADC_InitStructure = {0};

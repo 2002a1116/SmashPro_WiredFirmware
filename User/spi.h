@@ -8,6 +8,7 @@
 #ifndef USER_SPI_H_
 #define USER_SPI_H_
 
+#define INDICATE_LED_BRIGHTNESS (100)
 
 int spi_init(void);
 void flush_rgb(uint8_t status);

@@ -1,10 +1,4 @@
 /*
- * imu_quaternion.c
- *
- *  Created on: 2025年2月28日
- *      Author: Reed
- */
-/*
 * imu_quaternion.c
 *
 *  Created on: 2025年2月28日

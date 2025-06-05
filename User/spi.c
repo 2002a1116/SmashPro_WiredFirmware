@@ -5,36 +5,6 @@
  *      Author: Reed
  */
 
-
- /********************************** (C) COPYRIGHT *******************************
- * File Name          : main.c
- * Author             : WCH
- * Version            : V1.0.0
- * Date               : 2024/01/05
- * Description        : Main program body.
- *********************************************************************************
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * Attention: This software (modified or not) and binary are used for
- * microcontroller manufactured by Nanjing Qinheng Microelectronics.
- *******************************************************************************/
-
-/*
- *@Note
- *SPI uses DMA, master / slave mode transceiver routine:
- *Master:SPI1_SCK(PA5)\SPI1_MISO(PA6)\SPI1_MOSI(PA7).
- *Slave:SPI1_SCK(PA5)\SPI1_MISO(PA6)\SPI1_MOSI(PA7).
- *
- *This example demonstrates that Master and Slave use DAM full-duplex transmission
- *and reception at the same time.
- *Note: The two boards download the Master and Slave programs respectively, and
- *power on at the same time.
- *     Hardware connection:
- *               PA5 -- PA5
- *               PA6 -- PA6
- *               PA7 -- PA7
- *
- */
-
 #include "debug.h"
 #include "string.h"
 #include "conf.h"
@@ -158,7 +128,7 @@ void flush_spi_tx_seq(uint8_t status)
             set_led_rgb(i, 0, 0, 0);
         else{
             set_led_rgb(i, user_config.rgb_data[j].r, user_config.rgb_data[j].g, user_config.rgb_data[j].b);
-#ifdef PCB_TYPE
+/*#ifdef PCB_TYPE
     #if (PCB_TYPE==PCB_TYPE_MICRO)
                 j+=(i>3);//skip 0~3;
     #else
@@ -166,39 +136,51 @@ void flush_spi_tx_seq(uint8_t status)
     #endif
 #else
             ++j;
-#endif
+#endif*/
+            switch(user_config.pcb_typ){
+            case CONF_PCB_TYPE_SMALL:
+                j+=(i>3);//skip 0~3;
+                break;
+            case CONF_PCB_TYPE_LARGE:
+                j+=(i<4||i>7);
+                break;
+            default:
+                ++j;
+            }
         }
         //printf("rgb %d 0x%02x 0x%02x 0x%02x\r\n",i,user_config.rgb_data[i].r,user_config.rgb_data[i].g,user_config.rgb_data[i].b);
     }
     if(!status)
         return;
+    /*
 #ifdef PCB_TYPE
 #if (PCB_TYPE==PCB_TYPE_MICRO)
-    set_led_rgb(0, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
-    set_led_rgb(1, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
-    set_led_rgb(2, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
-    set_led_rgb(3, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+    set_led_rgb(0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
 #else
-    set_led_rgb(4, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
-    set_led_rgb(5, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
-    set_led_rgb(6, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
-    set_led_rgb(7, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+    set_led_rgb(4, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(5, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(6, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(7, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
 #endif
 #else
-    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)//CONF_PCB_TYPE_LARGE
+*/
+    if(user_config.pcb_typ==CONF_PCB_TYPE_SMALL)
     {
-        set_led_rgb(0, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
-        set_led_rgb(1, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
-        set_led_rgb(2, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
-        set_led_rgb(3, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+        set_led_rgb(0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
     }
-    else if(user_config.pcb_typ==CONF_PCB_TYPE_SMALL){//CONF_PCB_TYPE_LARGE
-        set_led_rgb(4, connection_state.esp32_paired*200, connection_state.esp32_paired*200, connection_state.esp32_paired*200);
-        set_led_rgb(5, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200, (!user_config.imu_disabled)*200);
-        set_led_rgb(6, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200, (!user_config.rumble_disabled)*200);
-        set_led_rgb(7, (force_esp32_active)*200, (force_esp32_active)*200, (force_esp32_active)*200);
+    else if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE){
+        set_led_rgb(4, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(5, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(6, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
+        set_led_rgb(7, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
     }
-#endif
+//#endif
     //spi_tx_buf[user_config.rgb_cnt*3].load=0;
     //spi_tx_buf[user_config.rgb_cnt*3+1].load=0;
 }

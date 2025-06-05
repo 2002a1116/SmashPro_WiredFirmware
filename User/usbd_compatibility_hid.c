@@ -1,10 +1,3 @@
-/********************************** (C) COPYRIGHT *******************************
- * File Name  :usbd_compatibility_hid.c
- * Author     :OWNER
- * Version    : v0.01
- * Date       : 2022��7��8��
- * Description:
-*******************************************************************************/
 #include "debug.h"
 #include "string.h"
 #include "ch32v10x_usbfs_device.h"
@@ -52,19 +45,6 @@ uint8_t ns_hid_get_packet_timer(){
         return Get_Systick_MS()/5;
     }
 }
-/*
-uint8_t _unknown_thing()
-{
-  static uint8_t out = 0xA;
-  if (out == 0xA)
-    out = 0xB;
-  else if (out == 0xB)
-    out = 0xC;
-  else
-    out = 0xA;
-
-  return out;
-}*/
 void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
     ////printf("rpt\r\n");
         //todo : support more report typ someday
@@ -88,7 +68,6 @@ void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
         //todo : support battery quantity and charge state(oops,hardware doesnt support this one,so forget it);
         rpt->con_info=0x01;//todo : expect set this to 0x00 to be pro controller on battery,check if its correct;
         rpt->rumble_status=0x80;//todo : value includes(0x70,0xC0,0xB0,0x80,0xA0),what does these mean?
-        //rpt->rumble_status=_unknown_thing();
 }
 uint8_t empty_report[]={0xa1,0x00};
 uint8_t* pkg_ptr;

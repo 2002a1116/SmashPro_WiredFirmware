@@ -29,17 +29,19 @@ void hd_rumble_init(uint8_t force_disable){
         return;
     }
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+    /*
 #if (PCB_TYPE==PCB_TYPE_1_0)
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6|GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 #else
+*/
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-#endif
+//#endif
     TIM_TimeBaseInitStructure.TIM_Period = HD_RUMBLE_TIM_PERIOD;//72m/250
     TIM_TimeBaseInitStructure.TIM_Prescaler = HD_RUMBLE_TIM_PRESCALER-1;//
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -57,11 +59,11 @@ void hd_rumble_init(uint8_t force_disable){
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
     TIM_OC1Init(TIM3, &TIM_OCInitStructure);
     TIM_OC3Init(TIM3, &TIM_OCInitStructure);
-#if (PCB_TYPE==PCB_TYPE_1_0)
+/*#if (PCB_TYPE==PCB_TYPE_1_0)
     TIM_OC2Init(TIM3, &TIM_OCInitStructure);
-#else
+#else*/
     TIM_OC4Init(TIM3, &TIM_OCInitStructure);
-#endif
+//#endif
 
     TIM_CtrlPWMOutputs(TIM3, ENABLE);
     TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);

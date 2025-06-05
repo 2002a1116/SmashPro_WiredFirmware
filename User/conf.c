@@ -128,6 +128,7 @@ void conf_init()
         user_config.pro_fw_version=2;
         user_config.joystick_snapback_filter_max_delay=12500;
         user_config.rumble_pattern=0;
+        user_config.pcb_typ=CONF_PCB_TYPE_LARGE;
         custom_conf_write();
     }
     conf_flush();

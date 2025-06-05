@@ -23,11 +23,11 @@ void push_waveform_into_buffer_task();
 void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr);
 #define HD_RUMBLE_HIGH_ACC_RINGBUFFER_CAP (32)
 #define HD_RUMBLE_HIGH_ACC_PACK_SIZE (sizeof(hd_rumble_high_accurary_pack))
-#if (PCB_TYPE==PCB_TYPE_1_0)
+/*#if (PCB_TYPE==PCB_TYPE_1_0)
 #define CHLCVR (TIM3->CH1CVR)
 #define CHRCVR (TIM3->CH2CVR)
-#else
+#else*/
 #define CHLCVR (TIM3->CH3CVR)
 #define CHRCVR (TIM3->CH4CVR)
-#endif
+//#endif
 #endif /* USER_HD_RUMBLE_HIGH_ACCURACY_H_ */

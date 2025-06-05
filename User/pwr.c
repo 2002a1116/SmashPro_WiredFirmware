@@ -4,16 +4,6 @@
  *  Created on: 2024Äê11ÔÂ12ÈÕ
  *      Author: Reed
  */
-
-//if bt disconnected for too long or lack of input for too long or other reason,
-//esp32 actively put ch32 into sleep before it sleep on it own
-
-//when usb intr or gpio exti wake ch32,ch32 will try to wake esp32 through uart as theres no more ch32 pins for inter connect
-//todo:is one uart pkt will be enough?
-//may be we can use led pin to do so? as when controller awake,top led should be light as an indication of controlller running.
-//todo:pcb dont have such wire,consider mod pcb to support it
-//as led pin will be set as drain,esp32 should pullup and monitor a falling edge
-
 #include "pwr.h"
 #include "debug.h"
 #include "gpio_digit.h"

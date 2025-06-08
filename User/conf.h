@@ -42,25 +42,33 @@ Offset  Size    Description
 */
 
 #pragma pack(push,1)
-typedef struct _joystick_calibration_data{
+typedef struct _joystick_calibration_data_left{
     uint16_t AnalogStickCalXPositive:12;
     uint16_t AnalogStickCalYPositive:12;
     uint16_t AnalogStickCalX0:12;
     uint16_t AnalogStickCalY0:12;
     uint16_t AnalogStickCalXNegative:12;
     uint16_t AnalogStickCalYNegative:12;
-}joystick_calibration_data;
+}joystick_calibration_data_left;
 //why uint8 for x & uint16 for y???
 //ans:they r uint12
+typedef struct _joystick_calibration_data_right{
+    uint16_t AnalogStickCalX0:12;
+    uint16_t AnalogStickCalY0:12;
+    uint16_t AnalogStickCalXNegative:12;
+    uint16_t AnalogStickCalYNegative:12;
+    uint16_t AnalogStickCalXPositive:12;
+    uint16_t AnalogStickCalYPositive:12;
+}joystick_calibration_data_right;//fk u nintendo.y u have to do this?
 typedef struct _user_joystick_calibration_data{
     uint16_t AnalogStickLeftUserMagicNumber;
-    joystick_calibration_data AnalogStickLeftUserCalibrationValue;
+    joystick_calibration_data_left AnalogStickLeftUserCalibrationValue;
     uint16_t AnalogStickRightUserMagicNumber;
-    joystick_calibration_data AnalogStickRightUserCalibrationValue;
+    joystick_calibration_data_right AnalogStickRightUserCalibrationValue;
 }user_joystick_calibration_data;
 typedef struct _factory_joystick_calibration_data{
-    joystick_calibration_data AnalogStickLeftFactoryCalibrationValue;
-    joystick_calibration_data AnalogStickRightFactoryCalibrationValue;
+    joystick_calibration_data_left AnalogStickLeftFactoryCalibrationValue;
+    joystick_calibration_data_right AnalogStickRightFactoryCalibrationValue;
 }factory_joystick_calibration_data;
 typedef struct _imu_calibration_data{
     int16_t Accelerometer0OffsetX;

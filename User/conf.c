@@ -47,7 +47,7 @@ void conf_init()
                 factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;*/
         memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
                &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
-               sizeof(joystick_calibration_data));
+               sizeof(joystick_calibration_data_left));
         factory_configuration.Design.ControllerColor.MainColor.r=0x32;
         factory_configuration.Design.ControllerColor.MainColor.g=0x31;
         factory_configuration.Design.ControllerColor.MainColor.b=0x32;
@@ -215,7 +215,7 @@ void unpack_fac_conf()
                 factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;/
         memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
                &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
-               sizeof(joystick_calibration_data));
+               sizeof(joystick_calibration_data_left));
 
         factory_configuration.Design.ControllerColor.MainColor.r=0x32;
         factory_configuration.Design.ControllerColor.MainColor.g=0x31;

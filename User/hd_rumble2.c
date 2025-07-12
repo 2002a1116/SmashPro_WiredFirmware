@@ -34,7 +34,7 @@ uint32_t exp2_lookup_tb[]={0,
         31379,32066,32768,33486,34219,34968,35734,36516,37316,38133,38968,39821,40693,41584,42495,
         43425,44376,45348,46341,47356,48393,49452,50535,51642,52773,53928,55109,56316,57549,58809,
         60097,61413,62757,64132};
-/*uint16_t amp_exp2_index_lookup_tb[]={0,
+/*uint8_t amp_exp2_index_lookup_tb[]={0,
         16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,
         130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,
         160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,
@@ -43,18 +43,20 @@ uint32_t exp2_lookup_tb[]={0,
         205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,
         220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,
         235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,
-        250,251,252,253,254,255,256};*/
-uint16_t amp_exp2_index_lookup_tb[]={0,
-        76,80,84,88,92,96,100,104,108,112,116,120,124,128,132,
-        130,132,134,136,138,140,142,144,146,148,150,152,154,156,158,
-        160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,
-        175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,
-        190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,
-        205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,
-        220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,
-        235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,
-        250,251,252,253,254,255,256};
-
+        250,251,252,253,254,255,255};
+*/
+uint16_t amp_exp2_index_lookup_tb_low_amp_rise[]={76,80,86,88,92,96,100,104};
+uint16_t amp_exp2_index_lookup_tb_low_amp_raw[]={44,52,59,68,76,84,91,99};
+uint16_t amp_exp2_index_lookup_tb[]={
+        0,44,52,59,68,76,84,91,99,108,115,123,132,140,148,
+        155,157,160,162,164,166,168,170,172,174,175,178,180,182,184,
+        186,188,189,190,191,192,193,194,195,196,197,198,199,200,201,
+        202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,
+        217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,
+        232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,
+        247,248,249,250,251,252,253,254,255,256,257,258,259,260,261,
+        262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,
+        277,278,279,280,281,282,283,284};
 uint16_t freq_exp2_index_lookup_tb[]={192,
         193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,
         208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,
@@ -318,7 +320,10 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     switch(pkt->FromatZero.PackFormat)
     {
     case 0:
-        decoded_cnt=0;
+        //decoded_cnt=0;
+        decoded_cnt=1;
+        linear_samples[0].hi_amp_linear=0;
+        linear_samples[0].lo_amp_linear=0;
         break;
     case 1:
         if(pkt->FormatOne.Reserved==0) {
@@ -347,12 +352,14 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
         sample.amp=(exp2_lookup_tb[ptr->hi_amp_linear]*user_config.hd_rumble_amp_ratio[0])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        sample.step=FULLSTEP/(1+exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
+        sample.step=FULLSTEP/(exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
+        //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
         ////printf("wave left low amp:%d step:%d amp linear:%d\r\n",sample.amp,sample.step,ptr->hi_amp_linear);
         push_waveform(0,&sample);
         //ring_buffer_push(&left_high_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         sample.amp=(exp2_lookup_tb[ptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[2])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        sample.step=FULLSTEP/(1+exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
+        sample.step=FULLSTEP/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
+        //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
         push_waveform(2,&sample);
         //ring_buffer_push(&left_low_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
     }
@@ -362,6 +369,9 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     switch(pkt->FromatZero.PackFormat)
     {
     case 0:
+        decoded_cnt=1;
+        linear_samples[0].hi_amp_linear=0;
+        linear_samples[0].lo_amp_linear=0;
         break;
     case 1:
         if(pkt->FormatOne.Reserved==0) {
@@ -390,123 +400,21 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
         sample.amp=(exp2_lookup_tb[ptr->hi_amp_linear]*user_config.hd_rumble_amp_ratio[1])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        sample.step=FULLSTEP/(1+exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
+        sample.step=FULLSTEP/(exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
+        //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->hi_freq_linear]*CenterFreqHigh);
         push_waveform(1,&sample);
         //ring_buffer_push(&right_high_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         sample.amp=(exp2_lookup_tb[ptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[3])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
-        sample.step=FULLSTEP/(1+exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
+        sample.step=FULLSTEP/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
+        //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
         push_waveform(3,&sample);
         //ring_buffer_push(&right_low_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
     }
     ////printf("decoded")
 }
-/*
-static hd_rumble_frame rumble_frame[3];
-void decode_hd_rumble_multiformat(hd_rumble_multiformat* pkt,hd_rumble_multiformat* pkt_r)
-{
-    static uint8_t cnt=0,tp=0;
-    static hd_rumble_frame* frame=NULL,*tf=NULL;
-    global_sample_channel=SAMPLE_CHANNEL_L;
-    switch(pkt->FromatZero.PackFormat)
-    {
-    case 0:
-        decoded_cnt=0;
-        break;
-    case 1:
-        if(pkt->FormatOne.Reserved==0) {
-            deocde_hd_rumble_format1(&pkt->FormatOne);
-        }else if(pkt->FormatOne28bit.Reserved==0) {
-            decode_hd_rumble_format1long(&pkt->FormatOne28bit);
-        }else {
-            decode_hd_rumble_format1full(&pkt->FormatThree7bit);
-        }
-        break;
-    case 2:
-        if(pkt->FormatTwo.Reserved==0) {
-            decode_hd_rumble_format2(&pkt->FormatTwo);
-        }else{
-            decode_hd_rumble_format2long(&pkt->FormatTwo14bit);
-        }
-        break;
-    case 3:
-        decode_hd_rumble_format3(&pkt->FormatThree);
-        break;
-    }
-    cnt=decoded_cnt;
-    frame=rumble_frame;
-    for(int i=0;i<decoded_cnt;++i,++frame)
-    {
-        frame->amp[HD_RUMBLE_PWM_L][HD_RUMBLE_HIGH]=rumble_samples[SAMPLE_CHANNEL_L][i].high_amp>>4;
-        frame->arr[HD_RUMBLE_PWM_L][HD_RUMBLE_HIGH]=
-                rumble_samples[SAMPLE_CHANNEL_L][i].high_freq?(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/rumble_samples[SAMPLE_CHANNEL_L][i].high_freq:0;
-        frame->step[HD_RUMBLE_PWM_L][HD_RUMBLE_HIGH]=(frame->arr[HD_RUMBLE_PWM_L][HD_RUMBLE_HIGH]*HD_RUMBLE_STEP)>>HD_RUMBLE_SAMPLERATE_SHIFT;
-        frame->amp[HD_RUMBLE_PWM_L][HD_RUMBLE_LOW]=rumble_samples[SAMPLE_CHANNEL_L][i].low_amp>>4;
-        frame->arr[HD_RUMBLE_PWM_L][HD_RUMBLE_LOW]=
-                rumble_samples[SAMPLE_CHANNEL_L][i].low_freq?(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/rumble_samples[SAMPLE_CHANNEL_L][i].low_freq:0;
-        frame->step[HD_RUMBLE_PWM_L][HD_RUMBLE_LOW]=(frame->arr[HD_RUMBLE_PWM_L][HD_RUMBLE_LOW]*HD_RUMBLE_STEP)>>HD_RUMBLE_SAMPLERATE_SHIFT;
-    }
-    pkt=pkt_r;
-    global_sample_channel=SAMPLE_CHANNEL_R;
-    decoded_cnt=0;
-    switch(pkt->FromatZero.PackFormat)
-    {
-    case 0:
-        break;
-    case 1:
-        if(pkt->FormatOne.Reserved==0) {
-            deocde_hd_rumble_format1(&pkt->FormatOne);
-        }else if(pkt->FormatOne28bit.Reserved==0) {
-            decode_hd_rumble_format1long(&pkt->FormatOne28bit);
-        }else {
-            decode_hd_rumble_format1full(&pkt->FormatThree7bit);
-        }
-        break;
-    case 2:
-        if(pkt->FormatTwo.Reserved==0) {
-            decode_hd_rumble_format2(&pkt->FormatTwo);
-        }else{
-            decode_hd_rumble_format2long(&pkt->FormatTwo14bit);
-        }
-        break;
-    case 3:
-        decode_hd_rumble_format3(&pkt->FormatThree);
-        break;
-    default:
-        break;
-    }
-    frame=rumble_frame;
-    for(int i=0;i<decoded_cnt;++i,++frame)
-    {
-        frame->amp[HD_RUMBLE_PWM_R][HD_RUMBLE_HIGH]=rumble_samples[SAMPLE_CHANNEL_R][i].high_amp>>4;
-        frame->arr[HD_RUMBLE_PWM_R][HD_RUMBLE_HIGH]=
-                rumble_samples[SAMPLE_CHANNEL_R][i].high_freq?(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/rumble_samples[SAMPLE_CHANNEL_R][i].high_freq:0;
-        frame->step[HD_RUMBLE_PWM_R][HD_RUMBLE_HIGH]=(frame->arr[HD_RUMBLE_PWM_R][HD_RUMBLE_HIGH]*HD_RUMBLE_STEP)>>HD_RUMBLE_SAMPLERATE_SHIFT;
-        frame->amp[HD_RUMBLE_PWM_R][HD_RUMBLE_LOW]=rumble_samples[SAMPLE_CHANNEL_R][i].low_amp>>4;
-        frame->arr[HD_RUMBLE_PWM_R][HD_RUMBLE_LOW]=
-                rumble_samples[SAMPLE_CHANNEL_R][i].low_freq?(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/rumble_samples[SAMPLE_CHANNEL_R][i].low_freq:0;
-        frame->step[HD_RUMBLE_PWM_R][HD_RUMBLE_LOW]=(frame->arr[HD_RUMBLE_PWM_R][HD_RUMBLE_LOW]*HD_RUMBLE_STEP)>>HD_RUMBLE_SAMPLERATE_SHIFT;
-    }
-    tp=HD_RUMBLE_PWM_L;
-    if(cnt>decoded_cnt)
-    {
-        tp=cnt;
-        cnt=decoded_cnt;
-        decoded_cnt=tp;
-        tp=HD_RUMBLE_PWM_R;
-    }
-    //channel:tp from cnt to dcnt
-    frame=&rumble_frame[cnt];
-    tf=&rumble_frame[cnt-1];
-    for(int i=cnt;i<decoded_cnt;++i,++frame)
-    {
-        frame->amp[tp][HD_RUMBLE_HIGH]=tf->amp[tp][HD_RUMBLE_HIGH];
-        frame->amp[tp][HD_RUMBLE_LOW]=tf->amp[tp][HD_RUMBLE_LOW];
-        frame->arr[tp][HD_RUMBLE_HIGH]=tf->arr[tp][HD_RUMBLE_HIGH];
-        frame->arr[tp][HD_RUMBLE_LOW]=tf->arr[tp][HD_RUMBLE_LOW];
-        frame->step[tp][HD_RUMBLE_HIGH]=tf->step[tp][HD_RUMBLE_HIGH];
-        frame->step[tp][HD_RUMBLE_LOW]=tf->step[tp][HD_RUMBLE_LOW];
-    }
-    frame=rumble_frame;
-    for(int i=0;i<decoded_cnt;++i)
-        push_rumble_frame(frame++);
-}*/
+void hd_rumble_lookup_tb_init(){
+    if(user_config.rumble_low_amp_rise)
+        memcpy(amp_exp2_index_lookup_tb+1,amp_exp2_index_lookup_tb_low_amp_rise,sizeof(amp_exp2_index_lookup_tb_low_amp_rise));
+    else
+        memcpy(amp_exp2_index_lookup_tb+1,amp_exp2_index_lookup_tb_low_amp_raw,sizeof(amp_exp2_index_lookup_tb_low_amp_raw));
+}

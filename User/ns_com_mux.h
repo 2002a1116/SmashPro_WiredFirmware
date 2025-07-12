@@ -39,8 +39,8 @@ extern uint32_t rts_cnt,rts_tcnt;
 void ns_hid_register_packet_dispatch(int typ,void (*handler)(cmd_packet*));
 void ns_mux_init();
 uint8_t ns_send_report(report_packet* rpt);
-uint8_t ns_send_full64byte_report(report_packet* rpt);
-uint8_t hid_send_full64byte_report(uint8_t* buf,uint8_t len);
+//uint8_t ns_send_full64byte_report(report_packet* rpt);
+//uint8_t hid_send_full64byte_report(uint8_t* buf,uint8_t len);
 void hid_dispatch(cmd_packet* pkt);
 
 #endif /* USER_NS_COM_MUX_H_ */

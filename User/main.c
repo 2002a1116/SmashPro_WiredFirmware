@@ -160,7 +160,7 @@ void imu_read_test(){
     //printf("imu read start\r\n");
     i2c_write_byte(0x04, 0b00001000);
     id=0;
-    res=i2c_read_byte(IMU_ID,&id);
+    res=i2c_read_byte(IMU_ID_REG,&id);
     //printf("imu id:0x%02x ,res:%d\r\n",id,res);
 }
 void func_switch_task(){
@@ -269,7 +269,7 @@ void routine_service(void){
         routine_tick=Get_Systick_MS();
     }
     top_timer();
-    push_waveform_into_buffer_task();
+    //push_waveform_into_buffer_task();
     imu_upd();
     func_switch_task();
 }
@@ -365,11 +365,12 @@ int main(void)
         else{
             connection_state.usb_enumed=connection_state.usb_paired=0;
         }
+        push_waveform_into_buffer_task();
 #ifdef COMPILE_WL
         uart_com_task();
         UART1_Tx_Service();
 #endif
-        soft_watchdog_feed();
+        //soft_watchdog_feed();
     }
 }
 

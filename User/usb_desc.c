@@ -105,7 +105,7 @@ const uint8_t  MyHIDReportDesc[] =
     0xC0,                           // End Collection
 };
 */
-const uint8_t  MyHIDReportDesc[] =
+const uint8_t MyHIDReportDesc[] =
 {
         0x05, 0x01, // Usage Page (Generic Desktop Ctrls)
         //0x05,0x05,

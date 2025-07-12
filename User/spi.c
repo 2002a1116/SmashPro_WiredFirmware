@@ -11,6 +11,8 @@
 #include "pwr.h"
 #include "spi.h"
 #include "board_type.h"
+#include "hd_rumble_high_accuracy.h"
+#include "imu.h"
 
 void DMA1_Channel3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
@@ -29,6 +31,7 @@ typedef struct _rgb_spi_pkg{
 #pragma pack(pop)
 #define SPI_RESET_OFFSET (5)
 rgb_spi_pkg spi_tx_buf[RGB_MAX_CNT*3+SPI_RESET_OFFSET*2];//+reset
+uint8_t indi_status=0;
 //uint16_t spi_length;
 
 /*********************************************************************
@@ -128,15 +131,6 @@ void flush_spi_tx_seq(uint8_t status)
             set_led_rgb(i, 0, 0, 0);
         else{
             set_led_rgb(i, user_config.rgb_data[j].r, user_config.rgb_data[j].g, user_config.rgb_data[j].b);
-/*#ifdef PCB_TYPE
-    #if (PCB_TYPE==PCB_TYPE_MICRO)
-                j+=(i>3);//skip 0~3;
-    #else
-                j+=(i<4||i>7);//skip 4~7
-    #endif
-#else
-            ++j;
-#endif*/
             switch(user_config.pcb_typ){
             case CONF_PCB_TYPE_SMALL:
                 j+=(i>3);//skip 0~3;
@@ -146,47 +140,47 @@ void flush_spi_tx_seq(uint8_t status)
                 break;
             default:
                 ++j;
+                break;
             }
         }
-        //printf("rgb %d 0x%02x 0x%02x 0x%02x\r\n",i,user_config.rgb_data[i].r,user_config.rgb_data[i].g,user_config.rgb_data[i].b);
     }
-    if(!status)
-        return;
-    /*
-#ifdef PCB_TYPE
-#if (PCB_TYPE==PCB_TYPE_MICRO)
-    set_led_rgb(0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
-#else
-    set_led_rgb(4, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(5, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(6, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(7, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
-#endif
-#else
-*/
-    if(user_config.pcb_typ==CONF_PCB_TYPE_SMALL)
-    {
-        set_led_rgb(0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
+    uint8_t ofst=0;
+    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)
+        ofst=4;
+    set_led_rgb(ofst+0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(ofst+1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
+    //set_led_rgb(ofst+2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
+    set_led_rgb(ofst+3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
+    if((!user_config.imu_disabled)&&imu_error)
+        set_led_rgb(ofst+1, INDICATE_LED_BRIGHTNESS*2, 0, 0);
+    if(user_config.rumble_disabled){
+        set_led_rgb(ofst+2,0,0,0);
+    }else{
+        if(user_config.legacy_rumble)
+            set_led_rgb(ofst+2,0,0,INDICATE_LED_BRIGHTNESS);
+        else
+            set_led_rgb(ofst+2,0,INDICATE_LED_BRIGHTNESS,0);
     }
-    else if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE){
-        set_led_rgb(4, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(5, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(6, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
-        set_led_rgb(7, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
+    if(rumble_rb_overflow)
+        set_led_rgb(ofst+2,INDICATE_LED_BRIGHTNESS,0,0);
+
+    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)
+        ofst=12;
+    else
+        ofst=4;
+    if(user_config.rgb_typ==CONF_BTN_RGB_PWR_ONLY){
+        //16 21 being home
+        set_led_rgb(ofst+4,user_config.rgb_data[16].r,user_config.rgb_data[16].g,user_config.rgb_data[16].b);
+        set_led_rgb(ofst+5,user_config.rgb_data[21].r,user_config.rgb_data[21].g,user_config.rgb_data[21].b);
     }
-//#endif
+    //#endif
     //spi_tx_buf[user_config.rgb_cnt*3].load=0;
     //spi_tx_buf[user_config.rgb_cnt*3+1].load=0;
 }
 void flush_rgb(uint8_t status)
 {
-    //SPI_Cmd(SPI1, ENABLE);
+    //SPI_Cmd(SPI1, DISABLE);
+    DMA_Cmd(DMA1_Channel3, DISABLE);
     flush_spi_tx_seq(status);
     DMA1_Channel3->MADDR = (uint32_t)spi_tx_buf;
     DMA1_Channel3->CNTR = (uint32_t)(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg);
@@ -196,11 +190,17 @@ void flush_rgb(uint8_t status)
 int spi_init(void)
 {
     SPI_FullDuplex_Init();
+    Delay_Ms(2);
     spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     flush_rgb(ENABLE);
     return 0;
 }
+void set_indicate_led_status(uint8_t status)
+{
+    indi_status=status;
+}
+
 void DMA1_Channel3_IRQHandler(){
     if(DMA_GetITStatus(DMA1_IT_TC3))
     {

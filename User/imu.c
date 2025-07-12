@@ -13,6 +13,7 @@
 #include "conf.h"
 #include "tick.h"
 #include "watchdog.h"
+#include "uart.h"
 #include <string.h>
 #pragma pack(push,1)
 uint8_t imu_upd_cnt;
@@ -40,9 +41,23 @@ void imu_set_acc_bandwidth(uint8_t BW0XL, uint8_t ODR)
     imu_set_reg(LSM6DS3TRC_CTRL8_XL, ODR, 0);
 }
 uint32_t imu_read_cnt,imu_read_fail_cnt;
+uint32_t imu_id_read_fail_cnt;
+uint8_t imu_error=0;
 uint8_t imu_read(){
-    static uint8_t status=0;
-    static uint8_t ret;
+    uint8_t status=0;
+    uint8_t ret;
+    if((ret=i2c_read_byte(IMU_ID_REG, &status))||(status!=IMU_ID_LSM6DS3&&status!=IMU_ID_LSM6DS3TRC)){
+        imu_id_read_fail_cnt++;
+        if((!imu_error)&&(imu_id_read_fail_cnt>=10)){
+            imu_error=1;
+            flush_rgb(ENABLE);
+        }
+    }else {
+        imu_id_read_fail_cnt=0;
+        imu_error=0;
+        flush_rgb(ENABLE);
+    }
+    if(imu_error)return 3;
     if(ret=i2c_read_byte(LSM6DS3TRC_STATUS_REG, &status)){
         ++imu_read_cnt;
         ++imu_read_fail_cnt;

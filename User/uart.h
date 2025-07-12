@@ -35,7 +35,13 @@ typedef struct __uart_packet{
 */
 typedef struct __uart_packet{
     struct{
-        uint8_t id:7;
+        union{
+            uint8_t id:7;
+            struct{
+                uint8_t id_short:4;
+                uint8_t flag:3;
+            };
+        };
         uint8_t starter:1;
     };
     union{
@@ -65,6 +71,7 @@ enum UART_PACKET_TYP{
     UART_PKG_CH32_FLASH_READ=0x08,
     UART_PKG_CH32_FLASH_WRITE=0x09,
     UART_PKG_GET_BATTERY_STATUS=0x0A,
+    UART_PKG_IMU_REPORT_DATA=0x0B,
 };
 #pragma pack(pop)
 
@@ -74,7 +81,8 @@ enum UART_PACKET_TYP{
 //#define UART_BAUD_RATE (921600)
 #define UART_PKG_SIZE (13)
 #define UART_RINGBUFFER_PKG_CAP (64)
-#define DEF_UART1_BUF_SIZE            384
+#define DEF_UART1_BUF_SIZE (384)
+//#define DEF_UART1_BUF_SIZE (192)
 extern void UART1_Tx_Service( void );
 extern void UART1_Rx_Service( void );
 extern void UART1_Init( void );
@@ -85,7 +93,7 @@ extern uint8_t send_uart_pkt(uart_packet* pkt);
 extern void encode_uart_pkt(uart_packet* pkt);
 extern void decode_uart_pkt(uart_packet* pkt);
 extern uint8_t check_uart_pkt(uart_packet* pkt);//if ok return false aka 0
-extern uint8_t send_uart_large(uint8_t* buf,uint8_t len,uint8_t typ);
+extern uint8_t send_uart_large_pkt(uint8_t* buf,uint8_t len,uint8_t typ);
 
 extern uint8_t uart_rx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
 extern uint8_t uart_tx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];

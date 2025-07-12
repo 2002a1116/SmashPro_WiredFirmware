@@ -12,7 +12,7 @@
 #include "ring_buffer.h"
 #include "debug.h"
 #define HD_RUMBLE_FRAME_TIME_MS (5)
-#define HD_RUMBLE_FRAME_TIMEOUT_MS (100)
+#define HD_RUMBLE_FRAME_TIMEOUT_MS (1000)
 #define HD_RUMBLE_HIGH (0)
 #define HD_RUMBLE_LOW (1)
 #define HD_RUMBLE_PWM_L (0)
@@ -23,6 +23,8 @@
 #define HD_RUMBLE_TIM_PRESCALER (1)
 #define HD_RUMBLE_TIM_PERIOD (1440)
 #define HD_RUMBLE_TIM_PERIOD_MID (720)
+//#define HD_RUMBLE_TIM_PERIOD_RANGE (400)
+#define HD_RUMBLE_TIM_PERIOD_RANGE (500)
 #define HD_RUMBLE_CLK (50000)//
 #define HD_RUMBLE_AMP_FIXED_RATIO (1)
 /*typedef struct _rumble_frame{

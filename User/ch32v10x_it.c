@@ -44,7 +44,7 @@ uint32_t EXC_PC;
 
 void HardFault_Handler(void)
 {
-    flush_rgb(DISABLE);
+    //flush_rgb(DISABLE);
     //csrr a0, mstatus
     __asm volatile ("csrr %0, mcause" : \
                 "=r"(EXC_CAUSE): : "memory");

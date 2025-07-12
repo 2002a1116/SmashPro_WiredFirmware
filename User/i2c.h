@@ -17,7 +17,6 @@
 #define CH32V_I2C_ADDR (0)
 #define IMU_I2C_FREQ (800000)
 #define IMU_ADDR (0b11010100)
-#define IMU_ID (0x0F)
 
 void i2c_hardware_init(u32 baudrate, u16 address, u8 allow_reset);
 void i2c_init();

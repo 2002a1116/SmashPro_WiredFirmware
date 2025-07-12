@@ -15,6 +15,7 @@ C_SRCS += \
 ../User/hd_rumble.c \
 ../User/hd_rumble2.c \
 ../User/hd_rumble_high_accuracy.c \
+../User/hd_rumble_high_accurary_packed.c \
 ../User/i2c.c \
 ../User/imu.c \
 ../User/imu_quaternion.c \
@@ -29,8 +30,7 @@ C_SRCS += \
 ../User/uart.c \
 ../User/uart_com.c \
 ../User/usb_desc.c \
-../User/usbd_compatibility_hid.c \
-../User/watchdog.c 
+../User/usbd_compatibility_hid.c 
 
 OBJS += \
 ./User/ch32v10x_it.o \
@@ -43,6 +43,7 @@ OBJS += \
 ./User/hd_rumble.o \
 ./User/hd_rumble2.o \
 ./User/hd_rumble_high_accuracy.o \
+./User/hd_rumble_high_accurary_packed.o \
 ./User/i2c.o \
 ./User/imu.o \
 ./User/imu_quaternion.o \
@@ -57,8 +58,7 @@ OBJS += \
 ./User/uart.o \
 ./User/uart_com.o \
 ./User/usb_desc.o \
-./User/usbd_compatibility_hid.o \
-./User/watchdog.o 
+./User/usbd_compatibility_hid.o 
 
 C_DEPS += \
 ./User/ch32v10x_it.d \
@@ -71,6 +71,7 @@ C_DEPS += \
 ./User/hd_rumble.d \
 ./User/hd_rumble2.d \
 ./User/hd_rumble_high_accuracy.d \
+./User/hd_rumble_high_accurary_packed.d \
 ./User/i2c.d \
 ./User/imu.d \
 ./User/imu_quaternion.d \
@@ -85,8 +86,7 @@ C_DEPS += \
 ./User/uart.d \
 ./User/uart_com.d \
 ./User/usb_desc.d \
-./User/usbd_compatibility_hid.d \
-./User/watchdog.d 
+./User/usbd_compatibility_hid.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

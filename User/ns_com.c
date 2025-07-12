@@ -260,7 +260,7 @@ void ns_subcommand_spi_write(NS_SUBCOMMAND_CB_PARAM){
     uint32_t addr=fetch_uint32(cmd->subcommand_data);
     uint8_t size=cmd->subcommand_data[4];
     uint8_t *data=cmd->subcommand_data+5;
-    conf_write(addr, data, size);
+    conf_write(addr, data, size,ENABLE);
     uart_conf_write(addr,data,size);
     //todo spi write,Replies with x8011 ack and a uint8 status. x00 = success, x01 = write protected.
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
@@ -391,6 +391,7 @@ uint8_t indicate_led_status;
 void ns_subcommand_set_indicate_led(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     indicate_led_status=cmd->subcommand_data[0];
+    set_indicate_led_status(indicate_led_status);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;
@@ -415,6 +416,7 @@ void ns_subcommand_get_indicate_led(NS_SUBCOMMAND_CB_PARAM){
 void ns_subcommand_set_home_led(NS_SUBCOMMAND_CB_PARAM){
     //really complecate,do nothing as we dont really have such thing;
     //no reply needed seems;
+    //TODO: if anyone have nothing better to do and have this done?just register an routine task.
 }
 
 
@@ -438,8 +440,8 @@ void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,NS_SUBCOMMAND_STATUS_ACK);
     //_ns_subcommand_set_ack(cmd->subcommand_id, 0x90);
-    //pkt.data.subcommand_report.subcommand_data[0]=state;
-    pkt.len=SUBC_REPORT_BASIC_LENGTH;
+    pkt.data.subcommand_report.subcommand_data[0]=state;
+    pkt.len=SUBC_REPORT_BASIC_LENGTH+1;
     ns_send_report(&pkt);
 }
 
@@ -448,13 +450,14 @@ void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
 void ns_subcommand_set_imu_conf(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     imu_mode=cmd->subcommand_data[0];
+    pkt.data.subcommand_report.subcommand_data[0]=0x40;
+    pkt.data.subcommand_report.subcommand_data[1]=0x01;
     //printf("set imu mode to:%d\r\n",imu_mode);
     if(!imu_conf.state){
         imu_conf.state=0x01;
+        imu_mode=0x01;
         //todo : set imu conf to default
         _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
-        pkt.data.subcommand_report.subcommand_data[0]=0x40;
-        pkt.data.subcommand_report.subcommand_data[1]=0x01;
         pkt.len=SUBC_REPORT_SET_IMU_CONF_LENGTH;
         ns_send_report(&pkt);
         return;

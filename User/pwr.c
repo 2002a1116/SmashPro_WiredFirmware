@@ -10,7 +10,7 @@
 /*uint32_t light_sleep_exti_gpio[]={GPIO_BUTTON_LS,GPIO_BUTTON_RS,GPIO_BUTTON_X,GPIO_BUTTON_Y,GPIO_BUTTON_A,
         GPIO_BUTTON_B,GPIO_BUTTON_UP,GPIO_BUTTON_DOWN,GPIO_BUTTON_LEFT,GPIO_BUTTON_RIGHT,GPIO_BUTTON_L,GPIO_BUTTON_R,
         GPIO_BUTTON_ZL,GPIO_BUTTON_ZR,GPIO_BUTTON_MINUS,GPIO_BUTTON_PLUS,GPIO_BUTTON_HOME,GPIO_BUTTON_CAP,
-        GPIO_Pin_9|GPIOA_PIN_MASK,GPIO_Pin_10|GPIOA_PIN_MASK};//uart1*/
+        GPIO_Pin_9|GPIOA_GROUP_MASK,GPIO_Pin_10|GPIOA_GROUP_MASK};//uart1*/
 //well there will be no such thing as for one pin number,channel a/b/c can have only one related to its exti
 /*
 void EXTI0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));

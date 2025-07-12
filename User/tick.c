@@ -23,8 +23,8 @@ void _systick_init(void){
     TIM_Cmd(TIM2, ENABLE); //使能定时器2
     NVIC_InitTypeDef NVIC_InitStructure; //定义NVIC初始化结构体
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn; //设置NVIC通道为定时器2中断
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; //设置NVIC通道抢占优先级为0
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1; //设置NVIC通道子优先级为0
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //设置NVIC通道抢占优先级为0
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2; //设置NVIC通道子优先级为0
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //使能NVIC通道
     NVIC_Init(&NVIC_InitStructure); //初始化NVIC
     NVIC_SetFastIRQ(TIM2_IRQHandler,TIM2_IRQn,1);

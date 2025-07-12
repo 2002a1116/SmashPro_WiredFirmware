@@ -118,6 +118,7 @@ typedef struct _hd_rumble_pack
 #define EXP2_FACTOR (16384) //2^14 aka 1<<14
 #define EXP2_FACTOR_SHIFT (14)
 #define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (11)
+//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (10)
 
 extern int32_t hliner,ftmp;
 
@@ -132,5 +133,5 @@ void decode_hd_rumble_format2(VibrationAmFmPackFormatTwo* pkg);
 void decode_hd_rumble_format2long(VibrationAmFmPackFormatTwo14bit* pkg);
 void decode_hd_rumble_format3(VibrationAmFmPackFormatThree* pkg);
 void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_multiformat* pkt_r);
-
+void hd_rumble_lookup_tb_init();
 #endif /* USER_HD_RUMBLE2_H_ */

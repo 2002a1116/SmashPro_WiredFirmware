@@ -19,6 +19,7 @@ extern volatile uint8_t HID_Set_Report_Flag;
 
 extern void HID_Set_Report_Deal( void );
 
+extern imu_report_pack* imu_report_buffer_ptr;
 extern peripheral_data global_input_data;
 
 void ns_set_peripheral_data_getter(void (*getter)(peripheral_data*));

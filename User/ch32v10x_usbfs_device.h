@@ -62,8 +62,8 @@
 #define DEF_RING_BUFFER_REMINE        4
 #define DEF_RING_BUFFER_RESTART       8
 
-#define NS_USB_RINGBUFFER_PKG_CAP (24+1)
-#define NS_USB_RINGBUFFER_PKG_SIZE (64)
+#define NS_USB_RINGBUFFER_PKG_CAP (24)
+#define NS_USB_RINGBUFFER_PKG_SIZE (65)
 
 /* Ring Buffer typedef *//*
 typedef struct __PACKED _RING_BUFF_COMM

@@ -295,7 +295,7 @@ uint8_t i2c_read_byte(uint32_t addr,uint8_t *ret)
         *ret=I2C_ReceiveData(I2C2);
         I2C_GenerateSTOP( I2C2, ENABLE );
     }while(0);
-    if(res|i2c_intr_error)
+    if(res||i2c_intr_error)
         i2c2_reset();
     user_calibration.tag2=res;
     return res;

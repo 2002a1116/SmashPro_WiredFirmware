@@ -71,10 +71,15 @@ void hd_rumble_init(uint8_t force_disable){
     TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC4PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_ARRPreloadConfig(TIM3, DISABLE);
-    TIM_SetCompare1(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
+    /*TIM_SetCompare1(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
     TIM_SetCompare2(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
     TIM_SetCompare3(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
-    TIM_SetCompare4(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);
+    TIM_SetCompare4(TIM3, HD_RUMBLE_AMP_FIXED_RATIO*1440/2);*/
+
+    //TIM_SetCompare1(TIM3, 590);
+    //TIM_SetCompare2(TIM3, 590);
+    TIM_SetCompare3(TIM3, HD_RUMBLE_TIM_PERIOD_MID);
+    TIM_SetCompare4(TIM3, HD_RUMBLE_TIM_PERIOD_MID);
 
     hd_rumble_high_accurary_init();
     NVIC_InitTypeDef NVIC_InitStructure; //定义NVIC初始化结构体

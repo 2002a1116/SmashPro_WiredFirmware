@@ -21,6 +21,8 @@ __attribute__ ((aligned(4))) uint8_t UART1_RxBuffer[DEF_UART1_BUF_SIZE];  // UAR
 
 uint8_t uart_rx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
 uint8_t uart_tx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];
+uint8_t uart_rx_rb_len[UART_RINGBUFFER_PKG_CAP];
+uint8_t uart_tx_rb_len[UART_RINGBUFFER_PKG_CAP];
 ring_buffer uart_rx_rb;
 ring_buffer uart_tx_rb;
 volatile uint16_t UART1_TimeOut;                                           // UART2 RX timeout flag
@@ -109,8 +111,8 @@ void UART1_Init( void )
     //USART_ITConfig(USART1, USART_IT_TC, ENABLE);
     USART_Cmd(USART1, ENABLE);
 
-    ring_buffer_init(&uart_rx_rb, uart_rx_rb_buf, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
-    ring_buffer_init(&uart_tx_rb, uart_tx_rb_buf, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
+    ring_buffer_init(&uart_rx_rb, uart_rx_rb_buf, uart_rx_rb_len, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
+    ring_buffer_init(&uart_tx_rb, uart_tx_rb_buf, uart_tx_rb_len, UART_RINGBUFFER_PKG_CAP, UART_PKG_SIZE);
 
 }
 
@@ -227,7 +229,7 @@ void UART1_Rx_Service( void )
                     {
                         decode_uart_pkt((uart_packet*)rx_filter_buf);
                         ////printf("uart pkt decode typ %d\r\n",((uart_packet*)rx_filter_buf)->typ);
-                        u16_temp=ring_buffer_push(&uart_rx_rb, rx_filter_buf, UART_PKG_SIZE, 0);
+                        u16_temp=ring_buffer_push(&uart_rx_rb, rx_filter_buf, UART_PKG_SIZE);
                         //if(u16_temp)
                             //printf("uart push error:%d\r\n",u16_temp);
                     }
@@ -298,9 +300,9 @@ uint8_t send_uart_pkt(uart_packet* pkt)
     memcpy(&send_buf,pkt,UART_PKG_SIZE);
     encode_uart_pkt(&send_buf);
     send_buf.starter=1;
-    return ring_buffer_push(&uart_tx_rb, (uint8_t*)&send_buf, UART_PKG_SIZE, 0);
+    return ring_buffer_push(&uart_tx_rb, (uint8_t*)&send_buf, UART_PKG_SIZE);
 }
-uint8_t send_uart_large(uint8_t* buf,uint8_t len,uint8_t typ)
+uint8_t send_uart_large_pkt(uint8_t* buf,uint8_t len,uint8_t typ)
 {
     uart_packet pkg;
     memset(&pkg,0,sizeof(uart_packet));

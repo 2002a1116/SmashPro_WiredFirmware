@@ -59,33 +59,33 @@ void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
     case 0x01:
         memcpy(usb_handshake_buf,usb_hs01,4);
         memcpy(usb_handshake_buf+4,connection_state.bd_addr,BD_ADDR_LEN);
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 10, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 10, 0x01);
         ////printf("rb pushed size:%d\r\n",ns_usb_send_rb.size);
         break;
     case 0x02:
         usb_handshake_buf[0]=0x81;
         usb_handshake_buf[1]=0x02;
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
         break;
     case 0x03:
         usb_handshake_buf[0]=0x81;
         usb_handshake_buf[1]=0x03;
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
         break;
     case 0x04:
         usb_handshake_buf[0]=0x81;
         usb_handshake_buf[1]=0x04;
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
         break;
     case 0x05:
         usb_handshake_buf[0]=0x81;
         usb_handshake_buf[1]=0x05;
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
         break;
     case 0x06:
         usb_handshake_buf[0]=0x81;
         usb_handshake_buf[1]=0x06;
-        ring_buffer_push(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
+        ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 2, 0x01);
         break;
     case 0x91:
         break;
@@ -104,7 +104,8 @@ static uint8_t* fw_buf=fw_buf_raw+2;
 uint8_t fw_snd_pkt(uint8_t id,uint8_t len){
     fw_buf_raw[0]=0xFE;
     fw_buf_raw[1]=id;
-    return hid_send_full64byte_report(fw_buf_raw,len+2);
+    return ring_buffer_push_with_hdr(&ns_usb_send_rb, fw_buf_raw, len+2 ,0x01);
+    //return hid_send_full64byte_report(fw_buf_raw,len+2);
 }
 #define FW_SUBC_ID_READ_SETTING (0x01)
 void fw_subcommand_read_setting(cmd_packet* pkt){
@@ -175,7 +176,7 @@ void fw_subcommand_read_emulate_rom(cmd_packet* pkt){
 #define FW_SUBC_ID_WRITE_EMULATE_ROM (0x04)
 void fw_subcommand_write_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
-    fw_buf[0]=conf_write(addr, &pkt->data[6], pkt->data[5]);
+    fw_buf[0]=conf_write(addr, &pkt->data[6], pkt->data[5],ENABLE);
     //hid_send_full64byte_report(fw_buf, 2);
     fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 1);
 }
@@ -267,12 +268,12 @@ void fw_subcommand_calibrate_js_offset(cmd_packet* pkt){
     for(int i=0;i<4;++i)
         user_calibration.internal_center[i]=adc_data[i];
     user_calibration.nonexist=0;
-    fw_buf[0]=conf_write(0x8000, 0, 0);
+    fw_buf[0]=conf_write(0x8000, 0, 0, ENABLE);
     fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_OFFSET, 1);
 }
 #define FW_SUBC_ID_GET_STATUS (0xFD)
 void fw_subcommand_get_status(cmd_packet* pkt){
-    fw_buf[0]=i2c_read_byte(IMU_ID,fw_buf+1);
+    fw_buf[0]=i2c_read_byte(IMU_ID_REG,fw_buf+1);
     if(!rts_tcnt)rts_tcnt=1;
     fw_buf[2]=rts_cnt/rts_tcnt;
     memcpy(fw_buf+3,&imu_read_cnt,4);
@@ -365,15 +366,16 @@ void hid_dispatch(cmd_packet* pkt)
     }
 }
 uint8_t ns_send_report(report_packet* rpt){
-   return ring_buffer_push(&ns_usb_send_rb, (uint8_t*)&(rpt->data), rpt->len,0x00);
+   return ring_buffer_push_with_hdr(&ns_usb_send_rb, (uint8_t*)&(rpt->data), rpt->len,0x00);
 }
+/*
 uint8_t ns_send_full64byte_report(report_packet* rpt){
-    return ring_buffer_push(&ns_usb_send_rb, (uint8_t*)&(rpt->data), rpt->len,0x02);
+    return ring_buffer_push_with_hdr(&ns_usb_send_rb, (uint8_t*)&(rpt->data), rpt->len,0x02);
 }
 uint8_t hid_send_full64byte_report(uint8_t* buf,uint8_t len){
-    return ring_buffer_push(&ns_usb_send_rb, buf, len,0x03);
+    return ring_buffer_push_with_hdr(&ns_usb_send_rb, buf, len,0x03);
 }
-
+*/
 void ns_hid_register_packet_dispatch(int typ,void (*handler)(cmd_packet*)){
         if(typ>=0&&typ<NS_PACKET_TYPE_MAX_VALUE)
                 ns_hid_packet_dispatch_tb[typ]=handler;

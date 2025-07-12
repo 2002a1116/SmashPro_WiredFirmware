@@ -73,9 +73,10 @@ uint8_t empty_report[]={0xa1,0x00};
 uint8_t* pkg_ptr;
 uint8_t pkg_len,pkg_typ;
 std_report *rpt;
-static imu_report_pack* rep;
+imu_report_pack* imu_report_buffer_ptr;
 void set_imu_available(imu_report_pack* p){
-    rep=p;
+    imu_report_buffer_ptr=p;
+    imu_buffer_reset_notifier();
 }
 void hid_init()
 {
@@ -90,9 +91,10 @@ void hid_tx_service( void )
     ////printf("not busy\r\n");
     if(ns_usb_send_rb.size)//special packet to send
     {
-        pkg_ptr=&ns_usb_send_rb.buf[ns_usb_send_rb.top*NS_USB_RINGBUFFER_PKG_SIZE];
+        pkg_ptr=&ns_usb_send_rb.buf[ns_usb_send_rb.top*NS_USB_RINGBUFFER_PKG_SIZE+1];
         pkg_len=ns_usb_send_rb.len[ns_usb_send_rb.top];
-        pkg_typ=ns_usb_send_rb.typ[ns_usb_send_rb.top];
+        //pkg_typ=ns_usb_send_rb.typ[ns_usb_send_rb.top];
+        pkg_typ=ns_usb_send_rb.buf[ns_usb_send_rb.top*NS_USB_RINGBUFFER_PKG_SIZE];
         ring_buffer_pop(&ns_usb_send_rb);
         switch(pkg_typ){
         case 0x00://std report
@@ -104,7 +106,7 @@ void hid_tx_service( void )
             ////printf("hid raw\r\n");
             memcpy(rpt,pkg_ptr,pkg_len);
             break;
-        case 0x02:
+        /*case 0x02:
             rpt_warpper(rpt,(std_report_data*)pkg_ptr,pkg_len);
             pkg_ptr=(uint8_t*)rpt;
             pkg_len=64;
@@ -113,6 +115,7 @@ void hid_tx_service( void )
             memset(rpt,0,64);
             memcpy(rpt,pkg_ptr,pkg_len);
             pkg_len=64;
+        */
         default:
             break;
         }
@@ -120,9 +123,9 @@ void hid_tx_service( void )
     else{//std report or empty report
         rpt_warpper(rpt,NULL,0);
         pkg_len=NS_STD_REPORT_BASIC_LENGTH;
-        if(imu_mode&&i2c_status){
-            if(rep){
-                memcpy(&rpt->data.imu_report,rep,sizeof(imu_report_pack));
+        if((!user_config.imu_disabled)&&imu_mode&&i2c_status){
+            if(imu_report_buffer_ptr){
+                memcpy(&rpt->data.imu_report,imu_report_buffer_ptr,sizeof(imu_report_pack));
                 pkg_len+=sizeof(imu_report_pack);
                 //rep=NULL;
             }

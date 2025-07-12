@@ -12,5 +12,6 @@
 
 int spi_init(void);
 void flush_rgb(uint8_t status);
+void set_indicate_led_status(uint8_t status);
 
 #endif /* USER_SPI_H_ */

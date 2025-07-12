@@ -13,5 +13,6 @@
 
 void uart_com_task();
 void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size);
+void imu_buffer_reset_notifier();
 
 #endif /* USER_UART_COM_H_ */

@@ -51,6 +51,7 @@ ring_buffer ns_usb_send_rb;
 ring_buffer ns_usb_recv_rb;
 uint8_t ns_usb_send_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
 uint8_t ns_usb_recv_buf[NS_USB_RINGBUFFER_PKG_CAP*NS_USB_RINGBUFFER_PKG_SIZE];
+uint8_t ns_usb_rb_len[2][NS_USB_RINGBUFFER_PKG_CAP];
 
 /******************************************************************************/
 /* Interrupt Service Routine Declaration*/
@@ -130,10 +131,10 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
 		USBFS_Device_Endp_Init( );
         R8_UDEV_CTRL = RB_UD_PD_DIS | RB_UD_PORT_EN;
-        ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, NS_USB_RINGBUFFER_PKG_CAP-1,NS_USB_RINGBUFFER_PKG_SIZE);
-        ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, NS_USB_RINGBUFFER_PKG_CAP-1,NS_USB_RINGBUFFER_PKG_SIZE);
-        //NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
-        NVIC_SetPriority(USBFS_IRQn,0x10);
+        ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, ns_usb_rb_len[0], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
+        ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, ns_usb_rb_len[1], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
+        NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
+        //NVIC_SetPriority(USBFS_IRQn,0x10);
         NVIC_EnableIRQ(USBFS_IRQn);
     }
     else
@@ -389,7 +390,7 @@ void USBFS_IRQHandler( void )
                         if ( intst & RB_UIS_TOG_OK )
                         {
                             R8_UEP1_CTRL ^= RB_UEP_R_TOG;
-                            ring_buffer_push(&ns_usb_recv_rb, pEP1_OUT_DataBuf, (R16_USB_RX_LEN & MASK_UIS_RX_LEN ), 0);
+                            ring_buffer_push(&ns_usb_recv_rb, pEP1_OUT_DataBuf, (R16_USB_RX_LEN & MASK_UIS_RX_LEN ));
 
                         }
                         break;

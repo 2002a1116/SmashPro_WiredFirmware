@@ -21,6 +21,10 @@
 #define CONF_PCB_TYPE_LARGE (1)
 #define CONF_PCB_TYPE_SMALL (0)
 
+#define CONF_BTN_RGB_FULL (0)
+#define CONF_BTN_RGB_PWR_ONLY (1)
+#define CONF_BTN_LED (2)
+
 /*
 Firmware
 The firmware is stored inside the flash in Broadcom's PatchRAM format as follows:
@@ -238,15 +242,17 @@ typedef struct _user_config_data{
         };
     };
     union{
-            uint8_t config_bitmap2;
-            struct{
-                uint8_t pcb_typ:2;
-                uint8_t rgb_typ:2;
-                uint8_t input_typ:1;//0:raw 1:scan
-                uint8_t reserved:3;
-            };
+        uint8_t config_bitmap2;
+        struct{
+            uint8_t pcb_typ:2;//main board led typ
+            uint8_t input_typ:1;//0:raw 1:scan
+            uint8_t rgb_typ:1;//key board typ,
+            uint8_t rumble_low_amp_rise:1;
+            uint8_t legacy_rumble:1;
+            uint8_t dead_zone_mode:2;
         };
-    uint8_t config_bitmap_reserved[2];
+    };
+    uint8_t config_bitmap_reserved34[2];
     uint8_t in_interval;
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
@@ -266,7 +272,13 @@ typedef struct _user_config_data{
     uint8_t pro_fw_version;
     uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
     uint8_t dead_zone[4];
-    uint8_t dead_zone_mode;
+    //uint8_t dead_zone_mode;
+    union{
+        uint8_t config_bitmap5;
+        struct{
+            uint8_t reserved5:8;
+        };
+    };
     uint8_t rgb_cnt;
     rgb_data_complete rgb_data[RGB_MAX_CNT];
 }user_config_data;
@@ -292,7 +304,7 @@ extern uint32_t joystick_snapback_deadzone_sq[2];
 
 void conf_init();
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size);
-uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size);
+uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save);
 void custom_conf_read();
 uint8_t custom_conf_write();
 void conf_flush();

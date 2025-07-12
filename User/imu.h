@@ -10,6 +10,9 @@
 
 #include "i2c.h"
 #include "ns_com.h"
+#define IMU_ID_REG (0x0F)
+#define IMU_ID_LSM6DS3 (0x69)
+#define IMU_ID_LSM6DS3TRC (0x6A)
 #define LSM6DS3TRC_CTRL1_XL     0x10
 //Linear acceleration out data rate
 #define LSM6DS3TRC_ACC_RATE_0   0x00
@@ -112,6 +115,7 @@ extern imu_pack* gyo_data;
 extern imu_pack* acc_data;
 extern float imu_ratio_xf,imu_ratio_yf,imu_ratio_zf;
 extern uint32_t imu_read_cnt,imu_read_fail_cnt;
+extern uint8_t imu_error;
 uint8_t imu_set_reg(uint8_t reg,uint8_t rate,uint8_t mask);
 void imu_upd();
 void set_imu_sleep();

@@ -12,6 +12,7 @@
 #include "spi.h"
 #include "imu.h"
 #include "gpio_digit.h"
+#include "hd_rumble2.h"
 #include <string.h>
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
@@ -45,9 +46,17 @@ void conf_init()
                 factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=2048;
         /*factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue=
                 factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;*/
-        memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
-               &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
-               sizeof(joystick_calibration_data_left));
+        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalXPositive=
+                2048*JOYSTICK_RANGE_FACTOR_RIGHT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalYPositive=
+                2048*JOYSTICK_RANGE_FACTOR_RIGHT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalXNegative=
+                2048*JOYSTICK_RANGE_FACTOR_RIGHT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalYNegative=
+                2048*JOYSTICK_RANGE_FACTOR_RIGHT;
+        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalX0=
+                factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalY0=2048;
+
         factory_configuration.Design.ControllerColor.MainColor.r=0x32;
         factory_configuration.Design.ControllerColor.MainColor.g=0x31;
         factory_configuration.Design.ControllerColor.MainColor.b=0x32;
@@ -110,13 +119,13 @@ void conf_init()
         user_config.in_interval=8;
         user_config.out_interval=8;
         for(int i=0;i<4;++i){
-            user_config.joystick_ratio[i]=(i<2?56:56);
+            user_config.joystick_ratio[i]=(i<2?45:45);
             user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
-            user_config.dead_zone[i]=96;
+            user_config.dead_zone[i]=64;
         }
         user_config.joystick_snapback_deadzone[0]=1400;
         user_config.joystick_snapback_deadzone[1]=1400;
-        user_config.dead_zone_mode=1;
+        user_config.dead_zone_mode=3;
         user_config.rgb_cnt=31;
         user_config.imu_sample_gap=1750;
         for(int i=0;i<user_config.rgb_cnt;++i){
@@ -126,9 +135,12 @@ void conf_init()
         user_config.imu_ratio_y=127;
         user_config.imu_ratio_z=127;
         user_config.pro_fw_version=2;
-        user_config.joystick_snapback_filter_max_delay=12500;
+        user_config.joystick_snapback_filter_max_delay=13500;
         user_config.rumble_pattern=0;
-        user_config.pcb_typ=CONF_PCB_TYPE_LARGE;
+        user_config.legacy_rumble=0;
+        user_config.pcb_typ=CONF_PCB_TYPE_SMALL;
+        user_config.input_typ=0;
+        user_config.imu_disabled=1;//we disabled this in default as many people dont need this
         custom_conf_write();
     }
     conf_flush();
@@ -154,7 +166,7 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     }
 }
-uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
+uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
     uint8_t flash_res=0;
     switch(addr & 0xffff00)
     {
@@ -162,7 +174,8 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     case 0x6000:
         memcpy(((uint8_t*)&factory_configuration)+(addr&0xff),(uint8_t*)buf,size);
-        flash_res=fac_conf_write();
+        if(save)
+            flash_res=fac_conf_write();
         //flash_res=write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)buf, size);
         uart_conf_write(addr, ((uint8_t*)&factory_configuration)+(addr&0xff), size);
         break;
@@ -170,11 +183,14 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size){
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
         //flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
         //flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)buf, size);
-        flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION,(uint8_t*)&user_calibration,sizeof(user_calibration));
+        if(save)
+            flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION,(uint8_t*)&user_calibration,sizeof(user_calibration));
         uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:
         memcpy(((uint8_t*)&user_config)+(addr&0xff),(uint8_t*)buf,size);
+        if(save)
+            flash_res=custom_conf_write();
         uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
         break;
     default:
@@ -317,5 +333,7 @@ void conf_flush(){
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
     gpio_tb_init();
+    gpio_init();
+    hd_rumble_lookup_tb_init();
     //uart_update_config();
 }

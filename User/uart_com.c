@@ -19,6 +19,7 @@
 #include "spi.h"
 #include "conf.h"
 #include "pwr.h"
+#include "imu.h"
 static uart_packet pkt;
 static uint32_t input_update_tick;
 void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size)
@@ -58,6 +59,11 @@ void uart_update_config()
         send_uart_pkt(&pkt);
     }*/
 }
+static uint8_t imu_report_buffer_ptr_reset_flag;
+void imu_buffer_reset_notifier()
+{
+    imu_report_buffer_ptr_reset_flag=1;
+}
 void send_input_with_uart(void)
 {
     memset(&pkt,0,UART_PKG_SIZE);
@@ -73,6 +79,11 @@ void send_input_with_uart(void)
     send_uart_pkt(&pkt);*/
     memcpy(pkt.load,&global_input_data,9);
     send_uart_pkt(&pkt);
+    //if(connection_state.esp32_connected&&!connection_state.usb_paired&&!connection_state.esp32_sleep)
+    if(imu_mode&&imu_report_buffer_ptr_reset_flag){
+        send_uart_large_pkt(imu_report_buffer_ptr,sizeof(imu_report_pack),UART_PKG_IMU_REPORT_DATA);
+        imu_report_buffer_ptr_reset_flag=0;
+    }
 }
 void start_connect(){
     static uint32_t tick;
@@ -167,7 +178,7 @@ void recv_flash_operation(){
     if(pkt.typ!=UART_PKG_CH32_FLASH_READ&&pkt.typ!=UART_PKG_CH32_FLASH_WRITE)return;
     if(pkt.typ==UART_PKG_CH32_FLASH_READ){
         //pkt.typ=UART_PKG_CH32_FLASH_READ;
-        switch(pkt.id){
+        switch(pkt.id_short){
             case 0xF://user config
                 conf_read(0xF000|(pkt.load[0]), pkt.load+1, 8);
                 break;
@@ -182,15 +193,15 @@ void recv_flash_operation(){
         }
     }else{//write
         //pkt.typ=UART_PKG_CH32_FLASH_WRITE;
-        switch(pkt.id){
+        switch(pkt.id_short){
             case 0xF://user config
-                conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_config)-pkt.load[0]));
+                conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_config)-pkt.load[0]),pkt.flag);
                 break;
             case 0x6:
-                conf_write(0x6000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(factory_configuration)-pkt.load[0]));
+                conf_write(0x6000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(factory_configuration)-pkt.load[0]),pkt.flag);
                 break;
             case 0x8:
-                conf_write(0x8000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_calibration)-pkt.load[0]));
+                conf_write(0x8000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_calibration)-pkt.load[0]),pkt.flag);
                 break;
             default:
                 break;

@@ -355,30 +355,33 @@ void TIM3_IRQHandler(void)
                 }
             }
             switch_upd=0;
-            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_MID*((ccr_lookup_tb[left_high_pos]*left_high.amp)+
-                    (ccr_lookup_tb[left_low_pos]*left_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
-            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_MID*((ccr_lookup_tb[right_high_pos]*right_high.amp)+
-                    (ccr_lookup_tb[right_low_pos]*right_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
+            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_MID*(((ccr_lookup_tb[left_high_pos]*left_high.amp)+
+                    (ccr_lookup_tb[left_low_pos]*left_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+                            +HD_RUMBLE_TIM_PERIOD_MID;
+            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_MID*(((ccr_lookup_tb[right_high_pos]*right_high.amp)+
+                    (ccr_lookup_tb[right_low_pos]*right_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+                            +HD_RUMBLE_TIM_PERIOD_MID;
         }
         else {
             step_forward(&left_high_pos,&left_high_sum,left_high.step);
             step_forward(&left_low_pos,&left_low_sum,left_low.step);
             step_forward(&right_high_pos,&right_high_sum,right_high.step);
             step_forward(&right_low_pos,&right_low_sum,right_low.step);
-            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_RANGE*((ccr_lookup_tb[left_high_pos]*left_high.amp)+
-                    (ccr_lookup_tb[left_low_pos]*left_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
-            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_RANGE*
-                    (((ccr_lookup_tb[right_high_pos])*right_high.amp)+
-                    ((ccr_lookup_tb[right_low_pos])*right_low.amp)))>>20)+HD_RUMBLE_TIM_PERIOD_MID;
+            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[left_high_pos]*left_high.amp)+
+                    (ccr_lookup_tb[left_low_pos]*left_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+                            +HD_RUMBLE_TIM_PERIOD_MID;
+            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[right_high_pos]*right_high.amp)+
+                    (ccr_lookup_tb[right_low_pos]*right_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+                            +HD_RUMBLE_TIM_PERIOD_MID;
             if(left_high_buf_rdy&&left_low_buf_rdy){
                     left_high_buf_rdy=left_low_buf_rdy=0;
                     left_low=left_low_buf;
                     left_high=left_high_buf;
                     left_high_buf_stdby=left_low_buf_stdby=1;
                     left_high_tick=left_low_tick=tim3_counter;
-                    if(!left_high.amp)
+                    if(!left_high.amp||!left_high.step)
                         left_high.step=left_high_pos=left_high_sum=0;
-                    if(!left_low.amp)
+                    if(!left_low.amp||!left_low.step)
                         left_low.step=left_low_pos=left_low_sum=0;
             }
             if(right_high_buf_rdy&&right_low_buf_rdy){
@@ -387,9 +390,9 @@ void TIM3_IRQHandler(void)
                     right_high=right_high_buf;
                     right_high_buf_stdby=right_low_buf_stdby=1;
                     right_high_tick=right_low_tick=tim3_counter;
-                    if(!right_high.amp)
+                    if(!right_high.amp||!right_high.step)
                         right_high.step=right_high_pos=right_high_sum=0;
-                    if(!right_low.amp)
+                    if(!right_low.amp||!right_low.step)
                         right_low.step=right_low_pos=right_low_sum=0;
             }
             /*if(left_high_buf_rdy){
@@ -413,6 +416,7 @@ void TIM3_IRQHandler(void)
                 right_low_buf_stdby=1;
             }*/
         }
+        //CHLCVR=200;
         CHLCVR=i32_clamp(tim3_irq_tmp_l,0,HD_RUMBLE_TIM_PERIOD);
         CHRCVR=i32_clamp(tim3_irq_tmp_r,0,HD_RUMBLE_TIM_PERIOD);
         /*CHLCVR=i32_clamp(tim3_irq_tmp_l,0,HD_RUMBLE_TIM_PERIOD);

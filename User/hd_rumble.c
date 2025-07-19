@@ -57,7 +57,7 @@ void hd_rumble_init(uint8_t force_disable){
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = 0;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-    TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+    //TIM_OC1Init(TIM3, &TIM_OCInitStructure);
     TIM_OC3Init(TIM3, &TIM_OCInitStructure);
 /*#if (PCB_TYPE==PCB_TYPE_1_0)
     TIM_OC2Init(TIM3, &TIM_OCInitStructure);
@@ -66,8 +66,8 @@ void hd_rumble_init(uint8_t force_disable){
 //#endif
 
     TIM_CtrlPWMOutputs(TIM3, ENABLE);
-    TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
-    TIM_OC2PreloadConfig(TIM3,TIM_OCPreload_Enable);
+    //TIM_OC1PreloadConfig(TIM3,TIM_OCPreload_Enable);
+    //TIM_OC2PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC4PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_ARRPreloadConfig(TIM3, DISABLE);
@@ -85,7 +85,7 @@ void hd_rumble_init(uint8_t force_disable){
     NVIC_InitTypeDef NVIC_InitStructure; //定义NVIC初始化结构体
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn; //设置NVIC通道为定时器2中断
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; //设置NVIC通道抢占优先级为0
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 6; //设置NVIC通道子优先级为0
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 7; //设置NVIC通道子优先级为0
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //使能NVIC通道
     NVIC_Init(&NVIC_InitStructure); //初始化NVIC
     NVIC_SetFastIRQ(TIM3_IRQHandler,TIM3_IRQn,2);

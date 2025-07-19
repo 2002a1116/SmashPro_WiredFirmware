@@ -49,7 +49,7 @@ void i2c_enable_error_interupt(){
     I2C2->CTLR2|=0x100;//ITERREN
     NVIC_InitStructure.NVIC_IRQChannel = I2C1_ER_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 7;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 6;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init( &NVIC_InitStructure );
 }

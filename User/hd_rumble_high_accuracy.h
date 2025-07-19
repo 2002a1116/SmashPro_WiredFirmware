@@ -23,8 +23,10 @@ void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void hd_rumble_high_accurary_init();
 void push_waveform_into_buffer_task();
 void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr);
-#define HD_RUMBLE_HIGH_ACC_RINGBUFFER_CAP (64)
+#define HD_RUMBLE_HIGH_ACC_RINGBUFFER_CAP (32)
 #define HD_RUMBLE_HIGH_ACC_PACK_SIZE (sizeof(hd_rumble_high_accurary_pack))
+#define HD_RUMBLE_AMP_SHIFT_1 (10)
+#define HD_RUMBLE_AMP_SHIFT_2 (17)
 /*#if (PCB_TYPE==PCB_TYPE_1_0)
 #define CHLCVR (TIM3->CH1CVR)
 #define CHRCVR (TIM3->CH2CVR)

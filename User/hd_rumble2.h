@@ -117,8 +117,8 @@ typedef struct _hd_rumble_pack
 
 #define EXP2_FACTOR (16384) //2^14 aka 1<<14
 #define EXP2_FACTOR_SHIFT (14)
-#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (11)
-//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (10)
+//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (11)
+#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (4)
 
 extern int32_t hliner,ftmp;
 

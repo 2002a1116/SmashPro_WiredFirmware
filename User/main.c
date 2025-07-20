@@ -251,14 +251,6 @@ void top_timer(void){
         top_tick=0;
     }
 }
-void ls_test()
-{
-    uint8_t res=!gpio_read(NS_BUTTON_LS);
-    if(res)
-    {
-        //printf("ls down\r\n");
-    }
-}
 void routine_service(void){
     ////printf("routine service tick:%d %d %d\r\n",Get_Systick_MS(),SysTick->CNTL,SysTick->CMPLR);
     ++rts_cnt;
@@ -269,7 +261,7 @@ void routine_service(void){
         routine_tick=Get_Systick_MS();
     }
     top_timer();
-    //push_waveform_into_buffer_task();
+    push_waveform_into_buffer_task();
     imu_upd();
     func_switch_task();
 }
@@ -365,7 +357,6 @@ int main(void)
         else{
             connection_state.usb_enumed=connection_state.usb_paired=0;
         }
-        push_waveform_into_buffer_task();
 #ifdef COMPILE_WL
         uart_com_task();
         UART1_Tx_Service();

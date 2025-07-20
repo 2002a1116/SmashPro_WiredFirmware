@@ -67,7 +67,7 @@ uint16_t freq_exp2_index_lookup_tb[]={192,
         283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,
         298,299,300,301,302,303,304,305,306,307,308,309,310,311,312,
         313,314,315,316,317,318,319};
-struct Switch5BitCommand CommandTable[] = {
+struct Switch5BitCommand CommandTable[] = {//offset*=32
         { .am_action = Switch5BitAction_Default,    .fm_action = Switch5BitAction_Default,    .am_offset =  0,     .fm_offset =  0 },
         { .am_action = Switch5BitAction_Substitute, .fm_action = Switch5BitAction_Ignore,     .am_offset =  0,     .fm_offset =  0 },
         { .am_action = Switch5BitAction_Substitute, .fm_action = Switch5BitAction_Ignore,     .am_offset = -16,    .fm_offset =  0 },
@@ -103,7 +103,7 @@ struct Switch5BitCommand CommandTable[] = {
 };//thk to mission control guys
 uint8_t decoded_cnt=0;
 uint8_t global_sample_channel;
-int32_t hliner=320;
+//int32_t hliner=320;
 typedef struct _rumble_data_linear{
     int16_t lo_amp_linear;
     int16_t lo_freq_linear;
@@ -116,15 +116,17 @@ int16_t ApplyCommand(uint8_t action, int16_t offset, int16_t current_val, int16_
     switch (action) {
         case Switch5BitAction_Ignore:     return current_val;
         case Switch5BitAction_Substitute: //return offset;
-            current_val = offset;
+            /*/current_val = offset;
             if(current_val<min)current_val=min;
             else if(current_val>max)current_val=max;
-            return current_val;
+            return current_val;*/
+            return (int16_t)i32_clamp(offset, min, max);
         case Switch5BitAction_Sum:
-            current_val += offset;
+            /*current_val += offset;
             if(current_val<min)current_val=min;
             else if(current_val>max)current_val=max;
-            return current_val;
+            return current_val;*/
+            return (int16_t)i32_clamp((int32_t)current_val+offset,min,max);
         default:                          return default_val;
     }
 }
@@ -136,12 +138,13 @@ int16_t ApplyAmCommand(u8 amfm_code, int16_t current_val) {
 int16_t ApplyFmCommand(u8 amfm_code, int16_t current_val) {
     return ApplyCommand(CommandTable[amfm_code].fm_action, CommandTable[amfm_code].fm_offset, current_val, DefaultFrequency, MinFrequency, MaxFrequency);
 }
-int32_t ftmp=1e9;
 void get_hd_rumble_pack(uint8_t id)
 {
     linear_samples[id]=m_state;
     //if(!pkg)return;
-    /*hd_rumble_pack* pkg=&rumble_samples[global_sample_channel][id];
+    /*
+    static int32_t ftmp=1e9;
+    hd_rumble_pack* pkg=&rumble_samples[global_sample_channel][id];
     pkg->high_amp=exp2_lookup_tb[m_state.hi_amp_linear];
     pkg->low_amp=exp2_lookup_tb[m_state.lo_amp_linear];
     pkg->high_freq=exp2_lookup_tb[m_state.hi_freq_linear] * CenterFreqHigh;
@@ -172,8 +175,8 @@ void decode_hd_rumble_format1long(VibrationAmFmPackFormatOne28bit* pkg)
     m_state.hi_amp_linear  = Am7BitLookup[pkg->ChannelAmplitudeHigh];
     m_state.hi_freq_linear = Fm7BitLookup[pkg->ChannelFrequencyHigh];*/
     m_state.lo_amp_linear  = amp_exp2_index_lookup_tb[pkg->ChannelAmplitudeLow];
-    if(m_state.lo_amp_linear)
-        hliner=pkg->ChannelAmplitudeLow;
+    //if(m_state.lo_amp_linear)
+    //    hliner=pkg->ChannelAmplitudeLow;
     m_state.lo_freq_linear = freq_exp2_index_lookup_tb[pkg->ChannelFrequencyLow];
     m_state.hi_amp_linear  = amp_exp2_index_lookup_tb[pkg->ChannelAmplitudeHigh];
     m_state.hi_freq_linear = freq_exp2_index_lookup_tb[pkg->ChannelFrequencyHigh];
@@ -349,6 +352,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
     }
     ptr=linear_samples;
     decoded_cnt=i32_clamp(decoded_cnt, 0, 3);
+    //decoded_cnt=i32_clamp(decoded_cnt, 0, 1);
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
         sample.amp=(exp2_lookup_tb[ptr->hi_amp_linear]*user_config.hd_rumble_amp_ratio[0])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
@@ -358,6 +362,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
         push_waveform(0,&sample);
         //ring_buffer_push(&left_high_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         sample.amp=(exp2_lookup_tb[ptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[2])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
+        sample.amp=(-sample.amp)*user_config.hd_rumble_mixer_ratio>>HD_RUMBLE_MIXER_SHIFT;
         sample.step=(exp2_lookup_tb[ptr->lo_freq_linear]?(FULLSTEP/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow)):0);
         //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
         push_waveform(2,&sample);
@@ -396,6 +401,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
         break;
     }
     decoded_cnt=i32_clamp(decoded_cnt, 0, 3);
+    //decoded_cnt=i32_clamp(decoded_cnt, 0, 1);
     ptr=linear_samples;
     for(int i=0;i<decoded_cnt;++i,++ptr)
     {
@@ -405,6 +411,7 @@ void decode_hd_rumble_multiformat_high_acc(hd_rumble_multiformat* pkt,hd_rumble_
         push_waveform(1,&sample);
         //ring_buffer_push(&right_high_rb, (uint8_t*)&sample, HD_RUMBLE_HIGH_ACC_PACK_SIZE, 0);
         sample.amp=(exp2_lookup_tb[ptr->lo_amp_linear]*user_config.hd_rumble_amp_ratio[3])>>HD_RUMBLE_HIGH_ACC_AMP_SHIFT;
+        sample.amp=(-sample.amp)*user_config.hd_rumble_mixer_ratio>>HD_RUMBLE_MIXER_SHIFT;
         sample.step=(exp2_lookup_tb[ptr->lo_freq_linear]?(FULLSTEP/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow)):0);
         //sample.tick=1LL*(HD_RUMBLE_CLK<<EXP2_FACTOR_SHIFT)/(exp2_lookup_tb[ptr->lo_freq_linear]*CenterFreqLow);
         push_waveform(3,&sample);

@@ -244,7 +244,9 @@ typedef struct _user_config_data{
     union{
         uint8_t config_bitmap2;
         struct{
-            uint8_t pcb_typ:2;//main board led typ
+            //uint8_t pcb_typ:2;//main board led typ
+            uint8_t led_typ:1;//main board led typ
+            uint8_t pcb_typ:1;//vcc(0) for rumble or raw_in for rumble
             uint8_t input_typ:1;//0:raw 1:scan
             uint8_t rgb_typ:1;//key board typ,
             uint8_t rumble_low_amp_rise:1;
@@ -252,7 +254,9 @@ typedef struct _user_config_data{
             uint8_t dead_zone_mode:2;
         };
     };
-    uint8_t config_bitmap_reserved34[2];
+    //uint8_t config_bitmap_reserved34[2];
+    uint8_t config_bitmap_reserved3;
+    int8_t hd_rumble_mixer_ratio;// div 128
     uint8_t in_interval;
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
@@ -276,7 +280,9 @@ typedef struct _user_config_data{
     union{
         uint8_t config_bitmap5;
         struct{
-            uint8_t reserved5:8;
+            //uint8_t reserved5:8;
+            uint8_t clk_force_hsi:1;
+            uint8_t reserved5:7;
         };
     };
     uint8_t rgb_cnt;

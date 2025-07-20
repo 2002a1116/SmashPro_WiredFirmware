@@ -49,6 +49,12 @@ void SPI_FullDuplex_Init(void)
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
     //GPIO_PinRemapConfig(AFIO_PCFR1_USART1_REMAP, ENABLE);
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_ResetBits(GPIOA, GPIO_Pin_7);
+    Delay_Ms(25);//hope this will fix indicate led 1 light up as green.
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -131,7 +137,7 @@ void flush_spi_tx_seq(uint8_t status)
             set_led_rgb(i, 0, 0, 0);
         else{
             set_led_rgb(i, user_config.rgb_data[j].r, user_config.rgb_data[j].g, user_config.rgb_data[j].b);
-            switch(user_config.pcb_typ){
+            switch(user_config.led_typ){
             case CONF_PCB_TYPE_SMALL:
                 j+=(i>3);//skip 0~3;
                 break;
@@ -145,7 +151,7 @@ void flush_spi_tx_seq(uint8_t status)
         }
     }
     uint8_t ofst=0;
-    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)
+    if(user_config.led_typ==CONF_PCB_TYPE_LARGE)
         ofst=4;
     set_led_rgb(ofst+0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
     set_led_rgb(ofst+1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
@@ -164,7 +170,7 @@ void flush_spi_tx_seq(uint8_t status)
     if(rumble_rb_overflow)
         set_led_rgb(ofst+2,INDICATE_LED_BRIGHTNESS,0,0);
 
-    if(user_config.pcb_typ==CONF_PCB_TYPE_LARGE)
+    if(user_config.led_typ==CONF_PCB_TYPE_LARGE)
         ofst=12;
     else
         ofst=4;

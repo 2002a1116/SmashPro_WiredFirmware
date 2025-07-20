@@ -13,6 +13,7 @@
 #include "imu.h"
 #include "gpio_digit.h"
 #include "hd_rumble2.h"
+#include "hd_rumble_high_accuracy.h"
 #include <string.h>
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
@@ -123,6 +124,7 @@ void conf_init()
             user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
             user_config.dead_zone[i]=64;
         }
+        user_config.hd_rumble_mixer_ratio=64;//total amp = hi_amp + (-1/2)lo_amp
         user_config.joystick_snapback_deadzone[0]=1400;
         user_config.joystick_snapback_deadzone[1]=1400;
         user_config.dead_zone_mode=3;
@@ -138,7 +140,7 @@ void conf_init()
         user_config.joystick_snapback_filter_max_delay=13500;
         user_config.rumble_pattern=0;
         user_config.legacy_rumble=0;
-        user_config.pcb_typ=CONF_PCB_TYPE_SMALL;
+        user_config.led_typ=CONF_PCB_TYPE_SMALL;
         user_config.input_typ=0;
         user_config.imu_disabled=1;//we disabled this in default as many people dont need this
         custom_conf_write();
@@ -326,6 +328,11 @@ uint8_t fac_conf_write(){
     return write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 void conf_flush(){
+    if(user_config.clk_force_hsi){
+//todo: force switch to hsi
+    }else{
+
+    }
     flush_rgb(ENABLE);
     imu_ratio_xf=user_config.imu_ratio_x/127.0f;
     imu_ratio_yf=user_config.imu_ratio_y/127.0f;
@@ -335,5 +342,12 @@ void conf_flush(){
     gpio_tb_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
+    if(user_config.pcb_typ==0){
+        hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+HD_RUMBLE_OLD_PCB_MAX_CVR_OFFSET;
+        hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-HD_RUMBLE_OLD_PCB_MAX_CVR_OFFSET;
+    }else{
+        hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+HD_RUMBLE_NEW_PCB_MAX_CVR_OFFSET;
+        hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-HD_RUMBLE_NEW_PCB_MAX_CVR_OFFSET;
+    }
     //uart_update_config();
 }

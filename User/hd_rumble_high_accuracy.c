@@ -256,6 +256,8 @@ static uint8_t switch_flag=0xf;
 static uint8_t switch_upd;
 #define SET_RUMBLEFLAG_BIT(v,x) ((v)|=(1<<(x)))
 #define GET_RUMBLEFLAG_BIT(v,x) ((v)&(1<<(x)))
+uint16_t hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD;
+uint16_t hd_rumble_cvr_min=0;
 //NOTICE:result of GET_SWITCH_FLAG is !! NOT !! a boolean,not do math with it without converting.
 void TIM3_IRQHandler(void)
 {
@@ -320,7 +322,6 @@ void TIM3_IRQHandler(void)
                 }
             }
             //if oppo_switch=1 || not enough for more ,then end
-            if(user_config.legacy_rumble){
                 //if(switch_upd[0]){
                 if(GET_RUMBLEFLAG_BIT(switch_upd,0)){
                     left_high_buf_rdy=0;
@@ -353,13 +354,12 @@ void TIM3_IRQHandler(void)
                     right_low_buf_stdby=1;
                     right_low_tick=tim3_counter;
                 }
-            }
             switch_upd=0;
-            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_MID*(((ccr_lookup_tb[left_high_pos]*left_high.amp)+
-                    (ccr_lookup_tb[left_low_pos]*left_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[left_high_pos]*left_high.amp)+
+                    (ccr_lookup_tb[left_low_pos]*left_low.amp))>>(HD_RUMBLE_AMP_SHIFT_1)))>>HD_RUMBLE_AMP_SHIFT_2)
                             +HD_RUMBLE_TIM_PERIOD_MID;
-            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_MID*(((ccr_lookup_tb[right_high_pos]*right_high.amp)+
-                    (ccr_lookup_tb[right_low_pos]*right_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[right_high_pos]*right_high.amp)+
+                    (ccr_lookup_tb[right_low_pos]*right_low.amp))>>(HD_RUMBLE_AMP_SHIFT_1)))>>HD_RUMBLE_AMP_SHIFT_2)
                             +HD_RUMBLE_TIM_PERIOD_MID;
         }
         else {
@@ -367,11 +367,11 @@ void TIM3_IRQHandler(void)
             step_forward(&left_low_pos,&left_low_sum,left_low.step);
             step_forward(&right_high_pos,&right_high_sum,right_high.step);
             step_forward(&right_low_pos,&right_low_sum,right_low.step);
-            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[left_high_pos]*left_high.amp)+
-                    (ccr_lookup_tb[left_low_pos]*left_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+            tim3_irq_tmp_l=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[left_high_pos]*(left_high.amp))+
+                    (ccr_lookup_tb[left_low_pos]*(left_low.amp)))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
                             +HD_RUMBLE_TIM_PERIOD_MID;
-            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[right_high_pos]*right_high.amp)+
-                    (ccr_lookup_tb[right_low_pos]*right_low.amp))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
+            tim3_irq_tmp_r=((HD_RUMBLE_TIM_PERIOD_RANGE*(((ccr_lookup_tb[right_high_pos]*(right_high.amp))+
+                    (ccr_lookup_tb[right_low_pos]*(right_low.amp)))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
                             +HD_RUMBLE_TIM_PERIOD_MID;
             if(left_high_buf_rdy&&left_low_buf_rdy){
                     left_high_buf_rdy=left_low_buf_rdy=0;
@@ -417,10 +417,8 @@ void TIM3_IRQHandler(void)
             }*/
         }
         //CHLCVR=200;
-        CHLCVR=i32_clamp(tim3_irq_tmp_l,0,HD_RUMBLE_TIM_PERIOD);
-        CHRCVR=i32_clamp(tim3_irq_tmp_r,0,HD_RUMBLE_TIM_PERIOD);
-        /*CHLCVR=i32_clamp(tim3_irq_tmp_l,0,HD_RUMBLE_TIM_PERIOD);
-        CHRCVR=i32_clamp(tim3_irq_tmp_r,0,HD_RUMBLE_TIM_PERIOD);*/
+        CHLCVR=i32_clamp(tim3_irq_tmp_l,hd_rumble_cvr_min,hd_rumble_cvr_max);
+        CHRCVR=i32_clamp(tim3_irq_tmp_r,hd_rumble_cvr_min,hd_rumble_cvr_max);
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
     }
 }

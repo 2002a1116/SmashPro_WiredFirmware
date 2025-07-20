@@ -105,13 +105,14 @@ typedef struct _hd_rumble_pack
     uint32_t low_freq;
 }hd_rumble_pack;
 #define MinAmplitude      (0)
-#define MaxAmplitude       (256)
+#define MaxAmplitude       (284)
 #define DefaultAmplitude   (MinAmplitude)
 #define MinFrequency      (192)
 #define MaxFrequency       (320)
 #define DefaultFrequency   (256)
 #define CenterFreqHigh  (320)
 #define CenterFreqLow   (160)
+#define HD_RUMBLE_MIXER_SHIFT (7)
 #define SAMPLE_CHANNEL_L (0)
 #define SAMPLE_CHANNEL_R (1)
 
@@ -120,7 +121,7 @@ typedef struct _hd_rumble_pack
 //#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (11)
 #define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (4)
 
-extern int32_t hliner,ftmp;
+//extern int32_t hliner,ftmp;
 
 int16_t ApplyCommand(uint8_t action, int16_t offset, int16_t current_val, int16_t default_val, int16_t min, int16_t max);
 int16_t ApplyAmCommand(u8 amfm_code, int16_t current_val);

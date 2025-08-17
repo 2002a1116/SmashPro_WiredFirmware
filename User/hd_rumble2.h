@@ -118,8 +118,14 @@ typedef struct _hd_rumble_pack
 
 #define EXP2_FACTOR (16384) //2^14 aka 1<<14
 #define EXP2_FACTOR_SHIFT (14)
-//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (11)
-#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT (4)
+//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT_LOW (11)
+#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT_LOW (4)
+#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT_HIGH (4)
+//#define HD_RUMBLE_HIGH_ACC_AMP_SHIFT_HIGH (HD_RUMBLE_HIGH_ACC_AMP_SHIFT_LOW+1)
+//total amp=la + 0.5ha
+//known by playing a known bnvib file(from gbatemp.net) with stock controller and checking with an oscilloscope(analyzed by fft).
+//may be inaccurate,but i dont care.i think this is good enough.
+//hd_rumble_mixer_ratio is removed.
 
 //extern int32_t hliner,ftmp;
 

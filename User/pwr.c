@@ -7,6 +7,7 @@
 #include "pwr.h"
 #include "debug.h"
 #include "gpio_digit.h"
+#include "conf.h"
 /*uint32_t light_sleep_exti_gpio[]={GPIO_BUTTON_LS,GPIO_BUTTON_RS,GPIO_BUTTON_X,GPIO_BUTTON_Y,GPIO_BUTTON_A,
         GPIO_BUTTON_B,GPIO_BUTTON_UP,GPIO_BUTTON_DOWN,GPIO_BUTTON_LEFT,GPIO_BUTTON_RIGHT,GPIO_BUTTON_L,GPIO_BUTTON_R,
         GPIO_BUTTON_ZL,GPIO_BUTTON_ZR,GPIO_BUTTON_MINUS,GPIO_BUTTON_PLUS,GPIO_BUTTON_HOME,GPIO_BUTTON_CAP,
@@ -26,12 +27,14 @@ void setup_exti(uint8_t state){
     NVIC_InitTypeDef NVIC_InitStructure = {0};
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
     /* GPIOB.1 ----> EXTI_Line1 *///HOME
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource1);
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource15);
     EXTI_InitStructure.EXTI_Line = EXTI_Line1;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = state;
     EXTI_Init(&EXTI_InitStructure);
 
@@ -39,7 +42,7 @@ void setup_exti(uint8_t state){
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource15);
     EXTI_InitStructure.EXTI_Line = EXTI_Line15;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = state;
     EXTI_Init(&EXTI_InitStructure);
 
@@ -47,7 +50,7 @@ void setup_exti(uint8_t state){
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource6);
     EXTI_InitStructure.EXTI_Line = EXTI_Line6;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = state;
     EXTI_Init(&EXTI_InitStructure);
 
@@ -55,7 +58,7 @@ void setup_exti(uint8_t state){
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource7);
     EXTI_InitStructure.EXTI_Line = EXTI_Line7;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = state;
     EXTI_Init(&EXTI_InitStructure);
 
@@ -63,7 +66,7 @@ void setup_exti(uint8_t state){
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource14);
     EXTI_InitStructure.EXTI_Line = EXTI_Line14;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising_Falling;
     EXTI_InitStructure.EXTI_LineCmd = state;
     EXTI_Init(&EXTI_InitStructure);
 }
@@ -83,46 +86,27 @@ void set_pwr_mode_sleep(void){
 uint32_t* PFIC_SCTLR=(uint32_t*)0xD10;
 uint32_t* PWR_CSR=(uint32_t*)0x004;
 uint8_t set_pwr_mode_stop(void){
+    //user_config.led_disabled=1;
+    flush_rgb(DISABLE);
+    Delay_Ms(10);
+    printf("sleep\r\n");
+    set_peripherals_state(DISABLE);
+    set_imu_sleep();
     setup_exti(ENABLE);
     RCC_LSICmd(ENABLE);
-    flush_rgb(DISABLE);
-    Delay_Us(100);
     if(!RCC_GetFlagStatus(RCC_FLAG_LSIRDY))
         return 1;
     {
         //printf("PUT TO SLEEP\r\n");
-        Delay_Ms(1);
-        //set_pwr_mode_sleep();
-        PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFE);
+        //Delay_Ms(1);
+        set_pwr_mode_sleep();
+        //PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFE);
         //init_all();
-        Delay_Ms(1);
+        //Delay_Ms(1);
     }
     //Delay_Ms(100);
     //todo:wake esp32
     setup_exti(DISABLE);
-    //Delay_Init();
-    //USART_//printf_Init(115200);
-    //wake esp32 through top button.
-    //this is some clumsy fk but at least better than use the backup plan(wkup pin) as its also used as right joystick button.
-    //fk espressif for write uart2 cant wake esp32 not in the sleep mode document
-    //but in the fking api description for esp_sleep_enable_uart_wakeup()
-    //and cant wake through uart0/1 unless signal came straight out io mux and bypass gpio matrix
-    //so actually we cant really wakeup esp32 through uart as uart1 stock pin is used by modules for psram
-    //and uart0 is used for debug and firmware flash,
-    //if we connect it with ch32,ch32 may be interfered during flash as they are put to download in the same time by top button
-    //esp32 will print some hints when download,i dont want to risk messing up ch32 flashing as it handles all the core functions.
-    //fk espressif again as they could have put all these rather critical things in the beginning;
-    //fk fk fk.i just dont want to read 1000 pages of chip datasheet before i start all the job,otherwise i just dont want to start at all.
-
-    //i dont konw.i just dont have enough gpio.should i use keyboard scan like stock or progcc(i dont want to do that)
-    //or shall i just switch to a 64pin package to have more gpio and redesign the pcb?
-    //and should i switch to ch32v203 with 144mhz and better core architecture for better performance?
-
-    //cant be bothered by now,this will do,and i all stick with it for now.
-    //Delay_Us(1000);
-    //NVIC_SystemReset();
-    //connection_state.esp32_bt_status=0;
-    //connection_state.esp32_connected=0;
     return 0;
 }
 /*

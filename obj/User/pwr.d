@@ -27,7 +27,8 @@ User/pwr.o: ../User/pwr.c ../User/pwr.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_usb.h \
  D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h \
  D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h \
- ../User/gpio_digit.h ../User/board_type.h
+ ../User/gpio_digit.h ../User/board_type.h ../User/conf.h \
+ ../User/ns_com_mux.h ../User/ns_com.h ../User/ring_buffer.h
 ../User/pwr.h:
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
@@ -59,3 +60,7 @@ D:\WCH\CH32V103C8T6_USB\User/ch32v10x_it.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/gpio_digit.h:
 ../User/board_type.h:
+../User/conf.h:
+../User/ns_com_mux.h:
+../User/ns_com.h:
+../User/ring_buffer.h:

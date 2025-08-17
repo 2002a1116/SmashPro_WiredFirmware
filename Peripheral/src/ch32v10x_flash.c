@@ -812,6 +812,7 @@ FLASH_Status FLASH_WaitForLastOperation(uint32_t Timeout)
     {
         status = FLASH_TIMEOUT;
     }
+    //FLASH->STATR&=~FLASH_FLAG_BANK1_EOP;
     return status;
 }
 

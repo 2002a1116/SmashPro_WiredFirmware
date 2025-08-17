@@ -19,15 +19,49 @@
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
 user_config_data user_config;
+smashpro_factory_config_data smashpro_factory_config;
 //#pragma pack(pop)
-//we need these structure 4-byte align as flash api requiring an u32*
 uint32_t joystick_snapback_deadzone_sq[2];
 //static factory_configuration_flash_pack* fac;
 #define JOYSTICK_RANGE_FACTOR_LEFT (0.6f)
 #define JOYSTICK_RANGE_FACTOR_RIGHT (0.6f)
+void set_hd_rumble_range(){
+    switch(smashpro_factory_config.pcb_rev){
+        case PCB_REV_200:
+            hd_rumble_cvr_range=650;
+            hd_rumble_cvr_max_offset=720;
+            break;
+        case PCB_REV_213:
+            hd_rumble_cvr_range=540;
+            hd_rumble_cvr_max_offset=720;
+            break;
+        //case PCB_REV_213_HIGH_VOLTAGE:
+            //disused,use a 270k gain resistor instead
+            /*fall through*/
+        default://smallest the safest
+            hd_rumble_cvr_range=500;
+            hd_rumble_cvr_max_offset=680;
+            break;
+    }
+    hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+hd_rumble_cvr_max_offset;
+    hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-hd_rumble_cvr_max_offset;
+}
 void conf_init()
 {
     memset(&factory_configuration,-1,sizeof(factory_configuration));
+    memset(&smashpro_factory_config,-1,sizeof(smashpro_factory_config));
+    read_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,sizeof(smashpro_factory_config));
+    if(smashpro_factory_config.nonexist)
+    {
+        memset(&smashpro_factory_config,0,sizeof(smashpro_factory_config));
+        /*smashpro_factory_config.rev_high=2;//2.00.0
+        smashpro_factory_config.rev_low=13;
+        smashpro_factory_config.rev_suffix=0;*/
+        smashpro_factory_config.pcb_rev=PCB_REV_213;
+        smashpro_factory_config.rgb_cnt=31;
+        uint8_t res = write_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,
+                sizeof(smashpro_factory_config));
+    }
     //fac=get_raw_flash_buf();
     fac_conf_read();
     if(factory_configuration.nonexist){
@@ -120,17 +154,18 @@ void conf_init()
         user_config.in_interval=8;
         user_config.out_interval=8;
         for(int i=0;i<4;++i){
-            user_config.joystick_ratio[i]=(i<2?45:45);
-            user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
+            user_config.joystick_ratio[i]=(i<2?32:32);
+            user_config.hd_rumble_amp_ratio[i]=128;
+            //user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
             user_config.dead_zone[i]=64;
         }
-        user_config.hd_rumble_mixer_ratio=64;//total amp = hi_amp + (-1/2)lo_amp
+        //user_config.hd_rumble_mixer_ratio=64;//total amp = hi_amp + (-1/2)lo_amp
         user_config.joystick_snapback_deadzone[0]=1400;
         user_config.joystick_snapback_deadzone[1]=1400;
         user_config.dead_zone_mode=3;
-        user_config.rgb_cnt=31;
+        //user_config.rgb_cnt=31;
         user_config.imu_sample_gap=1750;
-        for(int i=0;i<user_config.rgb_cnt;++i){
+        for(int i=0;i<smashpro_factory_config.rgb_cnt;++i){
             user_config.rgb_data[i].load=0xffffff;
         }
         user_config.imu_ratio_x=127;
@@ -140,8 +175,8 @@ void conf_init()
         user_config.joystick_snapback_filter_max_delay=13500;
         user_config.rumble_pattern=0;
         user_config.legacy_rumble=0;
-        user_config.led_typ=CONF_PCB_TYPE_SMALL;
-        user_config.input_typ=0;
+        //user_config.led_typ=CONF_PCB_TYPE_SMALL;
+        //user_config.input_typ=0;
         user_config.imu_disabled=1;//we disabled this in default as many people dont need this
         custom_conf_write();
     }
@@ -163,6 +198,10 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
         break;
     case 0xF000://user config
         memcpy(buf,((uint8_t*)&user_config)+(addr&0xff),size);
+        break;
+    case 0x0000://persistent flash hack
+        memcpy(buf,((uint8_t*)&smashpro_factory_config)+(addr&0xff),size);
+        //memcpy(buf,((uint8_t*)FLASH_ADDR_USEROPTION_PERSISTENT_BYTE)+(addr&0xff),size);
         break;
     default:
         break;
@@ -195,6 +234,12 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
             flash_res=custom_conf_write();
         uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
         break;
+    case 0x0000://smash pro factory hack
+        memcpy(((uint8_t*)&smashpro_factory_config)+(addr&0xff),(uint8_t*)buf,size);
+        if(save)
+            flash_res=write_flash(FLASH_ADDR_HARDWARE_INFO, (uint8_t*)buf, size);
+        uart_conf_write(addr, buf, size);
+        hw_config_flush();
     default:
         break;
     }
@@ -328,12 +373,6 @@ uint8_t fac_conf_write(){
     return write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 void conf_flush(){
-    if(user_config.clk_force_hsi){
-//todo: force switch to hsi
-    }else{
-
-    }
-    flush_rgb(ENABLE);
     imu_ratio_xf=user_config.imu_ratio_x/127.0f;
     imu_ratio_yf=user_config.imu_ratio_y/127.0f;
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
@@ -342,12 +381,10 @@ void conf_flush(){
     gpio_tb_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
-    if(user_config.pcb_typ==0){
-        hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+HD_RUMBLE_OLD_PCB_MAX_CVR_OFFSET;
-        hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-HD_RUMBLE_OLD_PCB_MAX_CVR_OFFSET;
-    }else{
-        hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+HD_RUMBLE_NEW_PCB_MAX_CVR_OFFSET;
-        hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-HD_RUMBLE_NEW_PCB_MAX_CVR_OFFSET;
-    }
+    flush_rgb(ENABLE);
     //uart_update_config();
+}
+void hw_config_flush(){
+    set_hd_rumble_range();
+    flush_rgb(ENABLE);
 }

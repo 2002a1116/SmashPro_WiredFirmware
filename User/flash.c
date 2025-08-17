@@ -6,6 +6,8 @@
  */
 
 #include "debug.h"
+#include "ch32v10x_flash.h"
+#include "flash.h"
 
 /* Global define */
 typedef enum

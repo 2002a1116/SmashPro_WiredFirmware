@@ -80,9 +80,10 @@ void send_input_with_uart(void)
     memcpy(pkt.load,&global_input_data,9);
     send_uart_pkt(&pkt);
     //if(connection_state.esp32_connected&&!connection_state.usb_paired&&!connection_state.esp32_sleep)
-    if(imu_mode&&imu_report_buffer_ptr_reset_flag){
+    if((!user_config.imu_disabled)&&imu_report_buffer_ptr_reset_flag){
         send_uart_large_pkt(imu_report_buffer_ptr,sizeof(imu_report_pack),UART_PKG_IMU_REPORT_DATA);
         imu_report_buffer_ptr_reset_flag=0;
+        //printf("send imu data\r\n");
     }
 }
 void start_connect(){
@@ -90,8 +91,11 @@ void start_connect(){
     if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
         return;
     if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
-    connection_state.esp32_connected&&!connection_state.esp32_bt_state&&!connection_state.esp32_sleep||!connection_state.esp32_paired))
+    connection_state.esp32_connected&&(!connection_state.esp32_bt_state)&&
+    ((!connection_state.esp32_sleep)&&(!connection_state.esp32_paired))))
     {
+        tick=Get_Systick_MS();
+        //printf("UART_PKG_CONNECT_CONTROL\r\n");
         pkt.typ=UART_PKG_CONNECT_CONTROL;
         pkt.id=0;
         pkt.load[0]=1;
@@ -101,10 +105,18 @@ void start_connect(){
 void wake_esp32()
 {
     //we wake up with uart
-    pkt.typ=UART_PKG_PWR_CONTROL;
-    pkt.id=1;
-    memset(pkt.load,-1,9);
-    send_uart_pkt(&pkt);
+    /*printf("wake esp32\r\n");
+    for(int i=0;i<5;++i){
+        pkt.typ=UART_PKG_PWR_CONTROL;
+        pkt.id=1;
+        memset(pkt.load,0,9);
+        send_uart_pkt(&pkt);
+    }*/
+    uint32_t t=GPIO_BUTTON_TOP;
+    _gpio_init(&t, 1, GPIO_Mode_Out_OD);
+    gpio_set(GPIO_BUTTON_TOP, 0);
+    Delay_Ms(10);
+    _gpio_init(&t, 1, GPIO_Mode_IPU);
 }
 void recv_esp32_connect_control()
 {
@@ -231,6 +243,10 @@ void recv_esp32_pkg()
     case UART_PKG_CH32_FLASH_WRITE:
         recv_flash_operation();
         break;
+    case UART_PKG_IMU_REPORT_DATA:
+        imu_mode=pkt.load[0];
+        printf("wl set imu mode %d\r\n",imu_mode);
+        break;
     default:
         break;
     }
@@ -238,17 +254,15 @@ void recv_esp32_pkg()
 void connection_state_handler()//decide if we go stop
 {
     start_connect();
+    printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
     if(!connection_state.usb_enumed && connection_state.esp32_sleep)
     {
-        set_peripherals_state(DISABLE);
-        set_imu_sleep();
         uint8_t stop_flag=set_pwr_mode_stop();
         if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
             NVIC_SystemReset();
         //fail safe,try to reset everything
         init_all();
         //set_peripherals_state(ENABLE);
-        wake_esp32();
     }
     else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_MS()-input_update_tick>UART_REPORT_GAP))
     {

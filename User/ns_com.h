@@ -49,7 +49,7 @@ typedef struct{
             uint32_t last_sample_0 : 21;
             /*uint32_t last_sample_1l : 7;
             uint16_t last_sample_1h : 14;*/
-            uint32_t last_sample_1:21;
+            uint32_t last_sample_1 : 21;
             uint16_t last_sample_2l : 2;
         };
         imu_pack gyo0;
@@ -73,7 +73,7 @@ typedef struct{
             uint32_t delta_mid_avg_2 : 7;
             /*uint32_t timestamp_start_l : 1;
             uint16_t timestamp_start_h : 10;*/
-            uint16_t timestamp_start;
+            uint16_t timestamp_start : 11;
             uint16_t timestamp_count : 6;
         };
         imu_pack gyo2;

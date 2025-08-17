@@ -29,7 +29,7 @@ User/spi.o: ../User/spi.c D:\WCH\CH32V103C8T6_USB\Debug/debug.h \
  ../User/ns_com_mux.h ../User/ns_com.h ../User/ring_buffer.h \
  ../User/pwr.h ../User/spi.h ../User/board_type.h \
  ../User/hd_rumble_high_accuracy.h ../User/hd_rumble.h ../User/imu.h \
- ../User/i2c.h
+ ../User/i2c.h ../User/gpio_digit.h
 D:\WCH\CH32V103C8T6_USB\Debug/debug.h:
 D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x.h:
 D:\WCH\CH32V103C8T6_USB\Core/core_riscv.h:
@@ -69,3 +69,4 @@ D:\WCH\CH32V103C8T6_USB\Peripheral\inc/ch32v10x_misc.h:
 ../User/hd_rumble.h:
 ../User/imu.h:
 ../User/i2c.h:
+../User/gpio_digit.h:

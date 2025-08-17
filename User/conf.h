@@ -10,8 +10,8 @@
 #include <stdint.h>
 #include "ns_com_mux.h"
 
-#define FW_VERSION_HIGH (0)
-#define FW_VERSION_LOW (4)
+#define FW_VERSION_HIGH (1)
+#define FW_VERSION_LOW (1)
 
 #define NS_SPI_USER_JOYSTICK_CALIBRATION_ADDR (0x8010)
 #define NS_SPI_USER_IMU_CALIBRATION_ADDR (0X8026)
@@ -21,8 +21,8 @@
 #define CONF_PCB_TYPE_LARGE (1)
 #define CONF_PCB_TYPE_SMALL (0)
 
-#define CONF_BTN_RGB_FULL (0)
-#define CONF_BTN_RGB_PWR_ONLY (1)
+#define CONF_BTN_RGB_FULL (1)
+#define CONF_BTN_RGB_PWR_ONLY (0)
 #define CONF_BTN_LED (2)
 
 /*
@@ -244,19 +244,19 @@ typedef struct _user_config_data{
     union{
         uint8_t config_bitmap2;
         struct{
-            //uint8_t pcb_typ:2;//main board led typ
-            uint8_t led_typ:1;//main board led typ
-            uint8_t pcb_typ:1;//vcc(0) for rumble or raw_in for rumble
-            uint8_t input_typ:1;//0:raw 1:scan
-            uint8_t rgb_typ:1;//key board typ,
+            //uint8_t led_typ:1;//main board led typ
+            uint8_t reserved2:3;
+            //uint8_t input_typ:1;//0:raw 1:scan
+            //uint8_t rgb_typ:1;//key board typ,
+            uint8_t rumble_high_amp_drop:1;
             uint8_t rumble_low_amp_rise:1;
             uint8_t legacy_rumble:1;
             uint8_t dead_zone_mode:2;
         };
     };
-    //uint8_t config_bitmap_reserved34[2];
-    uint8_t config_bitmap_reserved3;
-    int8_t hd_rumble_mixer_ratio;// div 128
+    uint8_t config_bitmap_reserved34[2];
+    //uint8_t config_bitmap_reserved3;
+    //int8_t hd_rumble_mixer_ratio;// div 128
     uint8_t in_interval;
     uint8_t out_interval;
     uint8_t hd_rumble_amp_ratio[4];
@@ -277,15 +277,8 @@ typedef struct _user_config_data{
     uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
     uint8_t dead_zone[4];
     //uint8_t dead_zone_mode;
-    union{
-        uint8_t config_bitmap5;
-        struct{
-            //uint8_t reserved5:8;
-            uint8_t clk_force_hsi:1;
-            uint8_t reserved5:7;
-        };
-    };
-    uint8_t rgb_cnt;
+    uint8_t config_bitmap_reserved56[2];
+    //uint8_t rgb_cnt;
     rgb_data_complete rgb_data[RGB_MAX_CNT];
 }user_config_data;
 //118 byte now
@@ -294,6 +287,30 @@ typedef struct _user_config_data{
  * 256~511 factory_config
  * 512~767 user_calibration
  */
+enum PCV_REV{
+    PCB_REV_200,
+    PCB_REV_213,
+    //PCB_REV_213_HIGH_VOLTAGE,
+};
+typedef struct _smashpro_factory_config_data{
+    union{
+        uint8_t config_bitmap0;
+        struct{
+            uint8_t nonexist:1;
+            uint8_t clk_force_hsi:1;
+            uint8_t reserved0:6;
+        };
+    };
+    uint8_t pcb_rev;
+    uint8_t reserved12345[5];
+    uint8_t input_typ;
+    uint8_t led_typ;
+    uint8_t rgb_typ;
+    uint8_t rgb_cnt;
+    /*
+     res reserved;
+     */
+}smashpro_factory_config_data;
 #pragma pack(pop)
 
 #define JOYSITCK_FITTING_PARAM_RATIO (255)
@@ -302,10 +319,12 @@ typedef struct _user_config_data{
 #define FLASH_ADDR_USER_CONFIG (0x0)
 #define FLASH_ADDR_FACTORY_CONFIG (0x100)
 #define FLASH_ADDR_USER_CALIBRATION (0x200)
+#define FLASH_ADDR_HARDWARE_INFO (0x300)
 
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;
 extern user_config_data user_config;
+extern smashpro_factory_config_data smashpro_factory_config;
 extern uint32_t joystick_snapback_deadzone_sq[2];
 
 void conf_init();

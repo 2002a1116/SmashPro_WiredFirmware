@@ -103,8 +103,9 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
             //float cos_sq=dp_sq/a_sq_b_sq;
             //cos_sq<0.8||cos_sq>(1/0.8)
             //if(dp_sq<0.375f*a_sq_b_sq)
-            uint64_t a_sq_b_sq=(len_sq*js_snapback_samples[id].len_sq*3)>>3;
-            if(dp_sq<a_sq_b_sq)
+            uint64_t a_sq_b_sq=(len_sq*js_snapback_samples[id].len_sq*3)>>3;//50deg
+            //uint64_t a_sq_b_sq=len_sq*js_snapback_samples[id].len_sq>>2;//60 deg
+            if(dp_sq<a_sq_b_sq)//angler larger than 50 degree
                 break;
             //prob snapback
             //force center
@@ -320,6 +321,7 @@ void init_all()
     i2c_init();
     imu_init();
     set_imu_awake();
+    conf_flush();
     USBFS_RCC_Init();
     USBFS_Device_Init( ENABLE , PWR_VDD_SupplyVoltage());
     //sofw_watchdog_init();
@@ -338,8 +340,8 @@ int main(void)
     ns_mux_init();
     ns_set_peripheral_data_getter(get_peripheral_data_handler);
     hid_init();
-    hd_rumble_init(!is_rumble_start);
-    routine_service_init();
+    hd_rumble_init(0);
+    //routine_service_init();
 #define COMPILE_WL
     while(1)
     {
@@ -348,7 +350,6 @@ int main(void)
 #endif
         joystick_debounce_task();
         get_peripheral_data_handler(&global_input_data);
-        routine_service();
         if(USBFS_DevEnumStatus){//usb
             connection_state.usb_enumed=1;
             hid_rx_service();
@@ -361,6 +362,7 @@ int main(void)
         uart_com_task();
         UART1_Tx_Service();
 #endif
+        routine_service();
         //soft_watchdog_feed();
     }
 }

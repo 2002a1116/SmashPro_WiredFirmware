@@ -98,6 +98,9 @@ void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
 }
 void gpio_kb_scan_init()
 {
+    uint32_t home_led_gpio=GPIO_BUTTON_HOME;
+    _gpio_init(&home_led_gpio, 1, GPIO_Mode_Out_OD);
+    GPIO_SET(GPIO_BUTTON_HOME,1);
     _gpio_init(kb_scan,4,GPIO_Mode_IPD);
     _gpio_init(kb_pull,4,GPIO_Mode_Out_PP);
     for(int i=0;i<4;++i){
@@ -108,7 +111,7 @@ void gpio_kb_scan_init()
 }
 void gpio_init(void){
     gpio_tb_init();
-    if(user_config.input_typ){//scan
+    if(smashpro_factory_config.input_typ){//scan
         gpio_kb_scan_init();
     }
     _gpio_init(hid_num_to_gpio,GPIO_INPUT_CNT,GPIO_Mode_IPU);
@@ -161,7 +164,7 @@ uint32_t gpio_kb_scan(){
 uint32_t gpio_read_all(void){
     uint8_t ret=0;
     uint32_t res=0;
-    if(user_config.input_typ){
+    if(smashpro_factory_config.input_typ){
         res=gpio_kb_scan();
     }
     for(int i=0;i<GPIO_INPUT_CNT;++i){
@@ -198,4 +201,7 @@ uint8_t gpio_read(uint32_t gpio_num)
         default:
             return 1;
     }
+}
+void gpio_set(uint32_t x,uint8_t v){
+    GPIO_SET(x,v);
 }

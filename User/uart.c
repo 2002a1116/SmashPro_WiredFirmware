@@ -185,9 +185,9 @@ void UART1_Rx_Service( void )
 {
     uint16_t u16_temp;
     UART1_RX_CurCnt = DMA_GetCurrDataCounter(DMA1_Channel5);
-    ////printf("rx\r\n");// Get DMA remaining count
     if (UART1_RX_LastCnt != UART1_RX_CurCnt)
     {
+        //printf("rx %d %d\r\n",UART1_RX_CurCnt,UART1_RX_LastCnt);// Get DMA remaining count
         if (UART1_RX_LastCnt > UART1_RX_CurCnt)
         {
             u16_temp = UART1_RX_LastCnt - UART1_RX_CurCnt;
@@ -198,12 +198,12 @@ void UART1_Rx_Service( void )
         }
 
         UART1_RX_LastCnt = UART1_RX_CurCnt;
-        ////printf("u16temp :%d\r\n",u16_temp);
+        //printf("u16temp :%d\r\n",u16_temp);
         if ((UART1_Rx_RemainLen + u16_temp) > DEF_UART1_BUF_SIZE )
         {
             UART1_Rx_RemainLen=DEF_UART1_BUF_SIZE;
             ////printf("remain len: %d ,temp : %d\r\n",UART1_Rx_RemainLen,u16_temp);
-            ////printf("Uart2 RX_buffer overflow\n");                                           // overflow: New data overwrites old data
+           //printf("Uart2 RX_buffer overflow\n");                                           // overflow: New data overwrites old data
         }
         else
         {
@@ -214,28 +214,33 @@ void UART1_Rx_Service( void )
     ////printf("r2 %d\r\n",UART1_Rx_RemainLen);
     //if(UART1_Rx_RemainLen)trigger_hardfault();
     uint8_t max_uart_byte_recv_once=128;
-    while(UART1_Rx_RemainLen&&max_uart_byte_recv_once--)
+    while(UART1_Rx_RemainLen)
     {
         if(UART1_RxBuffer[UART1_Rx_Deal_Ptr]&UART_PKG_HEADER_MASK)//HEADER
         {
             rx_ptr=1;
             rx_filter_buf[0]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
+            //printf("ptr %d\r\n",rx_ptr);
         }
         else if(rx_ptr>0){//join a packet
+            //printf("ptr %d\r\n",rx_ptr+1);
                 rx_filter_buf[rx_ptr++]=UART1_RxBuffer[UART1_Rx_Deal_Ptr];
                 if(rx_ptr>=UART_PKG_SIZE){//recive one
                     rx_ptr=0;
                     if(!check_uart_pkt((uart_packet*)rx_filter_buf))//if check returns true,check fail,drop it
                     {
                         decode_uart_pkt((uart_packet*)rx_filter_buf);
-                        ////printf("uart pkt decode typ %d\r\n",((uart_packet*)rx_filter_buf)->typ);
+                        //printf("uart pkt decode typ %d\r\n",((uart_packet*)rx_filter_buf)->typ);
                         u16_temp=ring_buffer_push(&uart_rx_rb, rx_filter_buf, UART_PKG_SIZE);
                         //if(u16_temp)
                             //printf("uart push error:%d\r\n",u16_temp);
+                    }else{
+                        //printf("decode fail\r\n");
                     }
                 }
         }
         else {
+            //printf("drop byte\r\n");
             rx_ptr=0;
         }
         --UART1_Rx_RemainLen;
@@ -310,6 +315,7 @@ uint8_t send_uart_large_pkt(uint8_t* buf,uint8_t len,uint8_t typ)
     pkg.typ=typ;
     while(len>=UART_PKG_LOAD_LENGTH)
     {
+        len-=UART_PKG_LOAD_LENGTH;
         memcpy(pkg.load,buf,UART_PKG_LOAD_LENGTH);
         buf+=UART_PKG_LOAD_LENGTH;
         pkg.id=id++;

@@ -34,23 +34,30 @@ typedef struct __uart_packet{
 }uart_packet,*puart_packet;
 */
 typedef struct __uart_packet{
-    struct{
-        union{
-            uint8_t id:7;
-            struct{
-                uint8_t id_short:4;
-                uint8_t flag:3;
-            };
-        };
-        uint8_t starter:1;
-    };
     union{
         struct{
-            uint8_t typ:5;
-            uint8_t hb2:2;
-            uint8_t _empty:1;
-            uint8_t hb1:7;
-            uint8_t _empty2:1;
+            uint8_t id:7;
+            uint8_t starter:1;
+        };
+        struct{
+            uint8_t id_short:4;
+            uint8_t flag:3;
+            uint8_t :1;
+        };
+    };
+        //uint8_t ___header;
+    union{
+        struct{
+            struct{
+                uint8_t typ:5;
+                uint8_t hb2:2;
+                uint8_t _empty:1;
+            };
+            struct
+            {
+                uint8_t hb1:7;
+                uint8_t _empty2:1;
+            };
             uint8_t load[9];
         };
         uint8_t data[11];

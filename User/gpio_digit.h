@@ -85,6 +85,8 @@ extern uint32_t sts_button;
 
 void gpio_init(void);
 uint32_t gpio_read_all(void);
-uint8_t gpio_read(uint32_t);
+uint8_t gpio_read(uint32_t gpio_num);
+void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode);
+void gpio_set(uint32_t x,uint8_t v);
 
 #endif /* USER_GPIO_DIGIT_H_ */

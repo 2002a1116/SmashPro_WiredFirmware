@@ -13,6 +13,7 @@
 #include "board_type.h"
 #include "hd_rumble_high_accuracy.h"
 #include "imu.h"
+#include "gpio_digit.h"
 
 void DMA1_Channel3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
@@ -29,7 +30,7 @@ typedef struct _rgb_spi_pkg{
     };
 }rgb_spi_pkg;
 #pragma pack(pop)
-#define SPI_RESET_OFFSET (5)
+#define SPI_RESET_OFFSET (10)
 rgb_spi_pkg spi_tx_buf[RGB_MAX_CNT*3+SPI_RESET_OFFSET*2];//+reset
 uint8_t indi_status=0;
 //uint16_t spi_length;
@@ -48,12 +49,6 @@ void SPI_FullDuplex_Init(void)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_SPI1, ENABLE);
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
     //GPIO_PinRemapConfig(AFIO_PCFR1_USART1_REMAP, ENABLE);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIO_ResetBits(GPIOA, GPIO_Pin_7);
-    Delay_Ms(25);//hope this will fix indicate led 1 light up as green.
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -132,12 +127,22 @@ void flush_spi_tx_seq(uint8_t status)
     //spi_tx_buf[1].load=0;
     //printf("flush rgb sequence.\r\n");
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
-    for(int i=0,j=0;i<user_config.rgb_cnt;++i){
-        if(user_config.led_disabled||!status)
+    if(!status){
+        if(smashpro_factory_config.input_typ){//stock keyboard
+            //gpio_set(GPIO_BUTTON_HOME, indi_status);
+            gpio_set(GPIO_BUTTON_HOME, DISABLE);
+        }
+        for(int i=0,j=0;i<smashpro_factory_config.rgb_cnt;++i){
+            set_led_rgb(i, 0, 0, 0);
+        }
+        return;
+    }
+    for(int i=0,j=0;i<smashpro_factory_config.rgb_cnt;++i){
+        if(user_config.led_disabled)
             set_led_rgb(i, 0, 0, 0);
         else{
             set_led_rgb(i, user_config.rgb_data[j].r, user_config.rgb_data[j].g, user_config.rgb_data[j].b);
-            switch(user_config.led_typ){
+            switch(smashpro_factory_config.led_typ){
             case CONF_PCB_TYPE_SMALL:
                 j+=(i>3);//skip 0~3;
                 break;
@@ -151,13 +156,13 @@ void flush_spi_tx_seq(uint8_t status)
         }
     }
     uint8_t ofst=0;
-    if(user_config.led_typ==CONF_PCB_TYPE_LARGE)
+    if(smashpro_factory_config.led_typ==CONF_PCB_TYPE_LARGE)
         ofst=4;
     set_led_rgb(ofst+0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
     set_led_rgb(ofst+1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
     //set_led_rgb(ofst+2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
     set_led_rgb(ofst+3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
-    if((!user_config.imu_disabled)&&imu_error)
+    if((!user_config.imu_disabled)&&(imu_error||!i2c_status))
         set_led_rgb(ofst+1, INDICATE_LED_BRIGHTNESS*2, 0, 0);
     if(user_config.rumble_disabled){
         set_led_rgb(ofst+2,0,0,0);
@@ -170,34 +175,44 @@ void flush_spi_tx_seq(uint8_t status)
     if(rumble_rb_overflow)
         set_led_rgb(ofst+2,INDICATE_LED_BRIGHTNESS,0,0);
 
-    if(user_config.led_typ==CONF_PCB_TYPE_LARGE)
+    if(smashpro_factory_config.led_typ==CONF_PCB_TYPE_LARGE)
         ofst=12;
     else
         ofst=4;
-    if(user_config.rgb_typ==CONF_BTN_RGB_PWR_ONLY){
-        //16 21 being home
-        set_led_rgb(ofst+4,user_config.rgb_data[16].r,user_config.rgb_data[16].g,user_config.rgb_data[16].b);
-        set_led_rgb(ofst+5,user_config.rgb_data[21].r,user_config.rgb_data[21].g,user_config.rgb_data[21].b);
+    if(smashpro_factory_config.rgb_typ==CONF_BTN_RGB_PWR_ONLY){
+        //12 17 being home
+        set_led_rgb(ofst,user_config.rgb_data[11].r,user_config.rgb_data[11].g,user_config.rgb_data[11].b);
+        set_led_rgb(ofst+1,user_config.rgb_data[16].r,user_config.rgb_data[16].g,user_config.rgb_data[16].b);
+    }
+    if(smashpro_factory_config.input_typ){//stock keyboard
+        //gpio_set(GPIO_BUTTON_HOME, indi_status);
+        gpio_set(GPIO_BUTTON_HOME, ENABLE);
     }
     //#endif
     //spi_tx_buf[user_config.rgb_cnt*3].load=0;
     //spi_tx_buf[user_config.rgb_cnt*3+1].load=0;
 }
-void flush_rgb(uint8_t status)
+void _flush_rgb(uint8_t status)
 {
     //SPI_Cmd(SPI1, DISABLE);
     DMA_Cmd(DMA1_Channel3, DISABLE);
-    flush_spi_tx_seq(status);
     DMA1_Channel3->MADDR = (uint32_t)spi_tx_buf;
-    DMA1_Channel3->CNTR = (uint32_t)(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg);
+    DMA1_Channel3->CNTR = (uint32_t)(smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg);
     DMA_Cmd(DMA1_Channel3, ENABLE);
     SPI_Cmd(SPI1, ENABLE);
+}
+void flush_rgb(uint8_t status){
+    flush_spi_tx_seq(status);
+    _flush_rgb(status);
+}
+void update_rgb(uint8_t status){
+    _flush_rgb(status);
 }
 int spi_init(void)
 {
     SPI_FullDuplex_Init();
     Delay_Ms(2);
-    spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
+    spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     flush_rgb(ENABLE);
     return 0;
@@ -205,6 +220,7 @@ int spi_init(void)
 void set_indicate_led_status(uint8_t status)
 {
     indi_status=status;
+    flush_rgb(ENABLE);
 }
 
 void DMA1_Channel3_IRQHandler(){

@@ -96,6 +96,7 @@ typedef struct{
 }device_info;
 #pragma pack(pop)
 device_info default_device_info={0x04,0x33,0x03,0x02,{},0x04,0x02};
+//device_info default_device_info={0x04,0x33,0x03,0x02,{},0x04,0x02};
 //device_info default_device_info={0x03,0x48,0x03,0x02,{},0x00,0x02};
 void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
@@ -391,7 +392,7 @@ uint8_t indicate_led_status;
 void ns_subcommand_set_indicate_led(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     indicate_led_status=cmd->subcommand_data[0];
-    set_indicate_led_status(indicate_led_status);
+    set_indicate_led_status(indicate_led_status>0);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;
@@ -437,11 +438,12 @@ void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
     //printf("set imu state:%d\r\n",state);
     imu_conf.state=state;
     imu_mode=state;
+    //printf("set imu mode1 %d\r\n",imu_mode);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,NS_SUBCOMMAND_STATUS_ACK);
     //_ns_subcommand_set_ack(cmd->subcommand_id, 0x90);
-    pkt.data.subcommand_report.subcommand_data[0]=state;
-    pkt.len=SUBC_REPORT_BASIC_LENGTH+1;
+    //pkt.data.subcommand_report.subcommand_data[0]=state;
+    pkt.len=SUBC_REPORT_BASIC_LENGTH;
     ns_send_report(&pkt);
 }
 
@@ -449,18 +451,20 @@ void ns_subcommand_set_imu_state(NS_SUBCOMMAND_CB_PARAM){
 #define SUBC_REPORT_SET_IMU_CONF_LENGTH (3)
 void ns_subcommand_set_imu_conf(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    imu_mode=cmd->subcommand_data[0];
     pkt.data.subcommand_report.subcommand_data[0]=0x40;
     pkt.data.subcommand_report.subcommand_data[1]=0x01;
     //printf("set imu mode to:%d\r\n",imu_mode);
     if(!imu_conf.state){
         imu_conf.state=0x01;
-        imu_mode=0x01;
+        //imu_mode=0x01;
+        /*printf("set imu mode2 %d\r\n",imu_mode);
         //todo : set imu conf to default
-        _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
+        _ns_subcommand_set_ack(cmd->subcommand_id,NS_SUBCOMMAND_STATUS_ACK);
         pkt.len=SUBC_REPORT_SET_IMU_CONF_LENGTH;
         ns_send_report(&pkt);
-        return;
+        return;*/
+    }else{
+        //imu_mode=cmd->subcommand_data[0];
     }
     memcpy(&imu_conf.imu_sensor_conf,cmd->subcommand_data,sizeof(imu_conf.imu_sensor_conf));
     _ns_subcommand_set_ack(cmd->subcommand_id,NS_SUBCOMMAND_STATUS_ACK);

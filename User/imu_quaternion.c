@@ -46,6 +46,7 @@ float InvSqrt (float x)
     x = x*(1.5f - xhalf*x*x);       // Å£¶Ùµü´ú·¨
     return x;
 }*/
+
 void _imu_quat_normalize(quaternion_s *data)
 {
     float norm_inverse = 1.0f / sqrtf(data->x * data->x + data->y * data->y + data->z * data->z + data->w * data->w);
@@ -109,14 +110,15 @@ void _imu_update_quaternion(imu_pack *acc,imu_pack *gyo, uint32_t timestamp) {
     _imu_quat_state.ay = acc->data[1];
     _imu_quat_state.az = acc->data[2];
 }
-#define QUAT_SHIFT (10)
+#define QUAT_SHIFT (9)
+
+
 void switch_motion_pack_quat(quaternion_s *in, imu_report_pack *out)
 {
     static uint32_t timestamp = 0;
     static int16_t gyo_samples[3][3];
     static uint8_t pos=0;
-    static uint8_t max_index = 0;
-    static int32_t quaternion_30bit_components[3];
+    int32_t quaternion_30bit_components[3];
     out->mode = 2;
     if(imu_upd_cnt==3){//start clean
         timestamp=Get_Systick_MS();
@@ -132,14 +134,21 @@ void switch_motion_pack_quat(quaternion_s *in, imu_report_pack *out)
                 out->max_index = i;
         }
         for (int i = 0; i < 3; ++i) {
-            quaternion_30bit_components[i] = in->raw[(max_index + i + 1) & 3] * 0x40000000 * (in->raw[max_index] < 0 ? -1 : 1);
+            quaternion_30bit_components[i] = in->raw[(out->max_index + i + 1) & 3] * 0x40000000 * (in->raw[out->max_index] < 0 ? -1 : 1);
         }
+        out->delta_last_first_0 = 0;
+        out->delta_last_first_1 = 0;
+        out->delta_last_first_2l = 0;
+        out->delta_last_first_2h = 0;
+        out->delta_mid_avg_0 = 0;
+        out->delta_mid_avg_1 = 0;
+        out->delta_mid_avg_2 = 0;
         out->last_sample_0 = quaternion_30bit_components[0] >> QUAT_SHIFT;
         out->last_sample_1 = (quaternion_30bit_components[1] >> QUAT_SHIFT);
         out->last_sample_2l = ((quaternion_30bit_components[2] >> QUAT_SHIFT) & 0x3);
         out->last_sample_2h = ((quaternion_30bit_components[2] >> QUAT_SHIFT) & 0x1FFFFC) >> 2;
-        out->timestamp_start=timestamp;
-        out->timestamp_count=3;
+        out->timestamp_start=timestamp&0x7ff;
+        out->timestamp_count=Get_Systick_MS()-timestamp;
         //out->timestamp_count=15;
         //moded by reed base on guessing
         //todo:finish this
@@ -151,9 +160,12 @@ void switch_motion_pack_quat(quaternion_s *in, imu_report_pack *out)
         out->delta_mid_avg_1 = (gyo_samples[1][1]-((imu_res[1]+gyo_samples[0][1]+gyo_samples[1][1])/3))>>9;
         out->delta_mid_avg_2 = (gyo_samples[1][2]-((imu_res[2]+gyo_samples[0][2]+gyo_samples[1][2])/3))>>9;
     }
+    out->acc0.data[0]=in->ax;
+    out->acc0.data[1]=in->ay;
+    out->acc0.data[2]=in->az;
 }
-void imu_upd2(){
+void imu_upd2(imu_report_pack *rep){
     _imu_update_quaternion(imu_res+3,imu_res,Get_Systick_US());
-    switch_motion_pack_quat(&_imu_quat_state, &imu_pack_buf[imu_buf_pos]);
+    switch_motion_pack_quat(&_imu_quat_state, rep);
     ////printf("imu ipd2 clk:%d\r\n",HighPrecisionTimerCnt());
 }

@@ -54,8 +54,10 @@ uint8_t imu_read(){
         }
     }else {
         imu_id_read_fail_cnt=0;
+        if(imu_error)
+            flush_rgb(ENABLE);
         imu_error=0;
-        flush_rgb(ENABLE);
+        //flush_rgb(ENABLE);
     }
     if(imu_error)return 3;
     if(ret=i2c_read_byte(LSM6DS3TRC_STATUS_REG, &status)){
@@ -177,11 +179,15 @@ void imu_upd()
         imu_sum[0]*=imu_ratio_xf;
         imu_sum[1]*=imu_ratio_yf;
         imu_sum[2]*=imu_ratio_zf;
+        /*imu_sum[3]*=0.95f;
+        imu_sum[4]*=0.95f;
+        imu_sum[5]*=0.95f;*/
         for(int i=0;i<6;++i){
             if(imu_sample_cnt)
                 imu_res[i]=imu_sum[i]/imu_sample_cnt;
             else
                 imu_res[i]=0;
+            //imu_res[i]&=0xffB0;
         }
         imu_sample_cnt=0;
         memset(imu_sum,0,sizeof(imu_sum));
@@ -190,7 +196,7 @@ void imu_upd()
 
         memcpy(&rep->acc0,&rep->acc1,IMU_ACC_SIZE);
         memcpy(&rep->acc1,&rep->acc2,IMU_ACC_SIZE);
-        memcpy(&rep->acc2,imu_raw_buf+3,IMU_ACC_SIZE);
+        memcpy(&rep->acc2,imu_res+3,IMU_ACC_SIZE);
         //memcpy(&rep->acc0,imu_res+3,IMU_ACC_SIZE);
         if(imu_mode==0x01){
             for(int i=0;i<3;++i){

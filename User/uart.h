@@ -40,6 +40,11 @@ typedef struct __uart_packet{
             uint8_t starter:1;
         };
         struct{
+            uint8_t r_typ_short:4;
+            uint8_t r_id_short:3;
+            uint8_t :1;
+        };
+        struct{
             uint8_t id_short:4;
             uint8_t flag:3;
             uint8_t :1;
@@ -58,7 +63,14 @@ typedef struct __uart_packet{
                 uint8_t hb1:7;
                 uint8_t _empty2:1;
             };
-            uint8_t load[9];
+            union{
+                struct{
+                    uint8_t r_id:7;
+                    uint8_t acc:1;
+                    uint8_t r_load[8];
+                };
+                uint8_t load[9];
+            };
         };
         uint8_t data[11];
     };
@@ -68,6 +80,7 @@ typedef struct __uart_packet{
     };
 }uart_packet,*puart_packet;
 enum UART_PACKET_TYP{
+    UART_PKG_RELIABLE=0x00,
     UART_PKG_INPUT_DATA=0x01,
     UART_PKG_INPUT_REQ=0x02,
     UART_PKG_CONNECT_CONTROL=0x03,

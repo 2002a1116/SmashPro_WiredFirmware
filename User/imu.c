@@ -179,9 +179,11 @@ void imu_upd()
         imu_sum[0]*=imu_ratio_xf;
         imu_sum[1]*=imu_ratio_yf;
         imu_sum[2]*=imu_ratio_zf;
-        /*imu_sum[3]*=0.95f;
-        imu_sum[4]*=0.95f;
-        imu_sum[5]*=0.95f;*/
+        imu_sum[3]=imu_sum[3]*96/100;
+        imu_sum[4]=imu_sum[4]*96/100;
+        imu_sum[5]=imu_sum[5]*96/100;
+        //workaround for high acc.
+        //i think its because imu sensor isnt configed correctly.
         for(int i=0;i<6;++i){
             if(imu_sample_cnt)
                 imu_res[i]=imu_sum[i]/imu_sample_cnt;

@@ -112,7 +112,7 @@ const uint8_t MyHIDReportDesc[] =
             0x15, 0x00, // Logical Minimum (0)
 
             0x09, 0x04, // Usage (Joystick)
-            //0x09,0x05,
+            //0x09,0x05, // Usage (GamePad)//cause input driver error on windows
             0xA1, 0x01, // Collection (Application)
 
             0x85, 0x30, //   Report ID (48)

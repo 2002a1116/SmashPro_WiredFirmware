@@ -30,8 +30,8 @@ extern "C" {
 
 /* DEBUG UATR Definition */
 #ifndef DEBUG
-#define DEBUG   DEBUG_UART2
-//#define DEBUG   DEBUG_NONE
+//#define DEBUG   DEBUG_UART2
+#define DEBUG   DEBUG_NONE
 #endif
 
 /* SDI //printf Definition */

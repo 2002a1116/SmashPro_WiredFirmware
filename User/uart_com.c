@@ -22,6 +22,9 @@
 #include "imu.h"
 static uart_packet pkt;
 static uint32_t input_update_tick;
+static reliable_uart_packet rurt_lst[MAX_RELIABLE_UART_PKT_CNT];
+static ring_buffer r_wait_queue;
+static uint8_t r_wait_queue_buffer[MAX_RELIABLE_UART_PKT_CNT];
 void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size)
 {
    pkt.typ=UART_PKG_CH32_FLASH_READ;
@@ -42,22 +45,8 @@ void uart_update_config()
         pkt.load[0]=i;
         memcpy(pkt.load+1,((uint8_t*)&user_config)+i*8,8);
         send_uart_pkt(&pkt);
-        send_uart_pkt(&pkt);
+        //send_uart_pkt(&pkt);
     }
-    /*pkt.id=0x6;
-    for(int i=0;i<sizeof(factory_configuration);i+=8){
-        pkt.load[0]=i;
-        memcpy(pkt.load+1,((uint8_t*)&factory_configuration)+i*8,8);
-        send_uart_pkt(&pkt);
-        send_uart_pkt(&pkt);
-    }
-    pkt.id=0x8;
-    for(int i=0;i<sizeof(user_calibration);i+=8){
-        pkt.load[0]=i;
-        memcpy(pkt.load+1,((uint8_t*)&user_calibration)+i*8,8);
-        send_uart_pkt(&pkt);
-        send_uart_pkt(&pkt);
-    }*/
 }
 static uint8_t imu_report_buffer_ptr_reset_flag;
 void imu_buffer_reset_notifier()
@@ -69,36 +58,47 @@ void send_input_with_uart(void)
     memset(&pkt,0,UART_PKG_SIZE);
     pkt.typ=UART_PKG_INPUT_DATA;
     pkt.id=1;//button status
-    /*pkt.load=global_input_data.button_status;
-    send_uart_pkt(&pkt);
-    pkt.id=2;//ljoy status
-    pkt.load=global_input_data.ljoy_status;
-    send_uart_pkt(&pkt);
-    pkt.id=3;//rjoy status
-    pkt.load=global_input_data.rjoy_status;
-    send_uart_pkt(&pkt);*/
     memcpy(pkt.load,&global_input_data,9);
     send_uart_pkt(&pkt);
-    //if(connection_state.esp32_connected&&!connection_state.usb_paired&&!connection_state.esp32_sleep)
     if((!user_config.imu_disabled)&&imu_report_buffer_ptr_reset_flag){
         send_uart_large_pkt(imu_report_buffer_ptr,sizeof(imu_report_pack),UART_PKG_IMU_REPORT_DATA);
         imu_report_buffer_ptr_reset_flag=0;
-        //printf("send imu data\r\n");
     }
+}
+static uint8_t bt_connect_mode=1;//1 listen 0 connect
+void set_bt_connect_mode(uint8_t v){
+    bt_connect_mode=v;
 }
 void start_connect(){
     static uint32_t tick;
     if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
         return;
     if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
-    connection_state.esp32_connected&&(!connection_state.esp32_bt_state)&&
+    connection_state.esp32_connected&&
     ((!connection_state.esp32_sleep)&&(!connection_state.esp32_paired))))
     {
         tick=Get_Systick_MS();
         //printf("UART_PKG_CONNECT_CONTROL\r\n");
         pkt.typ=UART_PKG_CONNECT_CONTROL;
         pkt.id=0;
-        pkt.load[0]=1;
+        if(connection_state.esp32_bt_state==BT_STATE_ERROR)
+            pkt.load[0]=BT_CMD_RESET;
+        else if(connection_state.esp32_bt_state==BT_STATE_NOT_RDY)
+            return;
+        else if(bt_connect_mode==0){//go connect
+            if(connection_state.esp32_bt_state!=BT_STATE_CONNECTED)
+                pkt.load[0]=BT_CMD_CONNECT;
+            else
+                return;
+        }else if(bt_connect_mode==1){//go listening
+            if(connection_state.esp32_bt_state==BT_STATE_CONNECTED){
+                pkt.load[0]=BT_CMD_DISCONNECT;//gracefully disconnect
+            }else if(connection_state.esp32_bt_state==BT_STATE_LISTENING)
+                return;
+            else if(connection_state.esp32_bt_state==BT_STATE_RDY){
+                pkt.load[0]=BT_CMD_LISTEN;
+            }
+        }
         send_uart_pkt(&pkt);
     }
 }
@@ -226,6 +226,9 @@ void recv_esp32_pkg()
 {
     switch(pkt.typ)
     {
+    case UART_PKG_RELIABLE:
+        reliable_uart_handler();
+        break;
     case UART_PKG_INPUT_REQ:
         ////printf("recv uart hb\r\n");
         break;
@@ -245,7 +248,7 @@ void recv_esp32_pkg()
         break;
     case UART_PKG_IMU_REPORT_DATA:
         imu_mode=pkt.load[0];
-        printf("wl set imu mode %d\r\n",imu_mode);
+        //printf("wl set imu mode %d\r\n",imu_mode);
         break;
     default:
         break;
@@ -254,13 +257,13 @@ void recv_esp32_pkg()
 void connection_state_handler()//decide if we go stop
 {
     start_connect();
-    printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
+    //printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
     if(!connection_state.usb_enumed && connection_state.esp32_sleep)
     {
         uint8_t stop_flag=set_pwr_mode_stop();
         if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
             NVIC_SystemReset();
-        //fail safe,try to reset everything
+        //fail safe,try to res6et everything
         init_all();
         //set_peripherals_state(ENABLE);
     }
@@ -330,4 +333,66 @@ void uart_com_task()
         recv_esp32_pkg();
     }
     connection_state_handler();
+}
+void reliable_uart_init()
+{
+    static uint8_t i=0;
+    ring_buffer_init(&r_wait_queue, r_wait_queue_buffer, NULL, MAX_RELIABLE_UART_PKT_CNT, 1);
+    memset(rurt_lst,0,sizeof(rurt_lst));
+}
+void reliable_uart_send(uart_packet* pkt,void (*cb)(uint8_t,void*),void* context){//Not Reentrant,be careful
+    if(!pkt)return;
+    uart_packet p=*pkt;
+    //uint8_t id=p.r_id=r_id_lst.buf[r_id_lst.top];
+    //ring_buffer_pop(&r_id_lst);
+    p.typ=UART_PKG_RELIABLE;
+    rurt_lst[p.r_id].r_id=p.r_id;
+    rurt_lst[p.r_id].cb=cb;
+    rurt_lst[p.r_id].context=context;
+    rurt_lst[p.r_id].timestamp_ms=Get_Systick_MS();
+    if(!rurt_lst[p.r_id].timestamp_ms)
+        rurt_lst[p.r_id].timestamp_ms=1;
+    ring_buffer_push(&r_wait_queue,&(rurt_lst[p.r_id].r_id),1);
+    send_uart_pkt(&p);
+}
+void reliable_uart_send_acc(uart_packet* pkt){
+    if(!pkt)return;
+    uart_packet p=*pkt;
+    p.acc=1;
+    send_uart_pkt(&p);
+}
+void reliable_uart_default_handler(uint8_t sts,void*){
+
+}
+uint32_t reliable_uart_timeout_cnt,reliable_uart_handled_cnt;
+void reliable_uart_task(){
+    static uint8_t id=0;
+    while(r_wait_queue.size){
+        id=r_wait_queue.buf[r_wait_queue.top*r_wait_queue.pkt_size];
+        if(!rurt_lst[id].timestamp_ms);
+        else if(Get_Systick_MS()-rurt_lst[id].timestamp_ms>=UART_RELIABLE_TIMEOUT){
+            if(rurt_lst[id].cb)
+                rurt_lst[id].cb(RURT_STS_TIMEOUT,rurt_lst[id].context);
+            ++reliable_uart_timeout_cnt;
+        }else
+            break;
+        ++reliable_uart_handled_cnt;
+        ring_buffer_pop(&r_wait_queue);
+    }
+}
+void reliable_uart_handler(){
+    if(pkt.acc){
+        if(rurt_lst[pkt.r_id].timestamp_ms){
+            if(rurt_lst[pkt.r_id].cb){
+                rurt_lst[pkt.r_id].cb(RURT_STS_OK,rurt_lst[pkt.r_id].context);
+            }
+            rurt_lst[pkt.r_id].timestamp_ms=0;//acc
+        }
+    }else{//req
+        reliable_uart_send_acc(&pkt);
+        if(pkt.r_typ_short)return;
+        pkt.typ=pkt.r_typ_short;
+        pkt.id=pkt.r_id_short;
+        recv_esp32_pkg();
+    }
 }

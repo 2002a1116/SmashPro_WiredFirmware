@@ -15,13 +15,16 @@
 #include "hd_rumble2.h"
 #include "hd_rumble_high_accuracy.h"
 #include <string.h>
+const uint32_t FW_VERSION=(0x00010200);
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
 user_config_data user_config;
+rgb_data_complete rgb_data[RGB_MAX_CNT];
 smashpro_factory_config_data smashpro_factory_config;
 //#pragma pack(pop)
 uint32_t joystick_snapback_deadzone_sq[2];
+uint32_t button_active_mask;
 //static factory_configuration_flash_pack* fac;
 #define JOYSTICK_RANGE_FACTOR_LEFT (0.6f)
 #define JOYSTICK_RANGE_FACTOR_RIGHT (0.6f)
@@ -50,7 +53,9 @@ void conf_init()
 {
     memset(&factory_configuration,-1,sizeof(factory_configuration));
     memset(&smashpro_factory_config,-1,sizeof(smashpro_factory_config));
+    memset(&rgb_data,-1,sizeof(rgb_data));
     read_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,sizeof(smashpro_factory_config));
+    read_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,sizeof(rgb_data));
     if(smashpro_factory_config.nonexist)
     {
         memset(&smashpro_factory_config,0,sizeof(smashpro_factory_config));
@@ -61,6 +66,8 @@ void conf_init()
         smashpro_factory_config.rgb_cnt=31;
         uint8_t res = write_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,
                 sizeof(smashpro_factory_config));
+        res = write_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,
+                sizeof(rgb_data));
     }
     //fac=get_raw_flash_buf();
     fac_conf_read();
@@ -166,7 +173,7 @@ void conf_init()
         //user_config.rgb_cnt=31;
         user_config.imu_sample_gap=1750;
         for(int i=0;i<smashpro_factory_config.rgb_cnt;++i){
-            user_config.rgb_data[i].load=0xffffff;
+            rgb_data[i].load=0xffffff;
         }
         user_config.imu_ratio_x=127;
         user_config.imu_ratio_y=127;
@@ -199,9 +206,12 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
     case 0xF000://user config
         memcpy(buf,((uint8_t*)&user_config)+(addr&0xff),size);
         break;
-    case 0x0000://persistent flash hack
+    case 0x0000:
         memcpy(buf,((uint8_t*)&smashpro_factory_config)+(addr&0xff),size);
         //memcpy(buf,((uint8_t*)FLASH_ADDR_USEROPTION_PERSISTENT_BYTE)+(addr&0xff),size);
+        break;
+    case 0x9000:
+        memcpy(buf,((uint8_t*)rgb_data)+(addr&0xff),size);
         break;
     default:
         break;
@@ -209,7 +219,7 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
 }
 uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
     uint8_t flash_res=0;
-    switch(addr & 0xffff00)
+    switch(addr & 0xfff000)
     {
     case 0x5000:
         break;
@@ -229,17 +239,25 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
         uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:
-        memcpy(((uint8_t*)&user_config)+(addr&0xff),(uint8_t*)buf,size);
+        memcpy(((uint8_t*)&user_config)+(addr&0xfff),(uint8_t*)buf,size);
         if(save)
             flash_res=custom_conf_write();
         uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
         break;
-    case 0x0000://smash pro factory hack
+    case 0x0000:
         memcpy(((uint8_t*)&smashpro_factory_config)+(addr&0xff),(uint8_t*)buf,size);
         if(save)
             flash_res=write_flash(FLASH_ADDR_HARDWARE_INFO, (uint8_t*)buf, size);
         uart_conf_write(addr, buf, size);
         hw_config_flush();
+        break;
+    case 0x9000:
+        memcpy(((uint8_t*)rgb_data)+(addr&0xff),(uint8_t*)buf,size);
+        if(save)
+            flash_res=write_flash(FLASH_ADDR_RGB_DATA, rgb_data, sizeof(rgb_data));
+        uart_conf_write(addr, buf, size);
+        flush_rgb(ENABLE);
+        break;
     default:
         break;
     }
@@ -378,9 +396,10 @@ void conf_flush(){
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
-    gpio_tb_init();
+    //gpio_tb_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
+    button_active_mask=~user_config.button_disable_mask;
     flush_rgb(ENABLE);
     //uart_update_config();
 }

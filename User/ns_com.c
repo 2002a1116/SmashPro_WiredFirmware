@@ -386,13 +386,11 @@ void ns_subcommand_get_attachment_info(NS_SUBCOMMAND_CB_PARAM){
     ns_send_report(&pkt);
 }
 
-
-uint8_t indicate_led_status;
+static uint8_t indicate_led_status=0;
 #define SUBC_ID_SET_INDICATE_LED (0x30)
 void ns_subcommand_set_indicate_led(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    indicate_led_status=cmd->subcommand_data[0];
-    set_indicate_led_status(indicate_led_status>0);
+    set_indicate_led_status(indicate_led_status=cmd->subcommand_data[0]);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;

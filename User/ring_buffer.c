@@ -28,10 +28,12 @@ uint8_t ring_buffer_push(pring_buffer rb,uint8_t* ptr,uint8_t len){
     if(len>rb->pkt_size)len=rb->pkt_size;
     //++rb->size;
     __AMOADD_W(&rb->size,1);
+    //__AMOADD_W(&rb->end,1);
     ++rb->end;
     if(rb->end>=rb->capcity)rb->end=0;
     memcpy(&rb->buf[rb->pkt_size*rb->end],ptr,len);
-    rb->len[rb->end]=len;
+    if(rb->len)
+        rb->len[rb->end]=len;
     //rb->typ[rb->end]=typ;
     if(rb->size>=rb->capcity)
         rb->full=1;
@@ -43,11 +45,13 @@ uint8_t ring_buffer_push_with_hdr(pring_buffer rb,uint8_t* ptr,uint8_t len,uint8
     if(len+1>rb->pkt_size)len=rb->pkt_size-1;
     //++rb->size;
     __AMOADD_W(&rb->size,1);
+    //__AMOADD_W(&rb->end,1);
     ++rb->end;
     if(rb->end>=rb->capcity)rb->end=0;
     rb->buf[rb->pkt_size*rb->end]=typ;
     memcpy(&rb->buf[rb->pkt_size*rb->end+1],ptr,len);
-    rb->len[rb->end]=len+1;
+    if(rb->len)
+        rb->len[rb->end]=len+1;
     //rb->typ[rb->end]=typ;
     if(rb->size>=rb->capcity)
         rb->full=1;
@@ -58,8 +62,10 @@ uint8_t ring_buffer_pop(pring_buffer rb){
     if(rb->size==0)return 0;
     //--rb->size;
     __AMOADD_W(&rb->size,-1);
+    //__AMOADD_W(&rb->top,1);
     ++rb->top;
     if(rb->top>=rb->capcity)rb->top=0;
     if(rb->full)
         rb->full=(uint8_t)(rb->capcity<=rb->size);
+    return 0;
 }

@@ -45,7 +45,7 @@ uint8_t ns_hid_get_packet_timer(){
         return Get_Systick_MS()/5;
     }
 }
-void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
+void rpt_wrapper(std_report* rpt,std_report_data* data,uint16_t len){
     ////printf("rpt\r\n");
         //todo : support more report typ someday
         memset(rpt,0,sizeof(std_report));
@@ -62,12 +62,15 @@ void rpt_warpper(std_report* rpt,std_report_data* data,uint16_t len){
         }
         //update_peripheral_data();
         rpt->input_data=global_input_data;
+        rpt->input_data.button_status &= button_active_mask;
         //rpt->timer=global_packet_timer;
         rpt->timer=ns_hid_get_packet_timer();
         rpt->battery_status=0x09;
         //todo : support battery quantity and charge state(oops,hardware doesnt support this one,so forget it);
         rpt->con_info=0x01;//todo : expect set this to 0x00 to be pro controller on battery,check if its correct;
-        rpt->rumble_status=0x00;//todo : value includes(0x70,0xC0,0xB0,0x80,0xA0),what does these mean?
+        //rpt->rumble_status=0x00;//todo : value includes(0x70,0xC0,0xB0,0x80,0xA0),what does these mean?
+        //0x00 works,try 0xA0
+        rpt->rumble_status=0x00;
 }
 uint8_t empty_report[]={0xa1,0x00};
 uint8_t* pkg_ptr;
@@ -98,7 +101,7 @@ void hid_tx_service( void )
         ring_buffer_pop(&ns_usb_send_rb);
         switch(pkg_typ){
         case 0x00://std report
-            rpt_warpper(rpt,(std_report_data*)pkg_ptr,pkg_len);
+            rpt_wrapper(rpt,(std_report_data*)pkg_ptr,pkg_len);
             pkg_len+=NS_STD_REPORT_BASIC_LENGTH;
             break;
         case 0x01://hid report
@@ -107,7 +110,7 @@ void hid_tx_service( void )
             memcpy(rpt,pkg_ptr,pkg_len);
             break;
         /*case 0x02:
-            rpt_warpper(rpt,(std_report_data*)pkg_ptr,pkg_len);
+            rpt_wrapper(rpt,(std_report_data*)pkg_ptr,pkg_len);
             pkg_ptr=(uint8_t*)rpt;
             pkg_len=64;
             break;
@@ -121,7 +124,7 @@ void hid_tx_service( void )
         }
     }
     else{//std report or empty report
-        rpt_warpper(rpt,NULL,0);
+        rpt_wrapper(rpt,NULL,0);
         pkg_len=NS_STD_REPORT_BASIC_LENGTH;
         if((!user_config.imu_disabled)&&imu_mode&&i2c_status){
             if(imu_report_buffer_ptr){
@@ -150,7 +153,6 @@ void hid_rx_service(){
     if(ns_usb_recv_rb.size){
         pkg_len=ns_usb_recv_rb.len[ns_usb_recv_rb.top];
         memcpy(pbuf,&ns_usb_recv_buf[ns_usb_recv_rb.top*NS_USB_RINGBUFFER_PKG_SIZE],pkg_len);
-        //we minimize critical section with atomic instruction,maybe unexpected disconnecting will be solved.
         ring_buffer_pop(&ns_usb_recv_rb);
         pkt.data=pbuf;
         pkt.len=pkg_len;

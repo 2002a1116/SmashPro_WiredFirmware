@@ -137,7 +137,8 @@ static uint8_t fw_red_cnt=0;
 void fw_subcommand_write_setting(cmd_packet* pkt){
     //printf("fw write\r\n");
     //fw_buf[0]=FW_SUBC_ID_WRITE_SETTING;
-    uint8_t offset=pkt->data[1];
+    conf_flush();
+    /*uint8_t offset=pkt->data[1];
     if(offset==0xff){//confirm
         if(fw_red_cnt==pkt->data[2])
         {
@@ -162,36 +163,52 @@ void fw_subcommand_write_setting(cmd_packet* pkt){
                 ((FW_MAX_PAYLOAD_LENGTH<=(sizeof(user_config)-offset*FW_MAX_PAYLOAD_LENGTH))?
                 FW_MAX_PAYLOAD_LENGTH:(sizeof(user_config)-offset*FW_MAX_PAYLOAD_LENGTH)));
         ++fw_red_cnt;
-    }
+    }*/
     //memcpy(&user_config,cmd->subcommand_data,sizeof(user_config));
 }
 #define FW_SUBC_ID_READ_EMULATE_ROM (0x03)
 void fw_subcommand_read_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
-    memcpy(fw_buf,pkt->data+1,5);
+    uint8_t size=pkt->data[5];
+    /*memcpy(fw_buf,pkt->data+1,5);
     conf_read(addr, fw_buf+5, pkt->data[5]);
     //hid_send_full64byte_report(fw_buf, pkt->data[5]+2);
-    fw_snd_pkt(FW_SUBC_ID_READ_EMULATE_ROM, pkt->data[5]+5);
+    fw_snd_pkt(FW_SUBC_ID_READ_EMULATE_ROM, pkt->data[5]+5);*/
+    while(size>57){
+        conf_read(addr,fw_buf+5,57);
+        memcpy(fw_buf,&addr,4);
+        fw_buf[4]=57;
+        size-=57;
+        addr+=57;
+        fw_snd_pkt(FW_SUBC_ID_READ_EMULATE_ROM, 57+5);
+    }
+    if(size){
+        conf_read(addr,fw_buf+5,size);
+        memcpy(fw_buf,&addr,4);
+        fw_buf[4]=size;
+        fw_snd_pkt(FW_SUBC_ID_READ_EMULATE_ROM, size+5);
+    }
 }
 #define FW_SUBC_ID_WRITE_EMULATE_ROM (0x04)
 void fw_subcommand_write_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
-    fw_buf[0]=conf_write(addr, &pkt->data[6], pkt->data[5],ENABLE);
+    fw_buf[0]=pkt->data[6];
+    fw_buf[1]=conf_write(addr, &pkt->data[7], pkt->data[5], pkt->data[6]);
     //hid_send_full64byte_report(fw_buf, 2);
-    fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 1);
+    fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 2);
 }
 #define CALIBRATE_MAX_RETRY (5)
-#define CALIBRATE_SAMPLE_CNT (20)
-static int32_t calibrate_imu_raw_buf[6];
+#define CALIBRATE_SAMPLE_CNT (50)
+static int64_t calibrate_imu_raw_buf[6];
 uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
     uint8_t res=0,retry=CALIBRATE_MAX_RETRY;
     memset(calibrate_imu_raw_buf,0,sizeof(calibrate_imu_raw_buf));
     for(int i=0;i<sample_cnt;++i){
         retry=CALIBRATE_MAX_RETRY;
-        Delay_Ms(5);
+        Delay_Ms(75);
         do{
             res=imu_read();
-            Delay_Ms(5);
+            Delay_Ms(50);
         }while(res&&retry--);
         if(res)
             break;
@@ -202,6 +219,9 @@ uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
     calibrate_imu_raw_buf[0]*=imu_ratio_xf;
     calibrate_imu_raw_buf[1]*=imu_ratio_yf;
     calibrate_imu_raw_buf[2]*=imu_ratio_zf;
+    calibrate_imu_raw_buf[3]=calibrate_imu_raw_buf[3]*0.96f;
+    calibrate_imu_raw_buf[4]=calibrate_imu_raw_buf[4]*0.96f;
+    calibrate_imu_raw_buf[5]=calibrate_imu_raw_buf[5]*0.96f;
     return res;
 }
 uint8_t calibrate_imu(uint8_t cnt){
@@ -289,9 +309,8 @@ void fw_subcommand_reboot(cmd_packet* pkt){
 #define FW_SUBC_ID_GET_VERSION (0xFF)
 void fw_subcommand_get_version(cmd_packet* pkt){
     //fw_buf[0]=FW_SUBC_ID_GET_VERSION;
-    fw_buf[0]=FW_VERSION_HIGH;
-    fw_buf[1]=FW_VERSION_LOW;
-    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 2);
+    memcpy(fw_buf,&FW_VERSION,4);
+    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 4);
     //hid_send_full64byte_report(fw_buf,3);
 }
 void fw_subcommand_dispatcher(cmd_packet* pkt){

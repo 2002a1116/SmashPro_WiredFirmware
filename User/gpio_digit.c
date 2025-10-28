@@ -24,13 +24,13 @@ GPIO_TypeDef* _gpio_mask_to_group_unsafe[8]={GPIOD,GPIOA,GPIOB,GPIOD,GPIOC,GPIOD
 #define GPIO_SET(x,v) (GPIO_SET_UNSAFE((x),(v)))
 #define GPIO_READ(x) ((uint32_t)GPIO_READ_UNSAFE(x))
 //GPIO_ReadOutputDataBit
-uint32_t sts_button;
+uint32_t sts_button,sts_button_raw;
 uint32_t hid_num_to_gpio[GPIO_INPUT_CNT]={};
 uint32_t kb_scan_to_hid[4][4]={
         {NS_BUTTON_X,NS_BUTTON_UP,NS_BUTTON_PLUS,NS_BUTTON_ZL},
         {NS_BUTTON_Y,NS_BUTTON_DOWN,NS_BUTTON_HOME,NS_BUTTON_R},
         {NS_BUTTON_A,NS_BUTTON_RIGHT,NS_BUTTON_MINUS,NS_BUTTON_ZR},
-        {NS_BUTTON_B,NS_BUTTON_LEFT,NS_BUTTON_LEFT,NS_BUTTON_L}};//(pull_i,scan_i)=>button_hid
+        {NS_BUTTON_B,NS_BUTTON_LEFT,NS_BUTTON_CAP,NS_BUTTON_L}};//(pull_i,scan_i)=>button_hid
 uint32_t kb_pull[]={GPIO_KB_PULL_1,GPIO_KB_PULL_2,GPIO_KB_PULL_3,GPIO_KB_PULL_4};
 uint32_t kb_scan[]={GPIO_KB_SCAN_1,GPIO_KB_SCAN_2,GPIO_KB_SCAN_3,GPIO_KB_SCAN_4};
 void gpio_tb_init(){
@@ -60,12 +60,12 @@ void gpio_tb_init(){
         hid_num_to_gpio[NS_BUTTON_X]=GPIO_BUTTON_Y;
         hid_num_to_gpio[NS_BUTTON_Y]=GPIO_BUTTON_X;
     }
-    if(user_config.cross_key_disabled){
+    /*if(user_config.cross_key_disabled){
         hid_num_to_gpio[NS_BUTTON_UP]=GPIO_BUTTON_NONE;
         hid_num_to_gpio[NS_BUTTON_DOWN]=GPIO_BUTTON_NONE;
         hid_num_to_gpio[NS_BUTTON_LEFT]=GPIO_BUTTON_NONE;
         hid_num_to_gpio[NS_BUTTON_RIGHT]=GPIO_BUTTON_NONE;
-    }
+    }*/
     //printf("board_type %d\r\n",PCB_TYPE);
 }
 void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
@@ -186,6 +186,8 @@ uint32_t gpio_read_all(void){
         //    //printf("set %d\r\n",i);
         res|=((!ret)<<i);
     }
+    //res&=button_active_mask;
+    sts_button_raw=res;
     return res;
 }
 
@@ -204,4 +206,7 @@ uint8_t gpio_read(uint32_t gpio_num)
 }
 void gpio_set(uint32_t x,uint8_t v){
     GPIO_SET(x,v);
+}
+uint8_t button_read(uint32_t num){
+    return (sts_button_raw&(1<<num))!=0;
 }

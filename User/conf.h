@@ -10,13 +10,11 @@
 #include <stdint.h>
 #include "ns_com_mux.h"
 
-#define FW_VERSION_HIGH (1)
-#define FW_VERSION_LOW (1)
 
 #define NS_SPI_USER_JOYSTICK_CALIBRATION_ADDR (0x8010)
 #define NS_SPI_USER_IMU_CALIBRATION_ADDR (0X8026)
 
-#define RGB_MAX_CNT (31)
+#define RGB_MAX_CNT (85)
 
 #define CONF_PCB_TYPE_LARGE (1)
 #define CONF_PCB_TYPE_SMALL (0)
@@ -71,8 +69,13 @@ typedef struct _user_joystick_calibration_data{
     joystick_calibration_data_right AnalogStickRightUserCalibrationValue;
 }user_joystick_calibration_data;
 typedef struct _factory_joystick_calibration_data{
-    joystick_calibration_data_left AnalogStickLeftFactoryCalibrationValue;
-    joystick_calibration_data_right AnalogStickRightFactoryCalibrationValue;
+    union{
+        struct{
+            joystick_calibration_data_left AnalogStickLeftFactoryCalibrationValue;
+            joystick_calibration_data_right AnalogStickRightFactoryCalibrationValue;
+        };
+        joystick_calibration_data_left AnalogStickFactoryCalibrationValue[2];
+    };
 }factory_joystick_calibration_data;
 typedef struct _imu_calibration_data{
     int16_t Accelerometer0OffsetX;
@@ -233,7 +236,9 @@ typedef struct _user_config_data{
         struct{
             uint8_t nonexist:1;
             uint8_t led_disabled:1;
-            uint8_t cross_key_disabled:1;//maybe someone want it
+            //uint8_t cross_key_disabled:1;//maybe someone want it
+            uint8_t config_bitmap_reserved1:1;
+            //uint8_t joystick_easy_smash:1;
             uint8_t x_y_swap:1;
             uint8_t a_b_swap:1;
             uint8_t rumble_disabled:1;
@@ -245,7 +250,8 @@ typedef struct _user_config_data{
         uint8_t config_bitmap2;
         struct{
             //uint8_t led_typ:1;//main board led typ
-            uint8_t reserved2:3;
+            uint8_t reserved2:2;
+            uint8_t joystick_range_normalization:1;
             //uint8_t input_typ:1;//0:raw 1:scan
             //uint8_t rgb_typ:1;//key board typ,
             uint8_t rumble_high_amp_drop:1;
@@ -254,11 +260,12 @@ typedef struct _user_config_data{
             uint8_t dead_zone_mode:2;
         };
     };
-    uint8_t config_bitmap_reserved34[2];
+    //uint8_t config_bitmap_reserved34[2];
     //uint8_t config_bitmap_reserved3;
     //int8_t hd_rumble_mixer_ratio;// div 128
     uint8_t in_interval;
     uint8_t out_interval;
+    uint32_t button_disable_mask:24;
     uint8_t hd_rumble_amp_ratio[4];
     int8_t joystick_ratio[4];
     //uint8_t reserved[2];
@@ -277,15 +284,16 @@ typedef struct _user_config_data{
     uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
     uint8_t dead_zone[4];
     //uint8_t dead_zone_mode;
-    uint8_t config_bitmap_reserved56[2];
+    //uint8_t config_bitmap_reserved56[2];
+    //uint8_t config_bitmap_reserved6;
     //uint8_t rgb_cnt;
-    rgb_data_complete rgb_data[RGB_MAX_CNT];
 }user_config_data;
 //118 byte now
 /*
  * 0~255 user_config
  * 256~511 factory_config
  * 512~767 user_calibration
+ * 768~1024 rgb
  */
 enum PCV_REV{
     PCB_REV_200,
@@ -320,12 +328,17 @@ typedef struct _smashpro_factory_config_data{
 #define FLASH_ADDR_FACTORY_CONFIG (0x100)
 #define FLASH_ADDR_USER_CALIBRATION (0x200)
 #define FLASH_ADDR_HARDWARE_INFO (0x300)
+#define FLASH_ADDR_RGB_DATA (0x400)
+
+extern const uint32_t FW_VERSION;
 
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;
 extern user_config_data user_config;
+extern rgb_data_complete rgb_data[RGB_MAX_CNT];
 extern smashpro_factory_config_data smashpro_factory_config;
 extern uint32_t joystick_snapback_deadzone_sq[2];
+extern uint32_t button_active_mask;
 
 void conf_init();
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size);

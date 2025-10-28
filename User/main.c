@@ -35,8 +35,9 @@ enum ADC_CHANNEL_ID{
 };
 static uint8_t top_trigger=0;
 void button_upd_all(){
+    uint32_t tp=gpio_read_all();
     if(!top_trigger)
-        sts_button=gpio_read_all();
+        sts_button=tp;
     else
         sts_button=0;
 }
@@ -124,6 +125,25 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     }
     x+=2048;
     y+=2048;
+    //x=i32_clamp(x, 0, 4095);
+    //y=i32_clamp(y, 0, 4095);
+    static int32_t nx,ny,px,py;
+    nx=ny=0;
+    px=py=4095;
+    if(user_config.joystick_range_normalization){
+        /*nx=i32_min(factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXNegative,
+                factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXPositive);
+        ny=i32_min(factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYNegative,
+                factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYPositive);*/
+        nx=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXNegative;
+        px=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXPositive;
+        ny=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYNegative;
+        py=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYPositive;
+        px=nx=i32_min(nx, px);
+        py=ny=i32_min(ny, py);
+        x=i32_clamp(x, 2048-nx, 2048+px);
+        y=i32_clamp(y, 2048-ny, 2048+py);
+    }
     x=i32_clamp(x, 0, 4095);
     y=i32_clamp(y, 0, 4095);
     return (y<<12)+x;
@@ -167,22 +187,21 @@ void imu_read_test(){
 void func_switch_task(){
     static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,fhf=0;
     static uint8_t save=0,upd=0;
-    if(!top_trigger)return;
     upd=save=0;
-    if(!gpio_read(GPIO_BUTTON_A)){//cause hard fault
+    if(top_trigger&&button_read(NS_BUTTON_A)){//cause hard fault
         if(fhf){
             //trigger_hardfault();
         }
         fhf=0;
     }else   fhf=1;
-    if(!gpio_read(GPIO_BUTTON_MINUS)){//imu switch
+    if(top_trigger&&button_read(NS_BUTTON_MINUS)){//imu switch
         if(f1){
             user_config.imu_disabled=!user_config.imu_disabled;
             upd=save=1;
         }
         f1=0;
     }else   f1=1;
-    if(!gpio_read(GPIO_BUTTON_PLUS)){
+    if(top_trigger&&button_read(NS_BUTTON_PLUS)){
         if(f2){
             user_config.rumble_disabled=!user_config.rumble_disabled;
             hd_rumble_set_status(!user_config.rumble_disabled);
@@ -190,14 +209,14 @@ void func_switch_task(){
         }
         f2=0;
     }else   f2=1;
-    if(!gpio_read(GPIO_BUTTON_CAP)){
+    if(top_trigger&&button_read(NS_BUTTON_CAP)){
         if(f3){
             user_config.led_disabled=!user_config.led_disabled;
             upd=save=1;
         }
         f3=0;
     }else   f3=1;
-    if(!gpio_read(GPIO_BUTTON_HOME)){
+    if(top_trigger&&button_read(NS_BUTTON_RS)){
         if(f4){
             //force_esp32_active=!force_esp32_active;
             pkt.typ=UART_PKG_PWR_CONTROL;
@@ -208,7 +227,7 @@ void func_switch_task(){
         }
         f4=0;
     }else   f4=1;
-    if(!gpio_read(GPIO_BUTTON_LS)){
+    if(top_trigger&&button_read(NS_BUTTON_LS)){
         if(f5){
             for(int i=5;i>=0&&(user_config.bd_addr[i]++)==255;--i);
             memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
@@ -216,15 +235,21 @@ void func_switch_task(){
         }
         f5=0;
     }else f5=1;
-    if(!connection_state.usb_paired&&!gpio_read(GPIO_BUTTON_RS)){
+    if(top_trigger&&!connection_state.usb_paired&&button_read(NS_BUTTON_HOME)){
         if(f6){
+            /*
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=5;
             pkt.load[0]=1;
             send_uart_pkt(&pkt);
             upd=1;
+            */
+            set_bt_connect_mode(1);
         }f6=0;
-    }else f6=1;
+    }else{
+        f6=0;
+        set_bt_connect_mode(0);
+    }
     if(upd)
         flush_rgb(ENABLE);
     if(save)//we save to flash
@@ -238,16 +263,18 @@ void top_timer(void){
         {
             if(Get_Systick_MS()-top_tick>100){
                 if(!top_trigger){
-                    printf("top pressed\r\n");
+                    //printf("top pressed\r\n");
                 }
                 top_trigger=1;
+                set_indicate_led_mode(1);
             }
         }
         else {
             top_tick=Get_Systick_MS();
         }
     }
-    else {
+    else if(top_trigger){
+        set_indicate_led_mode(0);
         top_trigger=0;
         top_tick=0;
     }
@@ -265,6 +292,8 @@ void routine_service(void){
     push_waveform_into_buffer_task();
     imu_upd();
     func_switch_task();
+    indicate_rgb_task(connection_state.usb_paired);
+    reliable_uart_task();
 }
 void routine_service_init(void){
     top_init();
@@ -307,6 +336,7 @@ void init_all()
     HighPrecisionTimer_Init();
     SysTick_Init();
     Delay_Ms(10);
+    reliable_uart_init();
     conf_init();
     RCC_ClocksTypeDef rcc_clock;
     RCC_GetClocksFreq(&rcc_clock);

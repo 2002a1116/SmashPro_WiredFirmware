@@ -815,6 +815,14 @@ void USBFS_IRQHandler( void )
     }
     else if( intflag & RB_UIF_SUSPEND )
     {
+        /*USBFS_DevConfig = 0;
+        USBFS_DevAddr = 0;
+        USBFS_DevSleepStatus = 0;
+        USBFS_DevEnumStatus = 0;
+
+        R8_USB_DEV_AD = 0;
+        USBFS_Device_Endp_Init( );
+        R8_USB_INT_FG |= RB_UIF_BUS_RST;*/
         /* usb suspend interrupt processing */
         R8_USB_INT_FG = RB_UIF_SUSPEND;
         //printf("usb suspend interrupt processing\r\n");
@@ -824,7 +832,7 @@ void USBFS_IRQHandler( void )
             USBFS_DevSleepStatus |= 0x02;
             if( USBFS_DevSleepStatus == 0x03 )
             {
-                /* Handling usb sleep here */
+                // Handling usb sleep here
             }
         }
         else

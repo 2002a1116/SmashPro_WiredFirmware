@@ -41,6 +41,10 @@ void button_upd_all(){
     else
         sts_button=0;
 }
+uint8_t button_read(uint32_t num)
+{
+    return (sts_button&(1<<num))!=0;
+}
 int32_t adc_debounce[4];
 typedef struct{
     uint32_t sample_timestamp;
@@ -160,10 +164,31 @@ void joystick_debounce_task(){
     tmp2=(adc_debounce[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2]);
     sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);
 }
+#define DPAD_MASK ((1<<NS_BUTTON_LEFT)|(1<<NS_BUTTON_RIGHT)|(1<<NS_BUTTON_UP)|(1<<NS_BUTTON_DOWN))
+#define DEFAULT_JOYSTICK_RANGE (1800);
+uint32_t get_ljs_range_on_axis(uint8_t num){
+    return DEFAULT_JOYSTICK_RANGE;
+}
 void get_peripheral_data_handler(peripheral_data* data){
     if(!data)return;
     //ananlog_read(adc_data,sizeof(adc_data)); //adc r now set with dma
     button_upd_all();
+    if(user_config.dpad_mapping_joystick&&(sts_button&DPAD_MASK)){
+        sts_ljoy=(2048<<12)+2048;
+        if(sts_button&(1<<NS_BUTTON_LEFT)){
+            sts_ljoy-=get_ljs_range_on_axis(0);
+        }
+        if(sts_button&(1<<NS_BUTTON_RIGHT)){
+            sts_ljoy+=get_ljs_range_on_axis(1);
+        }
+        if(sts_button&(1<<NS_BUTTON_UP)){
+            sts_ljoy-=get_ljs_range_on_axis(2)<<12;
+        }
+        if(sts_button&(1<<NS_BUTTON_DOWN)){
+            sts_ljoy+=get_ljs_range_on_axis(3)<<12;
+        }
+        sts_button&=~DPAD_MASK;
+    }
     data->button_status=sts_button;
     data->ljoy_status=sts_ljoy;
     data->rjoy_status=sts_rjoy;
@@ -188,20 +213,20 @@ void func_switch_task(){
     static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,fhf=0;
     static uint8_t save=0,upd=0;
     upd=save=0;
-    if(top_trigger&&button_read(NS_BUTTON_A)){//cause hard fault
+    if(top_trigger&&button_read_raw(NS_BUTTON_A)){//cause hard fault
         if(fhf){
             //trigger_hardfault();
         }
         fhf=0;
     }else   fhf=1;
-    if(top_trigger&&button_read(NS_BUTTON_MINUS)){//imu switch
+    if(top_trigger&&button_read_raw(NS_BUTTON_MINUS)){//imu switch
         if(f1){
             user_config.imu_disabled=!user_config.imu_disabled;
             upd=save=1;
         }
         f1=0;
     }else   f1=1;
-    if(top_trigger&&button_read(NS_BUTTON_PLUS)){
+    if(top_trigger&&button_read_raw(NS_BUTTON_PLUS)){
         if(f2){
             user_config.rumble_disabled=!user_config.rumble_disabled;
             hd_rumble_set_status(!user_config.rumble_disabled);
@@ -209,14 +234,14 @@ void func_switch_task(){
         }
         f2=0;
     }else   f2=1;
-    if(top_trigger&&button_read(NS_BUTTON_CAP)){
+    if(top_trigger&&button_read_raw(NS_BUTTON_CAP)){
         if(f3){
             user_config.led_disabled=!user_config.led_disabled;
             upd=save=1;
         }
         f3=0;
     }else   f3=1;
-    if(top_trigger&&button_read(NS_BUTTON_RS)){
+    if(top_trigger&&button_read_raw(NS_BUTTON_RS)){
         if(f4){
             //force_esp32_active=!force_esp32_active;
             pkt.typ=UART_PKG_PWR_CONTROL;
@@ -227,7 +252,7 @@ void func_switch_task(){
         }
         f4=0;
     }else   f4=1;
-    if(top_trigger&&button_read(NS_BUTTON_LS)){
+    if(top_trigger&&button_read_raw(NS_BUTTON_LS)){
         if(f5){
             for(int i=5;i>=0&&(user_config.bd_addr[i]++)==255;--i);
             memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
@@ -235,7 +260,7 @@ void func_switch_task(){
         }
         f5=0;
     }else f5=1;
-    if(top_trigger&&!connection_state.usb_paired&&button_read(NS_BUTTON_HOME)){
+    if(top_trigger&&!connection_state.usb_paired&&button_read_raw(NS_BUTTON_HOME)){
         if(f6){
             /*
             pkt.typ=UART_PKG_CONNECT_CONTROL;

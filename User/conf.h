@@ -237,7 +237,7 @@ typedef struct _user_config_data{
             uint8_t nonexist:1;
             uint8_t led_disabled:1;
             //uint8_t cross_key_disabled:1;//maybe someone want it
-            uint8_t config_bitmap_reserved1:1;
+            uint8_t dpad_mapping_joystick:1;
             //uint8_t joystick_easy_smash:1;
             uint8_t x_y_swap:1;
             uint8_t a_b_swap:1;
@@ -331,6 +331,7 @@ typedef struct _smashpro_factory_config_data{
 #define FLASH_ADDR_RGB_DATA (0x400)
 
 extern const uint32_t FW_VERSION;
+extern const uint32_t FW_SUB_VERSION;
 
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;

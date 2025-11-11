@@ -207,6 +207,6 @@ uint8_t gpio_read(uint32_t gpio_num)
 void gpio_set(uint32_t x,uint8_t v){
     GPIO_SET(x,v);
 }
-uint8_t button_read(uint32_t num){
+uint8_t button_read_raw(uint32_t num){
     return (sts_button_raw&(1<<num))!=0;
 }

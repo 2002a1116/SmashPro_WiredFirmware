@@ -310,7 +310,8 @@ void fw_subcommand_reboot(cmd_packet* pkt){
 void fw_subcommand_get_version(cmd_packet* pkt){
     //fw_buf[0]=FW_SUBC_ID_GET_VERSION;
     memcpy(fw_buf,&FW_VERSION,4);
-    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 4);
+    memcpy(fw_buf+4,&FW_SUB_VERSION,4);
+    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 8);
     //hid_send_full64byte_report(fw_buf,3);
 }
 void fw_subcommand_dispatcher(cmd_packet* pkt){

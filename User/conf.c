@@ -16,6 +16,7 @@
 #include "hd_rumble_high_accuracy.h"
 #include <string.h>
 const uint32_t FW_VERSION=(0x00010200);
+const uint32_t FW_SUB_VERSION=0x02;
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;

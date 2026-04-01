@@ -61,14 +61,14 @@ void ns_subcommand_pair_by_wire(NS_SUBCOMMAND_CB_PARAM){
     //printf("pair by wire subc id:%d \t typ:%d\r\n",cmd->subcommand_id,typ);
     switch(typ){
     case 0x01://request bd addr
-        memcpy(connection_state.con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
+        memcpy(con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
         connection_state.con_addr_set=1;
-        memcpy(pkt.data.subcommand_report.subcommand_data+1,connection_state.bd_addr,BD_ADDR_LEN);
+        memcpy(pkt.data.subcommand_report.subcommand_data+1,user_config.bd_addr,BD_ADDR_LEN);
         memcpy(pkt.data.subcommand_report.subcommand_data+1+BD_ADDR_LEN,pro_controller_string,sizeof(pro_controller_string));
         pkt.len=SUBC_REPORT_BASIC_LENGTH + sizeof(pro_controller_string)+BD_ADDR_LEN+1;
         break;
     case 0x02:
-        memcpy(pkt.data.subcommand_report.subcommand_data+1,connection_state.bt_ltk,BT_LTK_LENGTH);
+        memcpy(pkt.data.subcommand_report.subcommand_data+1,bt_ltk,BT_LTK_LENGTH);
         pkt.len=SUBC_REPORT_BASIC_LENGTH+17;
         break;
     case 0x03:
@@ -122,7 +122,7 @@ void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     //uint8_t* addr = esp_bt_dev_get_address();
     //todo
     for(int i=0;i<BD_ADDR_LEN;++i){
-        default_device_info.addr[i]=connection_state.bd_addr[BD_ADDR_LEN-i-1];
+        default_device_info.addr[i]=user_config.bd_addr[BD_ADDR_LEN-i-1];
         //printf("0x%02x ",connection_state.bd_addr[BD_ADDR_LEN-i-1]);
     }
     //printf("\r\n");
@@ -386,11 +386,11 @@ void ns_subcommand_get_attachment_info(NS_SUBCOMMAND_CB_PARAM){
     ns_send_report(&pkt);
 }
 
-static uint8_t indicate_led_status=0;
 #define SUBC_ID_SET_INDICATE_LED (0x30)
 void ns_subcommand_set_indicate_led(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    set_indicate_led_status(indicate_led_status=cmd->subcommand_data[0]);
+    connection_state.usb_indicate_led=cmd->subcommand_data[0];
+    //set_indicate_led_status(usb_indicate_led_status=cmd->subcommand_data[0]);
     //0x00 disable 0x01 enable
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;
@@ -406,7 +406,7 @@ void ns_subcommand_set_indicate_led(NS_SUBCOMMAND_CB_PARAM){
 void ns_subcommand_get_indicate_led(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
     _ns_subcommand_set_ack(cmd->subcommand_id,0xB0);
-    pkt.data.subcommand_report.subcommand_data[0]=indicate_led_status;
+    pkt.data.subcommand_report.subcommand_data[0]=connection_state.usb_indicate_led;
     pkt.len=SUBC_REPORT_GET_INDICATE_LED_LENGTH;
     ns_send_report(&pkt);
 }

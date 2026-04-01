@@ -15,8 +15,8 @@
 #include "hd_rumble2.h"
 #include "hd_rumble_high_accuracy.h"
 #include <string.h>
-const uint32_t FW_VERSION=(0x00010200);
-const uint32_t FW_SUB_VERSION=0x02;
+const uint32_t FW_VERSION=(0x00010301);
+const uint32_t FW_SUB_VERSION=0x0;//SmashProFw_V1.2.0.0.hex
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
@@ -39,9 +39,6 @@ void set_hd_rumble_range(){
             hd_rumble_cvr_range=540;
             hd_rumble_cvr_max_offset=720;
             break;
-        //case PCB_REV_213_HIGH_VOLTAGE:
-            //disused,use a 270k gain resistor instead
-            /*fall through*/
         default://smallest the safest
             hd_rumble_cvr_range=500;
             hd_rumble_cvr_max_offset=680;
@@ -60,11 +57,10 @@ void conf_init()
     if(smashpro_factory_config.nonexist)
     {
         memset(&smashpro_factory_config,0,sizeof(smashpro_factory_config));
-        /*smashpro_factory_config.rev_high=2;//2.00.0
-        smashpro_factory_config.rev_low=13;
-        smashpro_factory_config.rev_suffix=0;*/
-        smashpro_factory_config.pcb_rev=PCB_REV_213;
+        smashpro_factory_config.pcb_rev=PCB_REV_300;
         smashpro_factory_config.rgb_cnt=31;
+        smashpro_factory_config.rgb_typ=CONF_BTN_RGB_FULL;
+        smashpro_factory_config.rgb_slow_start_period=100;
         uint8_t res = write_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,
                 sizeof(smashpro_factory_config));
         res = write_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,
@@ -100,17 +96,21 @@ void conf_init()
         factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalX0=
                 factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalY0=2048;
 
-        factory_configuration.Design.ControllerColor.MainColor.r=0x32;
+        /*factory_configuration.Design.ControllerColor.MainColor.r=0x32;
         factory_configuration.Design.ControllerColor.MainColor.g=0x31;
-        factory_configuration.Design.ControllerColor.MainColor.b=0x32;
+        factory_configuration.Design.ControllerColor.MainColor.b=0x32;*/
+        factory_configuration.Design.ControllerColor.MainColor.r=0x00;
+        factory_configuration.Design.ControllerColor.MainColor.g=0x00;
+        factory_configuration.Design.ControllerColor.MainColor.b=0x00;
         factory_configuration.Design.ControllerColor.SubColor.r=0xff;
         factory_configuration.Design.ControllerColor.SubColor.g=0xff;
         factory_configuration.Design.ControllerColor.SubColor.b=0xff;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelNoise=0x00F;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelTypicalStroke=0x613;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x0AE;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x00F;//0x0AE;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCircuitDeadZoneScale=0xD99;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
+        //factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
+        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x541;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYPositive=0x541;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXNegative=0x541;
         factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYNegative=0x541;
@@ -183,15 +183,12 @@ void conf_init()
         user_config.joystick_snapback_filter_max_delay=13500;
         user_config.rumble_pattern=0;
         user_config.legacy_rumble=0;
-        //user_config.led_typ=CONF_PCB_TYPE_SMALL;
-        //user_config.input_typ=0;
         user_config.imu_disabled=1;//we disabled this in default as many people dont need this
         custom_conf_write();
     }
     conf_flush();
     MyCfgDescr[33]=user_config.out_interval;
     MyCfgDescr[40]=user_config.in_interval;
-    memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
 }
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
     switch(addr & 0xffff00)
@@ -244,20 +241,21 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
         if(save)
             flash_res=custom_conf_write();
         uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
+        conf_flush();
         break;
     case 0x0000:
         memcpy(((uint8_t*)&smashpro_factory_config)+(addr&0xff),(uint8_t*)buf,size);
         if(save)
             flash_res=write_flash(FLASH_ADDR_HARDWARE_INFO, (uint8_t*)buf, size);
         uart_conf_write(addr, buf, size);
-        hw_config_flush();
+        conf_flush();
         break;
     case 0x9000:
         memcpy(((uint8_t*)rgb_data)+(addr&0xff),(uint8_t*)buf,size);
         if(save)
             flash_res=write_flash(FLASH_ADDR_RGB_DATA, rgb_data, sizeof(rgb_data));
         uart_conf_write(addr, buf, size);
-        flush_rgb(ENABLE);
+        flush_rgb();
         break;
     default:
         break;
@@ -397,14 +395,13 @@ void conf_flush(){
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
-    //gpio_tb_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
     button_active_mask=~user_config.button_disable_mask;
-    flush_rgb(ENABLE);
-    //uart_update_config();
-}
-void hw_config_flush(){
+    rgb_slow_start_div=smashpro_factory_config.rgb_slow_start_period*50.0f;
+    if(rgb_slow_start_div<=0)rgb_slow_start_div=1.0f;
     set_hd_rumble_range();
-    flush_rgb(ENABLE);
+    flush_rgb();
+    //gpio_tb_init();
+    //uart_update_config();
 }

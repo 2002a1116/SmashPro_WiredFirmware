@@ -9,8 +9,9 @@
 //void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 
-volatile uint32_t Systick_MS;
-static uint16_t const * const Systick_CLK=&TIM2->CNT;
+volatile static uint32_t Systick_MS=0;
+volatile static uint32_t Systick_US_High=0;
+static uint16_t const * volatile const Systick_CLK=&TIM2->CNT;
 void _systick_init(void){
     //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE); //使能定时器2时钟
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;//定义定时器2结构体
@@ -31,12 +32,11 @@ void _systick_init(void){
 }
 void SysTick_Init(void)//定时器2初始化函数
 {
-    static inited=0;
+    static uint8_t inited=0;
     if(inited)return;
     inited=1;
     _systick_init();
 
-    //printf("systick init comp\r\n");
 }
 
 void TIM2_IRQHandler(void)//定时器2中断服务函数，硬件自动调用，不需要手动调用
@@ -44,14 +44,17 @@ void TIM2_IRQHandler(void)//定时器2中断服务函数，硬件自动调用，不需要手动调用
     if(TIM_GetFlagStatus(TIM2,TIM_FLAG_Update)==1)//判断定时器2更新标志位是否产生
     {
         Systick_MS++;//计数值加1 T=1000/1MHZ
+        Systick_US_High+=1000;
         TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update); //清除定时器2更新标志位
     }
 }
 inline uint32_t Get_Systick_US(){//chip is not fast enough to maintain a us tick,so just bare with it。
-    return Systick_MS*1000+(*Systick_CLK);
+    //return Systick_MS*1000+(*Systick_CLK);
+    return Systick_US_High+(*Systick_CLK);
 }
 inline uint64_t Get_Systick_US64(){
     return Systick_MS*1000ull+(*Systick_CLK);
+    //return Systick_US_High+(*Systick_CLK);
 }
 inline uint32_t Get_Systick_MS(){
     return Systick_MS;
@@ -70,7 +73,6 @@ inline void _set_systick_cmp(uint64_t n){
     SysTick->CMPHR1 = n>>40;
     SysTick->CMPHR2 = n>>48;
     SysTick->CMPHR3 = n>>56;
-    ////printf("set systick :%llu %llu",n,(((uint64_t)*(uint32_t*)(&SysTick->CMPLR0))<<32)+*(uint32_t*)(&SysTick->CMPHR0));
 }
 void _reset_systick_cnt();
 inline void _reset_systick_cnt(){
@@ -107,40 +109,42 @@ void HighPrecisionTimerDelayUs(uint32_t us){
     us*=p_us;
     while(HighPrecisionTimerCnt()<us);
 }
-uint8_t wait_nonblocking_us(uint8_t (*func)(void*),void* param,uint32_t n)
+uint8_t execute_timeout_us(uint8_t (*func)(void*),void* param,uint32_t n)
 {
     if(!func)return 0;
-    volatile uint32_t tp=Get_Systick_US();
-    //volatile uint32_t target=tp+n;
-    ////printf("execute us now:%d tar:%d\r\n",tp,target);
+    uint32_t tp=Get_Systick_US();
     while(1){
         if(func(param))
-            return 0;
+            break;
         if(Get_Systick_US()-tp>n){
             return !func(param);
         }
     }
-    return 1;
+    return 0;
 }
-uint8_t wait_nonblocking_ms(uint8_t (*func)(void*),void* param,uint32_t n)
+uint8_t execute_timeout_ms(uint8_t (*func)(void*),void* param,uint32_t n)
 {
     if(!func)return 0;
-    volatile uint32_t tp=Systick_MS;
+    uint32_t tp=Systick_MS;
     while(1){
         if(func(param))
-            return 0;
+            break;
         if(Systick_MS-tp>n)
             return !func(param);
     }
-    return 1;
+    return 0;
 }
 void Delay_Us(uint32_t n)
 {
-    volatile uint32_t tp=Get_Systick_US();
+    uint32_t tp=Get_Systick_US();
     while(Get_Systick_US()-tp<=n);
+}
+void Delay_Us_Fast(uint16_t n){
+    uint32_t tp=*Systick_CLK;
+    while(*Systick_CLK-tp<=n);
 }
 void Delay_Ms(uint32_t n)
 {
-    volatile uint32_t tp=Systick_MS;
+    uint32_t tp=Systick_MS;
     while(Systick_MS-tp<=n);
 }

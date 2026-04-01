@@ -105,6 +105,8 @@
 #define IMU_GYO_SIZE (6)
 #define IMU_RATIO_DIV (128.0f)
 
+//#define IMU_MODE_I2C
+
 extern int16_t imu_raw_buf[6];
 extern int16_t imu_res[6];
 extern uint8_t imu_upd_cnt;

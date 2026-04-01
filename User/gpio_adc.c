@@ -9,8 +9,8 @@
 #include "string.h"
 #include "ch32v10x_rcc.h"
 #include "gpio_adc.h"
+#include "conf.h"
 
-#include "debug.h"
 
 /* Global Variable */
 uint16_t adc_data[4];
@@ -25,7 +25,11 @@ void ADC_Function_Init(void)
     //RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
     RCC_ADCCLKConfig(RCC_PCLK2_Div2);
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_5|GPIO_Pin_3|GPIO_Pin_4;
+    if(smashpro_factory_config.pcb_rev<PCB_REV_300)
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_5|GPIO_Pin_3|GPIO_Pin_4;
+    else
+        GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4;
+
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
@@ -100,7 +104,7 @@ u16 Get_ADC_Val(u8 ch)
  *
  * @return  none
  */
-void DMA_Tx_Init(DMA_Channel_TypeDef *DMA_CHx, u32 ppadr, u32 memadr, u16 bufsize)
+void DMA_Tx_Init(DMA_Channel_TypeDef *DMA_CHx, uint32_t ppadr, uint32_t memadr, uint16_t bufsize)
 {
     DMA_InitTypeDef DMA_InitStructure = {0};
 
@@ -160,7 +164,12 @@ void adc_init(void){
     //DMA_Cmd(DMA1_Channel1, ENABLE);
 
     ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_239Cycles5);
-    ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 2, ADC_SampleTime_239Cycles5);
+
+    if(smashpro_factory_config.pcb_rev<PCB_REV_300)
+        ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 2, ADC_SampleTime_239Cycles5);
+    else
+        ADC_RegularChannelConfig(ADC1, ADC_Channel_2, 2, ADC_SampleTime_239Cycles5);
+
     ADC_RegularChannelConfig(ADC1, ADC_Channel_3, 3, ADC_SampleTime_239Cycles5);
     ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 4, ADC_SampleTime_239Cycles5);
     DMA_Cmd(DMA1_Channel1, ENABLE);

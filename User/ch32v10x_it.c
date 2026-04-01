@@ -25,10 +25,13 @@ void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
  */
 void NMI_Handler(void)
 {
-    flush_rgb(DISABLE);
+    printf("NMI_Handler\r\n");
+    _force_rgb(DISABLE);
     RCC->INTR|=RCC_CSSC;
     SetSysClock();//restart crystal
     PFIC->CFGR|=(1<<3);
+    for(int i=0;i<1e8;++i);
+    NVIC_SystemReset();
     //while(1);
 }
 
@@ -44,6 +47,8 @@ uint32_t EXC_PC;
 
 void HardFault_Handler(void)
 {
+    printf("HardFault_Handler\r\n");
+    NVIC_SystemReset();
     //flush_rgb(DISABLE);
     //csrr a0, mstatus
     /*__asm volatile ("csrr %0, mcause" : \

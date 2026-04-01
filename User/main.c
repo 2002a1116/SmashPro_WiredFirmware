@@ -23,10 +23,6 @@
 #include "spi.h"
 #include "watchdog.h"
 
-void Var_Init(void)
-{
-
-}
 enum ADC_CHANNEL_ID{
     ADC_CHANNEL_LJOYS_HORI=0,
     ADC_CHANNEL_LJOYS_VERT,
@@ -38,8 +34,32 @@ void button_upd_all(){
     uint32_t tp=gpio_read_all();
     if(!top_trigger)
         sts_button=tp;
-    else
+    else{
         sts_button=0;
+        if(smashpro_factory_config.pcb_rev==PCB_NGC_110){
+            if(sts_button_raw&(1<<NS_BUTTON_Y)){
+                sts_button|=(1<<NS_BUTTON_MINUS);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_X)){
+                sts_button|=(1<<NS_BUTTON_PLUS);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_B)){
+                sts_button|=(1<<NS_BUTTON_CAP);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_A)){
+                sts_button|=(1<<NS_BUTTON_HOME);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_UP)){
+                sts_button|=(1<<NS_BUTTON_L);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_LEFT)){
+                sts_button|=(1<<NS_BUTTON_LS);
+            }
+            if(sts_button_raw&(1<<NS_BUTTON_RIGHT)){
+                sts_button|=(1<<NS_BUTTON_RS);
+            }
+        }
+    }
 }
 uint8_t button_read(uint32_t num)
 {
@@ -50,7 +70,7 @@ typedef struct{
     uint32_t sample_timestamp;
     int32_t x;
     int32_t y;
-    int64_t len_sq;
+    int32_t len_sq;
 }js_sample;
 js_sample js_snapback_samples[2];
 //dif=0.8
@@ -77,8 +97,8 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
         break;
     }
     //snapback deadzone is influenced by joystick ratio,as its value is set by output x & y
-    x=(x*user_config.joystick_ratio[id*2])>>5;
-    y=(y*user_config.joystick_ratio[id*2+1])>>5;
+    x=(x*user_config.joystick_ratio[id>>2])>>5;
+    y=(y*user_config.joystick_ratio[(id>>2)+1])>>5;
 /*#if (PCB_TYPE==PCB_TYPE_MICRO)
     x=-x;
     y=-y;
@@ -89,7 +109,7 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
         if(len_sq>=joystick_snapback_deadzone_sq[id])
             set=1;
         uint32_t timestamp=Get_Systick_US();
-        if(!timestamp)++timestamp;
+        if(!timestamp)timestamp=1;
         do{
             //if(len_sq<160000)
             //if(js_snapback_samples[id].len_sq<160000)
@@ -103,14 +123,14 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
             int64_t dp_sq=js_snapback_samples[id].x*x+js_snapback_samples[id].y*y;
             if(dp_sq>=0)
                 break;
-            dp_sq*=dp_sq;
             //int64_t a_sq_b_sq=len_sq*js_snapback_samples[id].len_sq;
             //float cos_sq=dp_sq/a_sq_b_sq;
             //cos_sq<0.8||cos_sq>(1/0.8)
             //if(dp_sq<0.375f*a_sq_b_sq)
-            uint64_t a_sq_b_sq=(len_sq*js_snapback_samples[id].len_sq*3)>>3;//50deg
+            //dp_sq*=dp_sq;
+            //uint64_t a_sq_b_sq=(len_sq*js_snapback_samples[id].len_sq*3)>>3;//50deg
             //uint64_t a_sq_b_sq=len_sq*js_snapback_samples[id].len_sq>>2;//60 deg
-            if(dp_sq<a_sq_b_sq)//angler larger than 50 degree
+            if((dp_sq*dp_sq)<(3ll*len_sq*js_snapback_samples[id].len_sq)>>3)//angler larger than 50 degree
                 break;
             //prob snapback
             //force center
@@ -131,10 +151,8 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
     y+=2048;
     //x=i32_clamp(x, 0, 4095);
     //y=i32_clamp(y, 0, 4095);
-    static int32_t nx,ny,px,py;
-    nx=ny=0;
-    px=py=4095;
     if(user_config.joystick_range_normalization){
+        int32_t nx=0,ny=0,px=4095,py=4095;
         /*nx=i32_min(factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXNegative,
                 factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXPositive);
         ny=i32_min(factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYNegative,
@@ -154,7 +172,7 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
 }
 static uint32_t sts_ljoy,sts_rjoy;
 void joystick_debounce_task(){
-    for(int i=0;i<4;++i){
+    /*for(int i=0;i<4;++i){
         adc_debounce[i]=adc_data[i];
     }
     int32_t tmp1=(adc_debounce[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1]);
@@ -162,7 +180,11 @@ void joystick_debounce_task(){
     sts_ljoy=joystick_snapback_filter(tmp2, tmp1, 0);
     tmp1=(adc_debounce[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3]);
     tmp2=(adc_debounce[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2]);
-    sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);
+    sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);*/
+    sts_ljoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0],
+            adc_data[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1], 0);
+    sts_rjoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2],
+            adc_data[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3], 1);
 }
 #define DPAD_MASK ((1<<NS_BUTTON_LEFT)|(1<<NS_BUTTON_RIGHT)|(1<<NS_BUTTON_UP)|(1<<NS_BUTTON_DOWN))
 #define DEFAULT_JOYSTICK_RANGE (1800);
@@ -182,10 +204,10 @@ void get_peripheral_data_handler(peripheral_data* data){
             sts_ljoy+=get_ljs_range_on_axis(1);
         }
         if(sts_button&(1<<NS_BUTTON_UP)){
-            sts_ljoy-=get_ljs_range_on_axis(2)<<12;
+            sts_ljoy+=get_ljs_range_on_axis(2)<<12;
         }
         if(sts_button&(1<<NS_BUTTON_DOWN)){
-            sts_ljoy+=get_ljs_range_on_axis(3)<<12;
+            sts_ljoy-=get_ljs_range_on_axis(3)<<12;
         }
         sts_button&=~DPAD_MASK;
     }
@@ -210,7 +232,7 @@ void imu_read_test(){
     //printf("imu id:0x%02x ,res:%d\r\n",id,res);
 }
 void func_switch_task(){
-    static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,fhf=0;
+    static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,f7=0,fhf=0;
     static uint8_t save=0,upd=0;
     upd=save=0;
     if(top_trigger&&button_read_raw(NS_BUTTON_A)){//cause hard fault
@@ -237,46 +259,46 @@ void func_switch_task(){
     if(top_trigger&&button_read_raw(NS_BUTTON_CAP)){
         if(f3){
             user_config.led_disabled=!user_config.led_disabled;
-            upd=save=1;
+            save=1;
         }
         f3=0;
     }else   f3=1;
     if(top_trigger&&button_read_raw(NS_BUTTON_RS)){
         if(f4){
+            static uint32_t tk=0;
+            if(Get_Systick_MS()-tk>100){
+                pkt.typ=UART_PKG_PWR_CONTROL;
+                pkt.id=0;
+                pkt.load[0]=!force_esp32_active;
+                send_uart_pkt(&pkt);
+                tk=Get_Systick_MS();
+            }
             //force_esp32_active=!force_esp32_active;
-            pkt.typ=UART_PKG_PWR_CONTROL;
-            pkt.id=0;
-            pkt.load[0]=!force_esp32_active;
-            send_uart_pkt(&pkt);
-            upd=1;
         }
         f4=0;
     }else   f4=1;
     if(top_trigger&&button_read_raw(NS_BUTTON_LS)){
         if(f5){
             for(int i=5;i>=0&&(user_config.bd_addr[i]++)==255;--i);
-            memcpy(connection_state.bd_addr,user_config.bd_addr,BD_ADDR_LEN);
             custom_conf_write();
         }
         f5=0;
     }else f5=1;
     if(top_trigger&&!connection_state.usb_paired&&button_read_raw(NS_BUTTON_HOME)){
-        if(f6){
-            /*
-            pkt.typ=UART_PKG_CONNECT_CONTROL;
-            pkt.id=5;
-            pkt.load[0]=1;
-            send_uart_pkt(&pkt);
-            upd=1;
-            */
-            set_bt_connect_mode(1);
-        }f6=0;
-    }else{
+        if(f6)
+            send_bt_cmd(BT_CMD_LISTEN,0);
         f6=0;
-        set_bt_connect_mode(0);
-    }
+    }else f6=1;
+    if(top_trigger&&button_read_raw(NS_BUTTON_LS)){
+        if(f7){
+            pkt.typ=UART_PKG_PWR_CONTROL;
+            pkt.id=0xf;//reboot esp32
+            send_uart_pkt(&pkt);
+        }
+        f7=0;
+    }else f7=1;
     if(upd)
-        flush_rgb(ENABLE);
+        flush_rgb();
     if(save)//we save to flash
         custom_conf_write();
 }
@@ -288,7 +310,7 @@ void top_timer(void){
         {
             if(Get_Systick_MS()-top_tick>100){
                 if(!top_trigger){
-                    //printf("top pressed\r\n");
+                    printf("top pressed\r\n");
                 }
                 top_trigger=1;
                 set_indicate_led_mode(1);
@@ -308,28 +330,33 @@ void routine_service(void){
     ////printf("routine service tick:%d %d %d\r\n",Get_Systick_MS(),SysTick->CNTL,SysTick->CMPLR);
     ++rts_cnt;
     if(!rts_cnt)
-        rts_tcnt=1;
+        rts_tcnt=Get_Systick_MS();
     if(routine_tick!=Get_Systick_MS()){
         rts_tcnt+=Get_Systick_MS()-routine_tick;
         routine_tick=Get_Systick_MS();
     }
     top_timer();
     push_waveform_into_buffer_task();
-    imu_upd();
+    //imu_upd();
     func_switch_task();
-    indicate_rgb_task(connection_state.usb_paired);
-    reliable_uart_task();
+    rgb_task(connection_state.usb_paired);
+    //reliable_uart_task();
+    start_connect();
 }
 void routine_service_init(void){
+    uint32_t t=GPIO_LED_PWR;
+    _gpio_init(&t, 1, GPIO_Mode_Out_PP);
     top_init();
 }
 void set_peripherals_state(uint8_t state)
 {
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, state);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, state);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, state);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, state);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, state);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, state);
+    RCC_APB2PeriphClockCmd(RCC_APB1Periph_SPI2, state);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, state);
     DMA_Cmd(DMA1_Channel4, state);
     DMA_Cmd(DMA1_Channel5, state);
@@ -344,59 +371,59 @@ void init_all()
 {
     //SetSysClock();//this seems not reenterable?why?
     RCC->CTLR|=RCC_CSSON;
+    RCC->CTLR=RCC->CTLR&(~RCC_SW)|0x01;
     RCC_LSICmd(ENABLE);
+    SystemCoreClockUpdate();
     //RCC->CFGR0 &= ~RCC_HPRE;
     //RCC->CFGR0 &= ~RCC_PPRE2;
     //RCC->CFGR0 &= ~RCC_PPRE1;
     USART_printf_Init(115200);
     memset(&connection_state,0,sizeof(connection_state));
     printf("\r\n\r\nPROCON PROJECT\r\n");
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+
+    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);
+
+    /*RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);*/
+    set_peripherals_state(ENABLE);
     HighPrecisionTimer_Init();
     SysTick_Init();
     Delay_Ms(10);
-    reliable_uart_init();
+    //reliable_uart_init();
     conf_init();
-    RCC_ClocksTypeDef rcc_clock;
-    RCC_GetClocksFreq(&rcc_clock);
-    Var_Init();
+    /*RCC_ClocksTypeDef rcc_clock;
+    RCC_GetClocksFreq(&rcc_clock);*/
     gpio_init();
     UART1_Init();
     UART1_DMA_Init();
+    wake_esp32_init();
+    gpio_set(GPIO_WAKE_BAND, 1);
     adc_init();
-    wake_esp32();
     routine_service_init();
-    spi_init();
-    i2c_init();
+    rgb_init();
+    imu_spi_init();
+    //i2c_init();
     imu_init();
     set_imu_awake();
     conf_flush();
     USBFS_RCC_Init();
     USBFS_Device_Init( ENABLE , PWR_VDD_SupplyVoltage());
-    //sofw_watchdog_init();
+    ns_mux_init();
+    ns_set_peripheral_data_getter(get_peripheral_data_handler);
+    hid_init();
+    hd_rumble_init(0);
 }
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
     SystemCoreClockUpdate();
-    //NVIC_HaltPushCfg(ENABLE);
-    //seems every pfic(nvic) operation will influnce sysclock,and increase imu fail rate.
-    //dont know why.
-    //todo: figure it out.
     init_all();
     printf("SystemClk:%d\r\n",SystemCoreClock);
-    is_rumble_start=gpio_read(NS_BUTTON_HOME);
-    ns_mux_init();
-    ns_set_peripheral_data_getter(get_peripheral_data_handler);
-    hid_init();
-    hd_rumble_init(0);
-    //routine_service_init();
+    printf("%08x\r\n",RCC->RSTSCKR);
 #define COMPILE_WL
     while(1)
     {
@@ -410,15 +437,11 @@ int main(void)
             hid_rx_service();
             hid_tx_service();
         }
-        else{
-            connection_state.usb_enumed=connection_state.usb_paired=0;
-        }
 #ifdef COMPILE_WL
         uart_com_task();
         UART1_Tx_Service();
 #endif
         routine_service();
-        //soft_watchdog_feed();
     }
 }
 

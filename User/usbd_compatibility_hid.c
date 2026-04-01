@@ -87,10 +87,18 @@ void hid_init()
 }
 void hid_tx_service( void )
 {
+    static uint32_t tick=0;
+    if (!tick) {
+        tick=Get_Systick_MS();
+    }
     if(USBFS_Endp_Busy[DEF_UEP1]){//busy, so skip
         ////printf("busy %d\r\n",Get_Systick_MS());
+        if(Get_Systick_MS()-tick>1000){
+            usb_dev_reset();
+        }
         return;
     }
+    tick=Get_Systick_MS();
     ////printf("not busy\r\n");
     if(ns_usb_send_rb.size)//special packet to send
     {

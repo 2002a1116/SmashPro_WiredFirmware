@@ -14,6 +14,7 @@
 #include "tick.h"
 #include "watchdog.h"
 #include "uart.h"
+#include "imu_spi.h"
 #include <string.h>
 #pragma pack(push,1)
 uint8_t imu_upd_cnt;
@@ -27,12 +28,20 @@ float imu_ratio_xf,imu_ratio_yf,imu_ratio_zf;
 uint8_t imu_set_reg(uint8_t reg,uint8_t value,uint8_t mask)
 {
     uint8_t buf,ret=0;
+#ifdef IMU_MODE_I2C
     if(ret=i2c_read_byte(reg, &buf)){
         return ret;
     }
     buf = (buf&(~mask))|value;
     ret=i2c_write_byte(reg, buf);
+#else
+    if(ret=spi_get_reg(reg, &buf)){
+        return ret;
+    }
+    buf = (buf&(~mask))|value;
+    ret=spi_set_reg(reg, buf);
     return ret;
+#endif
 }
 
 void imu_set_acc_bandwidth(uint8_t BW0XL, uint8_t ODR)
@@ -46,28 +55,40 @@ uint8_t imu_error=0;
 uint8_t imu_read(){
     uint8_t status=0;
     uint8_t ret;
+#ifdef IMU_MODE_I2C
     if((ret=i2c_read_byte(IMU_ID_REG, &status))||(status!=IMU_ID_LSM6DS3&&status!=IMU_ID_LSM6DS3TRC)){
+#else
+    if((ret=spi_get_reg(IMU_ID_REG, &status))||(status!=IMU_ID_LSM6DS3&&status!=IMU_ID_LSM6DS3TRC)){
+#endif
         imu_id_read_fail_cnt++;
         if((!imu_error)&&(imu_id_read_fail_cnt>=10)){
             imu_error=1;
-            flush_rgb(ENABLE);
+            flush_rgb();
         }
     }else {
         imu_id_read_fail_cnt=0;
         if(imu_error)
-            flush_rgb(ENABLE);
+            flush_rgb();
         imu_error=0;
-        //flush_rgb(ENABLE);
+        //flush_rgb();
     }
     if(imu_error)return 3;
+#ifdef IMU_MODE_I2C
     if(ret=i2c_read_byte(LSM6DS3TRC_STATUS_REG, &status)){
+#else
+    if(ret=spi_get_reg(LSM6DS3TRC_STATUS_REG, &status)){
+#endif
         ++imu_read_cnt;
         ++imu_read_fail_cnt;
         return ret;
     }
     if((status&LSM6DS3TRC_STATUS_ACCELEROMETER)&&(status&LSM6DS3TRC_STATUS_GYROSCOPE)){
         ++imu_read_cnt;
+#ifdef IMU_MODE_I2C
         if(i2c_read_continuous(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
+#else
+        if(spi_get_multi_reg(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
+#endif
             ++imu_read_fail_cnt;
             return 1;
         }
@@ -157,7 +178,7 @@ void imu_upd()
         set_imu_available(rep);
         return;//disabled mask
     }
-    if(!i2c_status)return;
+    //if(!i2c_status)return;
     if(!imu_mode)return;
     if(!imu_upd_cnt)
         imu_upd_cnt=3;

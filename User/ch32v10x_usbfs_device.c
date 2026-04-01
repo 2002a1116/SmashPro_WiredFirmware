@@ -13,6 +13,7 @@
 #include "ch32v10x_usbfs_device.h"
 #include "usbd_compatibility_hid.h"
 #include "ring_buffer.h"
+#include "conf.h"
 /*******************************************************************************/
 /* Variable Definition */
 
@@ -125,7 +126,7 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     if( sta )
     {
 		R8_USB_CTRL = RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-        Delay_Us( 10 );
+		Delay_Us_Fast( 10 );
         R8_USB_CTRL = 0x00;
         R8_USB_INT_EN = RB_UIE_SUSPEND | RB_UIE_BUS_RST | RB_UIE_TRANSFER;
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
@@ -140,7 +141,7 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     else
     {
         R8_USB_CTRL = RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-        Delay_Us( 10 );
+        Delay_Us_Fast( 10 );
         R8_USB_CTRL = 0x00;
         NVIC_DisableIRQ(USBFS_IRQn);
     }
@@ -804,41 +805,28 @@ void USBFS_IRQHandler( void )
     else if( intflag & RB_UIF_BUS_RST )
     {
         /* usb reset interrupt processing */
-        USBFS_DevConfig = 0;
-        USBFS_DevAddr = 0;
-        USBFS_DevSleepStatus = 0;
-        USBFS_DevEnumStatus = 0;
-
-        R8_USB_DEV_AD = 0;
-        USBFS_Device_Endp_Init( );
-        R8_USB_INT_FG |= RB_UIF_BUS_RST;
+        usb_dev_reset();
     }
     else if( intflag & RB_UIF_SUSPEND )
     {
-        /*USBFS_DevConfig = 0;
-        USBFS_DevAddr = 0;
-        USBFS_DevSleepStatus = 0;
-        USBFS_DevEnumStatus = 0;
+        if(smashpro_factory_config.disable_usb_auto_recovery)
+            return;
+        R8_USB_INT_FG |= RB_UIF_SUSPEND;
 
-        R8_USB_DEV_AD = 0;
-        USBFS_Device_Endp_Init( );
-        R8_USB_INT_FG |= RB_UIF_BUS_RST;*/
-        /* usb suspend interrupt processing */
-        R8_USB_INT_FG = RB_UIF_SUSPEND;
-        //printf("usb suspend interrupt processing\r\n");
-        Delay_Us(10);
-        if ( R8_USB_MIS_ST & RB_UMS_SUSPEND )
-        {
-            USBFS_DevSleepStatus |= 0x02;
-            if( USBFS_DevSleepStatus == 0x03 )
-            {
-                // Handling usb sleep here
-            }
-        }
-        else
-        {
-            USBFS_DevSleepStatus &= ~0x02;
-        }
+        uint8_t usb_int_en = R8_USB_INT_EN;
+        uint8_t usb_dev_ad = R8_USB_DEV_AD;
+        uint8_t udev_ctrl = R8_UDEV_CTRL;
+        uint8_t uep1_ctrl = R8_UEP1_CTRL;
+
+        R8_USB_CTRL |= RB_UC_RESET_SIE;
+        Delay_Us_Fast(10);
+        R8_USB_CTRL &= ~RB_UC_RESET_SIE;
+
+        R8_USB_INT_EN = usb_int_en;
+        R8_USB_DEV_AD = usb_dev_ad;
+        R8_UDEV_CTRL = udev_ctrl;
+        R8_UEP1_CTRL = uep1_ctrl;
+        //recover from sie reset;
     }
     else
     {
@@ -854,6 +842,16 @@ void USBFS_IRQHandler( void )
  *
  * @return  none
  */
+void usb_dev_reset(){
+    USBFS_DevConfig = 0;
+    USBFS_DevAddr = 0;
+    USBFS_DevSleepStatus = 0;
+    USBFS_DevEnumStatus = 0;
+
+    R8_USB_DEV_AD = 0;
+    USBFS_Device_Endp_Init( );
+    R8_USB_INT_FG |= RB_UIF_BUS_RST;
+}
 void USBFS_Send_Resume(void)
 {
     R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;

@@ -186,7 +186,7 @@ void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr)
     }
     if(res){
         rumble_rb_overflow=1;
-        flush_rgb(ENABLE);
+        flush_rgb();
     }
 }
 void push_waveform_into_buffer_task()

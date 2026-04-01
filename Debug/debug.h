@@ -30,7 +30,7 @@ extern "C" {
 
 /* DEBUG UATR Definition */
 #ifndef DEBUG
-//#define DEBUG   DEBUG_UART2
+//#define DEBUG   DEBUG_UART3
 #define DEBUG   DEBUG_NONE
 #endif
 

@@ -1,4 +1,4 @@
-/*
+ /*
  * spi.c
  *
  *  Created on: 2025Äê1ÔÂ29ÈÕ
@@ -33,6 +33,10 @@ typedef struct _rgb_spi_pkg{
 #define SPI_RESET_OFFSET (16)
 rgb_spi_pkg spi_tx_buf[RGB_MAX_CNT*3+SPI_RESET_OFFSET*2];//+reset
 uint8_t indi_status=0;
+static uint8_t indicate_led_updated=1,indicate_led_override=0;
+uint32_t rgb_slow_start_timestamp_ms;
+uint8_t rgb_in_slow_start,rgb_update,rgb_reset;
+float rgb_slow_start_div=1.0f;
 //uint16_t spi_length;
 
 /*********************************************************************
@@ -74,7 +78,6 @@ void spi_DMA_Tx_Init(DMA_Channel_TypeDef *DMA_CHx, u32 ppadr, u32 memadr, u16 bu
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     DMA_DeInit(DMA_CHx);
-
     DMA_InitStructure.DMA_PeripheralBaseAddr = ppadr;
     DMA_InitStructure.DMA_MemoryBaseAddr = memadr;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
@@ -121,25 +124,20 @@ void set_led_rgb(uint8_t i,uint8_t r,uint8_t g,uint8_t b){
     spi_tx_buf[i*3+1+SPI_RESET_OFFSET]=rgb_spi_pkg_gen(r);
     spi_tx_buf[i*3+2+SPI_RESET_OFFSET]=rgb_spi_pkg_gen(b);
 }
-void flush_spi_tx_seq(uint8_t status)
+void flush_spi_tx_seq(uint8_t status,uint8_t use_factor,float factor)
 {
-    //spi_tx_buf[0].load=0;
-    //spi_tx_buf[1].load=0;
-    //printf("flush rgb sequence.\r\n");
-    //memset(spi_tx_buf,0,sizeof(spi_tx_buf));
+    if(factor>1.0f)
+        factor=1.0f;
     if(!status){
-        if(smashpro_factory_config.input_typ){//stock keyboard
-            //gpio_set(GPIO_BUTTON_HOME, indi_status);
-            gpio_set(GPIO_BUTTON_HOME, DISABLE);
-        }
+
         for(int i=0;i<smashpro_factory_config.rgb_cnt;++i){
             set_led_rgb(i, 0, 0, 0);
         }
         return;
     }
-    for(int i=0,j=0;i<smashpro_factory_config.rgb_cnt;++i){
+    for(int i=0,j=0;j<smashpro_factory_config.rgb_cnt;++i){
         if(user_config.led_disabled)
-            set_led_rgb(i, 0, 0, 0);
+            set_led_rgb(i, 0, 0, 0),++j;
         else{
             switch(smashpro_factory_config.led_typ){
             case CONF_PCB_TYPE_SMALL:
@@ -153,7 +151,10 @@ void flush_spi_tx_seq(uint8_t status)
             default:
                 break;
             }
-            set_led_rgb(i, rgb_data[j].r, rgb_data[j].g, rgb_data[j].b);
+            if(use_factor)
+                set_led_rgb(i, rgb_data[j].r*factor, rgb_data[j].g*factor, rgb_data[j].b*factor);
+            else
+                set_led_rgb(i, rgb_data[j].r, rgb_data[j].g, rgb_data[j].b);
             ++j;
         }
     }
@@ -164,18 +165,29 @@ void flush_spi_tx_seq(uint8_t status)
         ofst=4;
     if(smashpro_factory_config.rgb_typ==CONF_BTN_RGB_PWR_ONLY){
         //12 17 being home
-        set_led_rgb(ofst,rgb_data[11].r,rgb_data[11].g,rgb_data[11].b);
-        set_led_rgb(ofst+1,rgb_data[16].r,rgb_data[16].g,rgb_data[16].b);
+        if(user_config.led_disabled){
+            set_led_rgb(ofst,0,0,0);
+            set_led_rgb(ofst+1,0,0,0);
+        }else if(use_factor){
+            set_led_rgb(ofst,rgb_data[11].r*factor,rgb_data[11].g*factor,rgb_data[11].b*factor);
+            set_led_rgb(ofst+1,rgb_data[16].r*factor,rgb_data[16].g*factor,rgb_data[16].b*factor);
+        }else{
+            set_led_rgb(ofst,rgb_data[11].r,rgb_data[11].g,rgb_data[11].b);
+            set_led_rgb(ofst+1,rgb_data[16].r,rgb_data[16].g,rgb_data[16].b);
+        }
     }
-    if(smashpro_factory_config.input_typ){//stock keyboard
-        //gpio_set(GPIO_BUTTON_HOME, indi_status);
-        gpio_set(GPIO_BUTTON_HOME, ENABLE);
-    }
-    //#endif
-    //spi_tx_buf[user_config.rgb_cnt*3].load=0;
-    //spi_tx_buf[user_config.rgb_cnt*3+1].load=0;
 }
-void _flush_rgb(uint8_t status)
+static uint8_t pre_rgb_status=0;
+void _force_rgb(uint8_t status){
+    gpio_set(GPIO_LED_PWR, status);
+    if(pre_rgb_status!=status){
+        //Delay_Us_Fast(20);
+        pre_rgb_status=status;
+    }
+    flush_spi_tx_seq(status,0,1);
+    _flush_rgb();
+}
+void _flush_rgb()
 {
     SPI_Cmd(SPI1, DISABLE);
     DMA_Cmd(DMA1_Channel3, DISABLE);
@@ -184,21 +196,26 @@ void _flush_rgb(uint8_t status)
     DMA_Cmd(DMA1_Channel3, ENABLE);
     SPI_Cmd(SPI1, ENABLE);
 }
-void flush_rgb(uint8_t status){
-    flush_spi_tx_seq(status);
-    _flush_rgb(status);
+void flush_rgb(){
+    //flush_spi_tx_seq(status);
+    //_flush_rgb(status);
+    rgb_reset=1;
+    indicate_led_updated=1;
 }
-void update_rgb(uint8_t status){
-    _flush_rgb(status);
+void update_rgb(){
+    rgb_update=1;
 }
-int spi_init(void)
+int rgb_init(void)
 {
+    uint32_t t=GPIO_LED_PWR;
+    _gpio_init(&t, 1, GPIO_Mode_Out_PP);
+    gpio_set(t, 1);
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
     SPI_FullDuplex_Init();
-    Delay_Ms(2);
+    //Delay_Ms(2);
     spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
-    flush_rgb(ENABLE);
+    flush_rgb();
     return 0;
 }
 void set_indicate_led_function(){
@@ -244,12 +261,12 @@ void set_indicate_led_player(uint8_t is_on_usb){
         set_led_rgb(ofst+3,INDICATE_LED_BRIGHTNESS,INDICATE_LED_BRIGHTNESS,INDICATE_LED_BRIGHTNESS);
     }
 }
-static uint8_t indicate_led_updated=1,indicate_led_override=0;
 void set_indicate_led_status(uint8_t status)
 {
+    if(indi_status==status)
+        return;
     indi_status=status;
     indicate_led_updated=1;
-    //update_rgb(ENABLE);
 }
 void set_indicate_led_mode(uint8_t mode){
     if(mode!=indicate_led_override){
@@ -257,20 +274,59 @@ void set_indicate_led_mode(uint8_t mode){
         indicate_led_updated=1;
     }
 }
-void indicate_rgb_task(uint8_t is_on_usb){
-    static uint32_t indicate_rgb_task_tick=0;
-    if(Get_Systick_MS()-indicate_rgb_task_tick<8)
-        return;
-    indicate_rgb_task_tick=Get_Systick_MS();
+void set_indicate_led(uint8_t is_on_usb){
     if(indicate_led_override){
         set_indicate_led_function();
-        update_rgb(ENABLE);
     }
     else if(indicate_led_updated){
         set_indicate_led_player(is_on_usb);
-        update_rgb(ENABLE);
         indicate_led_updated=0;
     }
+}
+void set_rgb(uint8_t use_factor,float fac){
+    flush_spi_tx_seq(ENABLE,use_factor,fac);
+}
+void rgb_task(uint8_t is_on_usb){
+    static uint32_t rgb_task_t=0;
+    static uint32_t pre_led_disable=1;
+    uint32_t t=Get_Systick_MS();
+    if(t-rgb_task_t<10)//10 ms gap
+        return;
+    rgb_task_t=t;
+    if(connection_state.usb_paired){
+        set_indicate_led_status(connection_state.usb_indicate_led);
+    }else if(connection_state.esp32_paired){
+        set_indicate_led_status(connection_state.esp32_indicate_led);
+    }else {
+        set_indicate_led_status(0xFF);
+    }
+    if(user_config.led_disabled!=pre_led_disable){
+        rgb_reset=1;
+        pre_led_disable=user_config.led_disabled;
+        if(smashpro_factory_config.rgb_slow_start_period){
+            rgb_in_slow_start=1;
+            rgb_slow_start_timestamp_ms=t;
+        }
+    }
+    rgb_update |= rgb_reset|indicate_led_override|rgb_in_slow_start|indicate_led_updated;
+
+    if(rgb_update){
+        if(rgb_in_slow_start && !pre_led_disable){
+            float f=(t-rgb_slow_start_timestamp_ms)/rgb_slow_start_div;
+            if(f>=1.0f){
+                set_rgb(0,1.0f);
+                rgb_in_slow_start=0;
+            }else {
+                set_rgb(1,f);
+            }
+        }else if(rgb_reset){
+            set_rgb(0,1.0f);
+        }
+        set_indicate_led(is_on_usb);
+        _flush_rgb();
+    }
+    rgb_reset=0;
+    rgb_update=0;
 }
 void DMA1_Channel3_IRQHandler(){
     if(DMA_GetITStatus(DMA1_IT_TC3))

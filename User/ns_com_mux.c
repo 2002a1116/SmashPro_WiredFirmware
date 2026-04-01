@@ -20,6 +20,8 @@
 #include "watchdog.h"
 
 struct __connection_state connection_state;
+uint8_t con_addr[BD_ADDR_LEN];
+uint8_t bt_ltk[BT_LTK_LENGTH];
 void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
 uint8_t is_esp32_enabled=0;
 uint8_t bd_addr_default[BD_ADDR_LEN]={0x57, 0x30 ,0xea, 0x8a, 0xbb, 0x7c};
@@ -58,7 +60,7 @@ void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
     switch(typ){
     case 0x01:
         memcpy(usb_handshake_buf,usb_hs01,4);
-        memcpy(usb_handshake_buf+4,connection_state.bd_addr,BD_ADDR_LEN);
+        memcpy(usb_handshake_buf+4,user_config.bd_addr,BD_ADDR_LEN);
         ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 10, 0x01);
         ////printf("rb pushed size:%d\r\n",ns_usb_send_rb.size);
         break;
@@ -296,13 +298,13 @@ void fw_subcommand_get_status(cmd_packet* pkt){
     fw_buf[0]=i2c_read_byte(IMU_ID_REG,fw_buf+1);
     if(!rts_tcnt)rts_tcnt=1;
     fw_buf[2]=rts_cnt/rts_tcnt;
-    memcpy(fw_buf+3,&imu_read_cnt,4);
-    memcpy(fw_buf+7,&imu_read_fail_cnt,4);
+    memcpy(fw_buf+3,&rts_tcnt,4);
+    memcpy(fw_buf+7,&rts_cnt,4);
     fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 11);
 }
 #define FW_SUBC_ID_REBOOT (0xFE)
 void fw_subcommand_reboot(cmd_packet* pkt){
-    flush_rgb(DISABLE);
+    _force_rgb(DISABLE);
     Delay_Ms(10);
     NVIC_SystemReset();
 }
@@ -311,7 +313,8 @@ void fw_subcommand_get_version(cmd_packet* pkt){
     //fw_buf[0]=FW_SUBC_ID_GET_VERSION;
     memcpy(fw_buf,&FW_VERSION,4);
     memcpy(fw_buf+4,&FW_SUB_VERSION,4);
-    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 8);
+    memcpy(fw_buf+8,R32_ESIG_UNIID1,ESIG_LENGTH);
+    fw_snd_pkt(FW_SUBC_ID_GET_VERSION, 8+ESIG_LENGTH);
     //hid_send_full64byte_report(fw_buf,3);
 }
 void fw_subcommand_dispatcher(cmd_packet* pkt){

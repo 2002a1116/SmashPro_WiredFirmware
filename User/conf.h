@@ -10,6 +10,10 @@
 #include <stdint.h>
 #include "ns_com_mux.h"
 
+#define R32_ESIG_UNIID1 (0x1FFFF7E8)
+#define R32_ESIG_UNIID2 (0x1FFFF7EC)
+#define R32_ESIG_UNIID3 (0x1FFFF7F0)
+#define ESIG_LENGTH (12)
 
 #define NS_SPI_USER_JOYSTICK_CALIBRATION_ADDR (0x8010)
 #define NS_SPI_USER_IMU_CALIBRATION_ADDR (0X8026)
@@ -236,9 +240,7 @@ typedef struct _user_config_data{
         struct{
             uint8_t nonexist:1;
             uint8_t led_disabled:1;
-            //uint8_t cross_key_disabled:1;//maybe someone want it
             uint8_t dpad_mapping_joystick:1;
-            //uint8_t joystick_easy_smash:1;
             uint8_t x_y_swap:1;
             uint8_t a_b_swap:1;
             uint8_t rumble_disabled:1;
@@ -249,26 +251,19 @@ typedef struct _user_config_data{
     union{
         uint8_t config_bitmap2;
         struct{
-            //uint8_t led_typ:1;//main board led typ
             uint8_t reserved2:2;
             uint8_t joystick_range_normalization:1;
-            //uint8_t input_typ:1;//0:raw 1:scan
-            //uint8_t rgb_typ:1;//key board typ,
             uint8_t rumble_high_amp_drop:1;
             uint8_t rumble_low_amp_rise:1;
             uint8_t legacy_rumble:1;
             uint8_t dead_zone_mode:2;
         };
     };
-    //uint8_t config_bitmap_reserved34[2];
-    //uint8_t config_bitmap_reserved3;
-    //int8_t hd_rumble_mixer_ratio;// div 128
     uint8_t in_interval;
     uint8_t out_interval;
     uint32_t button_disable_mask:24;
     uint8_t hd_rumble_amp_ratio[4];
     int8_t joystick_ratio[4];
-    //uint8_t reserved[2];
     uint16_t imu_sample_gap;
     uint16_t joystick_snapback_deadzone[2];
 
@@ -298,6 +293,8 @@ typedef struct _user_config_data{
 enum PCV_REV{
     PCB_REV_200,
     PCB_REV_213,
+    PCB_REV_300,
+    PCB_NGC_110,
     //PCB_REV_213_HIGH_VOLTAGE,
 };
 typedef struct _smashpro_factory_config_data{
@@ -306,15 +303,16 @@ typedef struct _smashpro_factory_config_data{
         struct{
             uint8_t nonexist:1;
             uint8_t clk_force_hsi:1;
-            uint8_t reserved0:6;
+            uint8_t disable_usb_auto_recovery:1;
+            uint8_t reserved0:5;
         };
     };
     uint8_t pcb_rev;
-    uint8_t reserved12345[5];
-    uint8_t input_typ;
+    uint8_t reserved123456[6];
     uint8_t led_typ;
     uint8_t rgb_typ;
     uint8_t rgb_cnt;
+    uint8_t rgb_slow_start_period;
     /*
      res reserved;
      */

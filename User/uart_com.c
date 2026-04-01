@@ -65,9 +65,12 @@ void send_input_with_uart(void)
         imu_report_buffer_ptr_reset_flag=0;
     }
 }
-static uint8_t bt_connect_mode=1;//1 listen 0 connect
-void set_bt_connect_mode(uint8_t v){
-    bt_connect_mode=v;
+void send_bt_cmd(uint8_t cmd,uint8_t v){
+    pkt.typ=UART_PKG_CONNECT_CONTROL;
+    pkt.id=0;
+    pkt.load[0]=cmd;
+    pkt.load[1]=v;
+    send_uart_pkt(&pkt);
 }
 void start_connect(){
     static uint32_t tick;
@@ -78,75 +81,43 @@ void start_connect(){
     ((!connection_state.esp32_sleep)&&(!connection_state.esp32_paired))))
     {
         tick=Get_Systick_MS();
-        //printf("UART_PKG_CONNECT_CONTROL\r\n");
-        pkt.typ=UART_PKG_CONNECT_CONTROL;
-        pkt.id=0;
-        if(connection_state.esp32_bt_state==BT_STATE_ERROR)
-            pkt.load[0]=BT_CMD_RESET;
-        else if(connection_state.esp32_bt_state==BT_STATE_NOT_RDY)
-            return;
-        else if(bt_connect_mode==0){//go connect
-            if(connection_state.esp32_bt_state!=BT_STATE_CONNECTED)
-                pkt.load[0]=BT_CMD_CONNECT;
-            else
-                return;
-        }else if(bt_connect_mode==1){//go listening
-            if(connection_state.esp32_bt_state==BT_STATE_CONNECTED){
-                pkt.load[0]=BT_CMD_DISCONNECT;//gracefully disconnect
-            }else if(connection_state.esp32_bt_state==BT_STATE_LISTENING)
-                return;
-            else if(connection_state.esp32_bt_state==BT_STATE_RDY){
-                pkt.load[0]=BT_CMD_LISTEN;
-            }
-        }
-        send_uart_pkt(&pkt);
+        send_bt_cmd(BT_CMD_CONNECT,0);
     }
 }
-void wake_esp32()
-{
-    //we wake up with uart
-    /*printf("wake esp32\r\n");
-    for(int i=0;i<5;++i){
-        pkt.typ=UART_PKG_PWR_CONTROL;
-        pkt.id=1;
-        memset(pkt.load,0,9);
-        send_uart_pkt(&pkt);
-    }*/
-    uint32_t t=GPIO_BUTTON_TOP;
+void wake_esp32_init(){
+    uint32_t t=GPIO_WAKE_BAND;
     _gpio_init(&t, 1, GPIO_Mode_Out_OD);
-    gpio_set(GPIO_BUTTON_TOP, 0);
-    Delay_Ms(10);
-    _gpio_init(&t, 1, GPIO_Mode_IPU);
+    gpio_set(GPIO_WAKE_BAND, 0);
 }
 void recv_esp32_connect_control()
 {
+    //printf("id %d\r\n",pkt.id);
     switch(pkt.id){
     case 0:
-        memcpy(connection_state.bd_addr,pkt.load,BD_ADDR_LEN);
+        memcpy(user_config.bd_addr,pkt.load,BD_ADDR_LEN);
         connection_state.bd_addr_set=1;
         //we reset this every time we start
         break;
     case 1:
         for(int i=0;i<9;++i)
             pkt.load[i]^=0xAA;
-        memcpy(connection_state.bt_ltk,pkt.load,9);
+        memcpy(bt_ltk,pkt.load,9);
         break;
     case 2:
         for(int i=0;i<7;++i)
             pkt.load[i]^=0xAA;
-        memcpy(connection_state.bt_ltk+9,pkt.load,7);
+        memcpy(bt_ltk+9,pkt.load,7);
         connection_state.bt_ltk_set=1;
         break;
     case 0xC:
         connection_state.esp32_paired=pkt.load[0];
-        flush_rgb(!connection_state.esp32_sleep);
-        ////printf("esp32_paired:%d\r\n",connection_state.esp32_paired);
+        connection_state.esp32_indicate_led=pkt.load[1];
         break;
-    /*case 0xD:
-        connection_state.esp32_sleep=1;
-        break;*/
-    case 0xE:
+    case 0xD:
         connection_state.con_addr_set=0;
+        break;
+    case 0xE:
+        connection_state.state=pkt.load[0];
         break;
     case 0xF:
         connection_state.esp32_bt_state=pkt.load[0];
@@ -172,13 +143,14 @@ void recv_pwr_control(){
     switch(pkt.id){
     case 0x00://force_esp32_active
         force_esp32_active=pkt.load[0];
-        flush_rgb(ENABLE);
+        flush_rgb();
         break;
     case 0x01:
         connection_state.esp32_sleep=1;
         break;
     case 0x02://for wireless update,we use this to restart ch32 mcu.
-        flush_rgb(DISABLE);
+        //flush_rgb(DISABLE);
+        _force_rgb(DISABLE);
         Delay_Ms(10);
         NVIC_SystemReset();
         break;
@@ -224,6 +196,7 @@ void recv_flash_operation(){
 }
 void recv_esp32_pkg()
 {
+    //printf("packet typ:%d\r\n",pkt.typ);
     switch(pkt.typ)
     {
     case UART_PKG_RELIABLE:
@@ -256,31 +229,36 @@ void recv_esp32_pkg()
 }
 void connection_state_handler()//decide if we go stop
 {
-    start_connect();
     //printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
-    if(!connection_state.usb_enumed && connection_state.esp32_sleep)
+    if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_US()-input_update_tick>UART_INPUT_UPD_GAP)){
+        if(!connection_state.usb_paired);
+            send_input_with_uart();
+    }
+    if(!connection_state.usb_paired && connection_state.esp32_sleep)
     {
+        //while(1);
+        gpio_set(GPIO_WAKE_BAND, 0);
         uint8_t stop_flag=set_pwr_mode_stop();
-        if(stop_flag)//fk it,i have no idea what are needed to reset,so lets restart the mcu as its not that slow
-            NVIC_SystemReset();
+        connection_state.esp32_sleep=0;
+        gpio_set(GPIO_WAKE_BAND, 1);
         //fail safe,try to res6et everything
-        init_all();
+        //init_all();
         //set_peripherals_state(ENABLE);
     }
-    else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_MS()-input_update_tick>UART_REPORT_GAP))
+    else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_US()-input_update_tick>UART_REPORT_GAP))
     {
-        input_update_tick=Get_Systick_MS();
+        input_update_tick=Get_Systick_US();
         if(connection_state.con_addr_set)//if esp32 recved,we set this flag to be zero
         {
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=3;
             memset(pkt.data,0,11);
-            memcpy(pkt.load,connection_state.con_addr,6);
+            memcpy(pkt.load,con_addr,6);
             send_uart_pkt(&pkt);
         }
         if(!connection_state.usb_paired)
         {
-            send_input_with_uart();
+            //send_input_with_uart();
             ////printf("send bt start\r\n");
             if(!connection_state.bd_addr_set)
             {
@@ -298,15 +276,6 @@ void connection_state_handler()//decide if we go stop
                 //pkt.arr[0]=1;
                 send_uart_pkt(&pkt);
             }
-            /*if(!(connection_state.esp32_bt_state&0x1))
-            {
-                ////printf("send bt start cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=0;
-                pkt.arr[0]=1;
-                send_uart_pkt(&pkt);
-            }*/
-            //we active esp32 connect when user request
         }
         else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
             if((connection_state.esp32_bt_state&0x1))

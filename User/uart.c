@@ -149,12 +149,15 @@ void UART1_Tx_Service( void )
             USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);
             UART1_Tx_Flag = 0;
         }
+        else {
+            return;
+        }
         /*if(DMA_GetFlagStatus(DMA1_FLAG_TC4)){
             USART_DMACmd(USART1, USART_DMAReq_Tx, DISABLE);
             UART1_Tx_Flag = 0;
         }*/
     }
-    else
+    //else
     {
         ////printf("txss %d\r\n",uart_tx_rb.capcity);
         if(uart_tx_rb.size){
@@ -298,9 +301,9 @@ uint8_t check_uart_pkt(uart_packet* pkt){//if ok return false aka 0
         res^=pkt->data[i];
     return res!=pkt->cksum;
 }
-static uart_packet send_buf;
 uint8_t send_uart_pkt(uart_packet* pkt)
 {
+    uart_packet send_buf;
     if(!pkt)return -2;
     memcpy(&send_buf,pkt,UART_PKG_SIZE);
     encode_uart_pkt(&send_buf);

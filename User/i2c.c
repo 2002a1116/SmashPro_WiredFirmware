@@ -90,7 +90,7 @@ void i2c_hardware_init(u32 baudrate, u16 address, u8 allow_reset)
     //I2C_GenerateSTOP( I2C2, ENABLE );
     //Delay_Us(10);
     //printf("i2c busy flag:%d\r\n",I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
-    if(wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US)){
+    if(execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US)){
         //printf("i2c_init fail %d\r\n",allow_reset);
         if(allow_reset){
             I2C_SoftwareResetCmd(I2C2, ENABLE);
@@ -180,7 +180,7 @@ void i2c2_reset()
     uint8_t res;
     res=i2c_software_recovery();
     //I2C_Cmd(I2C2, ENABLE);
-    //res&=!wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
+    //res&=!execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
     if(res|i2c_intr_error){
         //printf("i2c reset success\r\n");
         //if(i2c_error_code==1||i2c_error_code==10)
@@ -188,7 +188,7 @@ void i2c2_reset()
         i2c_hardware_init(IMU_I2C_FREQ, CH32V_I2C_ADDR,0);
         //printf("i2c reset busy flag:%d\r\n",I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
         //Delay_Us(10);
-        //printf("i2c sleep %d\r\n",wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US));
+        //printf("i2c sleep %d\r\n",execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US));
     }else {
         //printf("i2c restart fail,disable i2c\r\n");
     }
@@ -203,7 +203,7 @@ uint8_t i2c_read_start(uint8_t addr,uint8_t ack_mode)
         //I2C_GenerateSTOP( I2C2, ENABLE );
         ////printf("i2c_read_byte 1\r\n");
         I2C_AcknowledgeConfig(I2C2, ENABLE);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=1;
             break;
@@ -211,7 +211,7 @@ uint8_t i2c_read_start(uint8_t addr,uint8_t ack_mode)
         //while( I2C_GetFlagStatus( I2C2, I2C_FLAG_BUSY ) != RESET );
         I2C_GenerateSTART( I2C2, ENABLE );
         //while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_MODE_SELECT ));
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=2;
             break;
@@ -220,7 +220,7 @@ uint8_t i2c_read_start(uint8_t addr,uint8_t ack_mode)
         I2C_Send7bitAddress(I2C2, IMU_ADDR, I2C_Direction_Transmitter);
         //HighPrecisionTimerStart();
         //while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED ));
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
         ////printf("time spend:%d\r\n",HighPrecisionTimerUs());
         if(res|i2c_intr_error){
             i2c_error_code=3;
@@ -228,20 +228,20 @@ uint8_t i2c_read_start(uint8_t addr,uint8_t ack_mode)
         }
         I2C_SendData(I2C2, addr);
         //while( !I2C_CheckEvent( I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=4;
             break;
         }
         I2C_AcknowledgeConfig(I2C2, ack_mode);
         I2C_GenerateSTART( I2C2, ENABLE );
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=5;
             break;
         }
         I2C_Send7bitAddress(I2C2, IMU_ADDR, I2C_Direction_Receiver);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=6;
             break;
@@ -260,8 +260,8 @@ uint8_t i2c_read_continuous(uint8_t addr,uint8_t* buf,uint8_t len)
         return res;
     }
     while(len--){
-        //res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_FLAG_RXNE,IMU_I2C_TIMEOUT_US);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_RECEIVED,IMU_I2C_TIMEOUT_US);
+        //res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_FLAG_RXNE,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_RECEIVED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             //printf("errorr len multi byte tot:%d len:%d\r\n",tl,len);
             i2c_error_code=7;
@@ -287,7 +287,7 @@ uint8_t i2c_read_byte(uint32_t addr,uint8_t *ret)
         if(res|i2c_intr_error){
             break;
         }
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_RECEIVED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_RECEIVED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=9;
             break;
@@ -305,31 +305,31 @@ uint8_t i2c_write_byte(uint8_t reg,uint8_t v)
     if(!i2c_status)return;
     uint8_t res=0;
     do{
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=10;
             break;
         }
         I2C_GenerateSTART( I2C2, ENABLE );
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_MODE_SELECT,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=11;
             break;
         }
         I2C_Send7bitAddress(I2C2, IMU_ADDR, I2C_Direction_Transmitter);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=12;
             break;
         }
         I2C_SendData(I2C2, reg);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=13;
             break;
         }
         I2C_SendData(I2C2, v);
-        res=wait_nonblocking_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
+        res=execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_event),(void*)I2C_EVENT_MASTER_BYTE_TRANSMITTED,IMU_I2C_TIMEOUT_US);
         if(res|i2c_intr_error){
             i2c_error_code=14;
             break;

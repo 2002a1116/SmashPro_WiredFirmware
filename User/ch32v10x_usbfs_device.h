@@ -120,6 +120,8 @@ extern void USBFS_RCC_Init(void);
 extern void USBFS_Send_Resume(void);
 extern void USBFS_Sleep_Wakeup_CFG( void );
 
+extern void usb_dev_reset();
+
 #ifdef __cplusplus
 }
 #endif

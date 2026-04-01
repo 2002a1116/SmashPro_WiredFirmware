@@ -10,10 +10,13 @@
 
 #define INDICATE_LED_BRIGHTNESS (50)
 
-int spi_init(void);
-void flush_rgb(uint8_t status);
+int rgb_init(void);
+void flush_rgb();
+void _force_rgb(uint8_t status);
 void set_indicate_led_status(uint8_t status);
-void indicate_rgb_task(uint8_t is_on_usb);
+void rgb_task(uint8_t is_on_usb);
 void set_indicate_led_mode(uint8_t mode);
+
+extern float rgb_slow_start_div;
 
 #endif /* USER_SPI_H_ */

@@ -97,8 +97,8 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
         break;
     }
     //snapback deadzone is influenced by joystick ratio,as its value is set by output x & y
-    x=(x*user_config.joystick_ratio[id>>2])>>5;
-    y=(y*user_config.joystick_ratio[(id>>2)+1])>>5;
+    x=(x*user_config.joystick_ratio[id<<1])>>5;
+    y=(y*user_config.joystick_ratio[(id<<1)+1])>>5;
 /*#if (PCB_TYPE==PCB_TYPE_MICRO)
     x=-x;
     y=-y;
@@ -172,7 +172,7 @@ uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
 }
 static uint32_t sts_ljoy,sts_rjoy;
 void joystick_debounce_task(){
-    /*for(int i=0;i<4;++i){
+    for(int i=0;i<4;++i){
         adc_debounce[i]=adc_data[i];
     }
     int32_t tmp1=(adc_debounce[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1]);
@@ -180,11 +180,11 @@ void joystick_debounce_task(){
     sts_ljoy=joystick_snapback_filter(tmp2, tmp1, 0);
     tmp1=(adc_debounce[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3]);
     tmp2=(adc_debounce[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2]);
-    sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);*/
-    sts_ljoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0],
+    sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);
+    /*sts_ljoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0],
             adc_data[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1], 0);
     sts_rjoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2],
-            adc_data[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3], 1);
+            adc_data[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3], 1);*/
 }
 #define DPAD_MASK ((1<<NS_BUTTON_LEFT)|(1<<NS_BUTTON_RIGHT)|(1<<NS_BUTTON_UP)|(1<<NS_BUTTON_DOWN))
 #define DEFAULT_JOYSTICK_RANGE (1800);
@@ -277,13 +277,13 @@ void func_switch_task(){
         }
         f4=0;
     }else   f4=1;
-    if(top_trigger&&button_read_raw(NS_BUTTON_LS)){
+    /*if(top_trigger&&button_read_raw(NS_BUTTON_LS)){
         if(f5){
             for(int i=5;i>=0&&(user_config.bd_addr[i]++)==255;--i);
             custom_conf_write();
         }
         f5=0;
-    }else f5=1;
+    }else f5=1;*/
     if(top_trigger&&!connection_state.usb_paired&&button_read_raw(NS_BUTTON_HOME)){
         if(f6)
             send_bt_cmd(BT_CMD_LISTEN,0);
@@ -416,6 +416,7 @@ void init_all()
     ns_set_peripheral_data_getter(get_peripheral_data_handler);
     hid_init();
     hd_rumble_init(0);
+    hd_rumble_set_status(!user_config.rumble_disabled);
 }
 int main(void)
 {

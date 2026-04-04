@@ -395,6 +395,7 @@ void conf_flush(){
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
     joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
     joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
+    adc_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
     button_active_mask=~user_config.button_disable_mask;

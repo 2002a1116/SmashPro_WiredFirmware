@@ -26,10 +26,8 @@ void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
 uint8_t is_esp32_enabled=0;
 uint8_t bd_addr_default[BD_ADDR_LEN]={0x57, 0x30 ,0xea, 0x8a, 0xbb, 0x7c};
 //hd_rumble_frame data;
-uint8_t is_rumble_start;
 uint32_t rts_cnt=0,rts_tcnt=1;
 void ns_rumble_handler(cmd_packet* pkt){
-    if(!is_rumble_start)return;
     decode_hd_rumble_multiformat_high_acc(&pkt->cmd->rumble_data_left,&pkt->cmd->rumble_data_right);
 }
 void ns_cmd_subcommand_dispatcher(cmd_packet* pkt){

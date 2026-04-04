@@ -163,7 +163,6 @@ uint32_t gpio_read_all(void){
         //    //printf("set %d\r\n",i);
         res|=((!ret)<<i);
     }
-    //res&=button_active_mask;
     sts_button_raw=res;
     return res;
 }

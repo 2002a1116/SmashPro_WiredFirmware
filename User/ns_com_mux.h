@@ -51,7 +51,6 @@ extern uint8_t bt_ltk[BT_LTK_LENGTH];
 extern struct __connection_state connection_state;
 extern ring_buffer ns_usb_send_rb;
 extern void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
-extern uint8_t is_rumble_start;
 extern uint32_t rts_cnt,rts_tcnt;
 void ns_hid_register_packet_dispatch(int typ,void (*handler)(cmd_packet*));
 void ns_mux_init();

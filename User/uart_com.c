@@ -73,11 +73,11 @@ void send_bt_cmd(uint8_t cmd,uint8_t v){
     send_uart_pkt(&pkt);
 }
 void start_connect(){
-    static uint32_t tick;
+    static uint32_t tick=0;
     if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
         return;
-    if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&(
-    connection_state.esp32_connected&&
+    if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&
+            (connection_state.esp32_connected&&
     ((!connection_state.esp32_sleep)&&(!connection_state.esp32_paired))))
     {
         tick=Get_Systick_MS();
@@ -230,9 +230,13 @@ void recv_esp32_pkg()
 void connection_state_handler()//decide if we go stop
 {
     //printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
-    if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_US()-input_update_tick>UART_INPUT_UPD_GAP)){
-        if(!connection_state.usb_paired);
+    static uint32_t uart_report_tick=0,input_update_tick=0;
+    uint32_t tick=Get_Systick_US();
+    if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(tick-input_update_tick>UART_INPUT_UPD_GAP)){
+        if(!connection_state.usb_paired){
+            input_update_tick=tick;
             send_input_with_uart();
+        }
     }
     if(!connection_state.usb_paired && connection_state.esp32_sleep)
     {
@@ -245,10 +249,10 @@ void connection_state_handler()//decide if we go stop
         //init_all();
         //set_peripherals_state(ENABLE);
     }
-    else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_US()-input_update_tick>UART_REPORT_GAP))
+    else if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(Get_Systick_MS()-uart_report_tick>UART_REPORT_GAP))
     {
-        input_update_tick=Get_Systick_US();
-        if(connection_state.con_addr_set)//if esp32 recved,we set this flag to be zero
+        uart_report_tick=Get_Systick_MS();
+        if(connection_state.con_addr_set)
         {
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=3;
@@ -278,13 +282,10 @@ void connection_state_handler()//decide if we go stop
             }
         }
         else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
-            if((connection_state.esp32_bt_state&0x1))
+            if((connection_state.esp32_bt_state))
             {
                 ////printf("send bt stop cmd\r\n");
-                pkt.typ=UART_PKG_CONNECT_CONTROL;
-                pkt.id=0;
-                pkt.load[0]=0;
-                send_uart_pkt(&pkt);
+                send_bt_cmd(BT_CMD_DISCONNECT, 0);
                 //actively close bt connection
             }
         }

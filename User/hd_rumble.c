@@ -5,6 +5,7 @@
  *      Author: Reed
  */
 #include "debug.h"
+#include "gpio_digit.h"
 #include "ring_buffer.h"
 #include "tick.h"
 #include "hd_rumble.h"
@@ -37,6 +38,11 @@ void hd_rumble_init(uint8_t force_disable){
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 #else
 */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5|GPIO_Pin_6;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -90,10 +96,12 @@ void hd_rumble_init(uint8_t force_disable){
     NVIC_Init(&NVIC_InitStructure); //≥ı ºªØNVIC
     NVIC_SetFastIRQ(TIM3_IRQHandler,TIM3_IRQn,2);
 
-    TIM_Cmd(TIM3, ENABLE);
+    //TIM_Cmd(TIM3, ENABLE);
     //ring_buffer_init(&rumble_rb, rumble_buf, HD_RUMBLE_RINGBUFFER_CAP, HD_RUMBLE_FRAME_SIZE);
 }
 void hd_rumble_set_status(uint8_t status)
 {
+    gpio_set(GPIO_RUMBLE_CTRL_L, status);
+    gpio_set(GPIO_RUMBLE_CTRL_R, status);
     TIM_Cmd(TIM3, status);
 }

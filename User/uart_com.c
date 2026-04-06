@@ -74,7 +74,9 @@ void send_bt_cmd(uint8_t cmd,uint8_t v){
 }
 void start_connect(){
     static uint32_t tick=0;
-    if((!sts_button)||connection_state.usb_paired)//if no button pressed or paired by usb,
+    //if no button pressed or paired by usb
+    //we ignore home as we use it in pairing.
+    if((!(sts_button&(1<<NS_BUTTON_HOME)))||connection_state.usb_paired)
         return;
     if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&
             (connection_state.esp32_connected&&
@@ -282,7 +284,7 @@ void connection_state_handler()//decide if we go stop
             }
         }
         else{//if usb paired,donot report to esp32 as esp32 doesnt need input data now
-            if((connection_state.esp32_bt_state))
+            if((connection_state.esp32_paired))
             {
                 ////printf("send bt stop cmd\r\n");
                 send_bt_cmd(BT_CMD_DISCONNECT, 0);

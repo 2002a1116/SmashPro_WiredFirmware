@@ -437,6 +437,8 @@ int main(void)
             connection_state.usb_enumed=1;
             hid_rx_service();
             hid_tx_service();
+        }else{
+            connection_state.usb_enumed=connection_state.usb_paired=0;
         }
 #ifdef COMPILE_WL
         uart_com_task();

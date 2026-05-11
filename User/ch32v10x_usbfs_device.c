@@ -122,7 +122,6 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     {
         EXTEN->EXTEN_CTR &= ~EXTEN_USB_5V_SEL;
     }
-
     if( sta )
     {
 		R8_USB_CTRL = RB_UC_RESET_SIE | RB_UC_CLR_ALL;
@@ -130,12 +129,14 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         R8_USB_CTRL = 0x00;
         R8_USB_INT_EN = RB_UIE_SUSPEND | RB_UIE_BUS_RST | RB_UIE_TRANSFER;
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
-		USBFS_Device_Endp_Init( );
+        usb_dev_reset();
+		//USBFS_Device_Endp_Init( );
         R8_UDEV_CTRL = RB_UD_PD_DIS | RB_UD_PORT_EN;
         ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, ns_usb_rb_len[0], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
         ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, ns_usb_rb_len[1], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
         NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
-        //NVIC_SetPriority(USBFS_IRQn,0x10);
+        //NVIC_SetPriority(USBFS_IRQn,0x30);
+        NVIC_SetPriority(USBFS_IRQn,0x30);
         NVIC_EnableIRQ(USBFS_IRQn);
     }
     else
@@ -385,14 +386,12 @@ void USBFS_IRQHandler( void )
                             }
                         }
                         break;
-
                     /* end-point 1 data out interrupt */
                     case UIS_TOKEN_OUT | DEF_UEP1:
                         if ( intst & RB_UIS_TOG_OK )
                         {
                             R8_UEP1_CTRL ^= RB_UEP_R_TOG;
                             ring_buffer_push(&ns_usb_recv_rb, pEP1_OUT_DataBuf, (R16_USB_RX_LEN & MASK_UIS_RX_LEN ));
-
                         }
                         break;
                     default:
@@ -625,6 +624,7 @@ void USBFS_IRQHandler( void )
 
                                         case ( DEF_UEP_IN | DEF_UEP2 ):
                                             /* Set End-point 2 IN NAK */
+                                            R8_UEP2_CTRL = ( R8_UEP2_CTRL & ~( RB_UEP_R_TOG | MASK_UEP_R_RES ) ) | UEP_R_RES_ACK;
                                             R8_UEP2_CTRL = ( R8_UEP2_CTRL & ~( RB_UEP_T_TOG | MASK_UEP_T_RES ) ) | UEP_T_RES_NAK;
                                             break;
 
@@ -678,8 +678,9 @@ void USBFS_IRQHandler( void )
                                             R8_UEP1_CTRL = ( R8_UEP1_CTRL & ~( RB_UEP_R_TOG | MASK_UEP_R_RES ) ) | UEP_R_RES_STALL;
                                             R8_UEP1_CTRL = ( R8_UEP1_CTRL & ~( RB_UEP_T_TOG | MASK_UEP_T_RES ) ) | UEP_T_RES_STALL;
                                             break;
-                                        case ( DEF_UEP_IN | DEF_UEP2 ):
+                                        case ( DEF_UEP_OUT | DEF_UEP_IN | DEF_UEP2 ):
                                             R8_UEP2_CTRL = ( R8_UEP2_CTRL & ~( RB_UEP_T_TOG | MASK_UEP_T_RES ) ) | UEP_T_RES_STALL;
+                                            R8_UEP2_CTRL = ( R8_UEP2_CTRL & ~( RB_UEP_R_TOG | MASK_UEP_R_RES ) ) | UEP_R_RES_STALL;
                                             break;
                                         default:
                                             errflag = 0xFF;
@@ -806,26 +807,36 @@ void USBFS_IRQHandler( void )
     {
         /* usb reset interrupt processing */
         usb_dev_reset();
+        R8_USB_INT_FG |= RB_UIF_BUS_RST;
     }
     else if( intflag & RB_UIF_SUSPEND )
     {
-        if(smashpro_factory_config.disable_usb_auto_recovery)
-            return;
         R8_USB_INT_FG |= RB_UIF_SUSPEND;
+        if(user_config.disable_usb_auto_recovery)
+            return;
 
         uint8_t usb_int_en = R8_USB_INT_EN;
         uint8_t usb_dev_ad = R8_USB_DEV_AD;
         uint8_t udev_ctrl = R8_UDEV_CTRL;
         uint8_t uep1_ctrl = R8_UEP1_CTRL;
+        //uint8_t uep2_ctrl = R8_UEP2_CTRL;
 
-        R8_USB_CTRL |= RB_UC_RESET_SIE;
-        Delay_Us_Fast(10);
-        R8_USB_CTRL &= ~RB_UC_RESET_SIE;
+        R8_USB_CTRL |= RB_UC_RESET_SIE | RB_UC_CLR_ALL;
+        //Delay_Us_Fast(10);
+        //Delay_Us_Fast(10);
+        //R8_USB_CTRL &= ~(RB_UC_RESET_SIE|RB_UC_CLR_ALL);
+        //R8_USB_CTRL = 0x00;
+        R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
 
         R8_USB_INT_EN = usb_int_en;
         R8_USB_DEV_AD = usb_dev_ad;
         R8_UDEV_CTRL = udev_ctrl;
         R8_UEP1_CTRL = uep1_ctrl;
+        //R8_UEP2_CTRL = uep2_ctrl;
+
+        /*R8_UEP1_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;
+        USBFS_Endp_Busy[DEF_UEP1]=0;*/
+
         //recover from sie reset;
     }
     else
@@ -842,6 +853,12 @@ void USBFS_IRQHandler( void )
  *
  * @return  none
  */
+void USBFS_Send_Resume(void)
+{
+    R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
+    Delay_Ms(8);
+    R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
+}
 void usb_dev_reset(){
     USBFS_DevConfig = 0;
     USBFS_DevAddr = 0;
@@ -850,11 +867,6 @@ void usb_dev_reset(){
 
     R8_USB_DEV_AD = 0;
     USBFS_Device_Endp_Init( );
-    R8_USB_INT_FG |= RB_UIF_BUS_RST;
-}
-void USBFS_Send_Resume(void)
-{
-    R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
-    Delay_Ms(8);
-    R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
+    //USBFS_Send_Resume();
+    //R8_USB_INT_FG |= RB_UIF_BUS_RST;
 }

@@ -15,8 +15,8 @@
 #include "hd_rumble2.h"
 #include "hd_rumble_high_accuracy.h"
 #include <string.h>
-const uint32_t FW_VERSION=(0x00010301);
-const uint32_t FW_SUB_VERSION=0x1;//SmashProFw_V1.2.0.0.hex
+const uint32_t FW_VERSION=(0x00010400);
+const uint32_t FW_SUB_VERSION=0x2;//SmashProFw_V1.2.0.0.hex
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
@@ -30,19 +30,12 @@ uint32_t button_active_mask;
 #define JOYSTICK_RANGE_FACTOR_LEFT (0.6f)
 #define JOYSTICK_RANGE_FACTOR_RIGHT (0.6f)
 void set_hd_rumble_range(){
-    switch(smashpro_factory_config.pcb_rev){
-        case PCB_REV_200:
-            hd_rumble_cvr_range=650;
-            hd_rumble_cvr_max_offset=720;
-            break;
-        case PCB_REV_213:
-            hd_rumble_cvr_range=540;
-            hd_rumble_cvr_max_offset=720;
-            break;
-        default://smallest the safest
-            hd_rumble_cvr_range=500;
-            hd_rumble_cvr_max_offset=680;
-            break;
+    if(PRO_IS(PRO_200)){
+        hd_rumble_cvr_range=650;
+        hd_rumble_cvr_max_offset=720;
+    }else{
+        hd_rumble_cvr_range=540;
+        hd_rumble_cvr_max_offset=720;
     }
     hd_rumble_cvr_max=HD_RUMBLE_TIM_PERIOD_MID+hd_rumble_cvr_max_offset;
     hd_rumble_cvr_min=HD_RUMBLE_TIM_PERIOD_MID-hd_rumble_cvr_max_offset;
@@ -56,11 +49,12 @@ void conf_init()
     read_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,sizeof(rgb_data));
     if(smashpro_factory_config.nonexist)
     {
-        memset(&smashpro_factory_config,0,sizeof(smashpro_factory_config));
-        smashpro_factory_config.pcb_rev=PCB_REV_300;
+        memset(&smashpro_factory_config,-1,sizeof(smashpro_factory_config));
+        smashpro_factory_config.nonexist=1;//now we use this for auto recover from cloud;
+        smashpro_factory_config.pcb_typ=PCB_TYP_PRO;
+        smashpro_factory_config.pcb_rev=PRO_300;
         smashpro_factory_config.rgb_cnt=31;
-        smashpro_factory_config.rgb_typ=CONF_BTN_RGB_FULL;
-        smashpro_factory_config.rgb_slow_start_period=100;
+        smashpro_factory_config.indi_led_ofst=4;
         uint8_t res = write_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,
                 sizeof(smashpro_factory_config));
         res = write_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,
@@ -140,7 +134,7 @@ void conf_init()
         factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
         factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
         factory_configuration.nonexist=0;
-        fac_conf_write();
+        //fac_conf_write();
     }
     factory_configuration.IdentificationCode[0]=0x80;//no sn
     factory_configuration.DeviceType=0x03;
@@ -159,6 +153,7 @@ void conf_init()
     if(user_config.nonexist)
     {
         memset(&user_config,0,sizeof(user_config));
+        user_config.nonexist=1;
         user_config.in_interval=8;
         user_config.out_interval=8;
         for(int i=0;i<4;++i){
@@ -184,11 +179,10 @@ void conf_init()
         user_config.rumble_pattern=0;
         user_config.legacy_rumble=0;
         user_config.imu_disabled=1;//we disabled this in default as many people dont need this
-        custom_conf_write();
+        user_config.rgb_slow_start_period=100;
+        //custom_conf_write();
     }
     conf_flush();
-    MyCfgDescr[33]=user_config.out_interval;
-    MyCfgDescr[40]=user_config.in_interval;
 }
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
     switch(addr & 0xffff00)
@@ -272,112 +266,7 @@ uint8_t custom_conf_write()
 {
     return write_flash(FLASH_ADDR_USER_CONFIG,(uint8_t*)&user_config, sizeof(user_config));
     //return flash_write(1, (uint8_t*)&user_config, sizeof(user_config));
-}/*
-void unpack_fac_conf()
-{
-    if(!fac)return;
-    //factory_configuration.nonexist=1;
-    if(factory_configuration.nonexist){
-        //factory_configuration.DeviceType=0x03;
-        //factory_configuration.BoardRevision=0xA0;
-        //factory_configuration.FormatVersion=0x1;//use custom color/
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXPositive=
-                2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYPositive=
-                2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalXNegative=
-                2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalYNegative=
-                2048*JOYSTICK_RANGE_FACTOR_LEFT;
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0=
-                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=2048;
-        /*factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue=
-                factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue;/
-        memcpy(&factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue,
-               &factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue,
-               sizeof(joystick_calibration_data_left));
-
-        factory_configuration.Design.ControllerColor.MainColor.r=0x32;
-        factory_configuration.Design.ControllerColor.MainColor.g=0x31;
-        factory_configuration.Design.ControllerColor.MainColor.b=0x32;
-        factory_configuration.Design.ControllerColor.SubColor.r=0xff;
-        factory_configuration.Design.ControllerColor.SubColor.g=0xff;
-        factory_configuration.Design.ControllerColor.SubColor.b=0xff;
-
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelNoise=0x00F;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelTypicalStroke=0x613;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterDeadZoneSize=0x0AE;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCircuitDeadZoneScale=0xD99;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXPositive=0x4D4;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYPositive=0x541;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeXNegative=0x541;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelMinimumStrokeYNegative=0x541;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXPositive=0x9C7;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYPositive=0x9C7;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeXNegative=0x633;
-        factory_configuration.Model.AnalogStickMainModelValue.AnalogStickModelCenterRangeYNegative=0x633;
-        factory_configuration.AnalogStickSubModelValue=factory_configuration.Model.AnalogStickMainModelValue;
-        //5B008BFF96010040004000401D00BEFFEEFF3B343B343B34
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetX=0x005B;
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetY=0xFF8B;
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer0OffsetZ=0X0196;
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleX=0X4000;
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleY=0X4000;
-        factory_configuration.SixAxisSensorCalibrationValue.Accelerometer1gScaleZ=0X4000;
-        /*factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X0001;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0X0001;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0X0001;/
-
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetX=0X001D;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetY=0XFFBE;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope0OffsetZ=0XFFEE;
-
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0X343B;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0X343B;
-        factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0X343B;
-        //50FD0000C60F0F30
-        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
-        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
-        factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
-        //factory_configuration.nonexist=0;
-    }
-    memcpy(&factory_configuration.SixAxisSensorCalibrationValue,
-            &(factory_configuration.SixAxisSensorCalibrationValue),sizeof(imu_calibration_data));
-    //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleX=0x343B;
-    //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleY=0x343B;
-    //factory_configuration.SixAxisSensorCalibrationValue.Gyroscope78rpmScaleZ=0x343B;
-    memcpy(&factory_configuration.JoystickCalibrationValue,
-            &(factory_configuration.JoystickCalibrationValue),sizeof(factory_joystick_calibration_data));
-    memcpy(&factory_configuration.Design,&(factory_configuration.Design),sizeof(device_design_data));
-    memcpy(&factory_configuration.Model,&(factory_configuration.Model),sizeof(model_data));
-    memcpy(&factory_configuration.AnalogStickSubModelValue,
-            &(factory_configuration.AnalogStickSubModelValue),sizeof(joystick_model_value));
-    //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetX=0xFD50;
-    //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetY=0X0000;
-    //factory_configuration.Model.SixAxisSensorModelValue.SixAxisHorizontalOffsetZ=0X0FC6;
-    if(factory_configuration.nonexist)
-    {
-        factory_configuration.nonexist=0;
-        fac_conf_write();
-    }
-}*/
-/*
-void pack_fac_conf()
-{
-    if(!fac)return;
-    memset(fac,-1,128);
-    memcpy(&(factory_configuration.SixAxisSensorCalibrationValue),
-            &factory_configuration.SixAxisSensorCalibrationValue,sizeof(imu_calibration_data));
-    memcpy(&(factory_configuration.JoystickCalibrationValue),
-            &factory_configuration.JoystickCalibrationValue,sizeof(factory_joystick_calibration_data));
-    memcpy(&(factory_configuration.Design),&factory_configuration.Design,sizeof(device_design_data));
-    memcpy(&(factory_configuration.Model),&factory_configuration.Model,sizeof(model_data));
-    memcpy(&(factory_configuration.AnalogStickSubModelValue),&factory_configuration.AnalogStickSubModelValue,sizeof(joystick_model_value));
-    factory_configuration.nonexist=0;
-    /*factory_configuration.DeviceType=factory_configuration.DeviceType;
-    factory_configuration.BoardRevision=factory_configuration.BoardRevision;
-    factory_configuration.FormatVersion=factory_configuration.FormatVersion;//use custom color//
-}*/
+}
 void fac_conf_read(){
     //flash_read(2, fac, sizeof(factory_configuration_flash_pack));
     //unpack_fac_conf(fac);
@@ -390,6 +279,8 @@ uint8_t fac_conf_write(){
     return write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 void conf_flush(){
+    MyCfgDescr[33]=user_config.out_interval;
+    MyCfgDescr[40]=user_config.in_interval;
     imu_ratio_xf=user_config.imu_ratio_x/127.0f;
     imu_ratio_yf=user_config.imu_ratio_y/127.0f;
     imu_ratio_zf=user_config.imu_ratio_z/127.0f;
@@ -399,7 +290,7 @@ void conf_flush(){
     gpio_init();
     hd_rumble_lookup_tb_init();
     button_active_mask=~user_config.button_disable_mask;
-    rgb_slow_start_div=smashpro_factory_config.rgb_slow_start_period*50.0f;
+    rgb_slow_start_div=user_config.rgb_slow_start_period*50.0f;
     if(rgb_slow_start_div<=0)rgb_slow_start_div=1.0f;
     set_hd_rumble_range();
     flush_rgb();

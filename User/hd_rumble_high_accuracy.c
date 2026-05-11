@@ -373,15 +373,10 @@ void TIM3_IRQHandler(void)
                 left_high=left_high_buf;
                 left_high_buf_stdby=1;
                 if(!left_high.amp||!left_high.step)
-                    left_high_buf.amp=left_high.step=left_high_pos=left_high_sum=0;
+                    left_high.step=left_high_pos=left_high_sum=0;
             }
             if(left_low_buf_rdy){
                 left_low_buf_rdy=0;
-                /*if(!left_low.amp){
-                    left_low_pos=-75*HD_RUMBLE_STEP;
-                    //switch did such phase shift
-                    //i dont know why.may be it just a bug,I shall just ignore it.
-                }*/
                 left_low=left_low_buf;
                 left_low_buf_stdby=1;
                 if(!left_low.amp||!left_low.step)
@@ -392,13 +387,10 @@ void TIM3_IRQHandler(void)
                 right_high=right_high_buf;
                 right_high_buf_stdby=1;
                 if(!right_high.amp||!right_high.step)
-                    right_high.amp=right_high.step=right_high_pos=right_high_sum=0;
+                    right_high.step=right_high_pos=right_high_sum=0;
             }
             if(right_low_buf_rdy){
                 right_low_buf_rdy=0;
-                /*if(!right_low.amp){
-                    right_low_pos=-75*HD_RUMBLE_STEP;
-                }*/
                 right_low=right_low_buf;
                 right_low_buf_stdby=1;
                 if(!right_low.amp||!right_low.step)
@@ -414,30 +406,6 @@ void TIM3_IRQHandler(void)
             tim3_irq_tmp_r=((hd_rumble_cvr_range*(((ccr_lookup_tb[right_high_pos]*(right_high.amp))+
                     (ccr_lookup_tb[right_low_pos]*(right_low.amp)))>>HD_RUMBLE_AMP_SHIFT_1))>>HD_RUMBLE_AMP_SHIFT_2)
                             +HD_RUMBLE_TIM_PERIOD_MID;
-            /*if(left_high_buf_rdy&&left_low_buf_rdy){
-                    left_high_buf_rdy=left_low_buf_rdy=0;
-                    left_low=left_low_buf;
-                    left_high=left_high_buf;
-                    left_high_buf_stdby=left_low_buf_stdby=1;
-                    left_high_tick=left_low_tick=tim3_counter;
-                    if(!left_high.amp||!left_high.step)
-                        left_high.step=left_high_pos=left_high_sum=0;
-                    if(!left_low.amp||!left_low.step)
-                        left_low.step=left_low_pos=left_low_sum=0;
-            }
-            if(right_high_buf_rdy&&right_low_buf_rdy){
-                    right_high_buf_rdy=right_low_buf_rdy=0;
-                    right_low=right_low_buf;
-                    right_high=right_high_buf;
-                    right_high_buf_stdby=right_low_buf_stdby=1;
-                    right_high_tick=right_low_tick=tim3_counter;
-                    if(!right_high.amp||!right_high.step)
-                        right_high.step=right_high_pos=right_high_sum=0;
-                    if(!right_low.amp||!right_low.step)
-                        right_low.step=right_low_pos=right_low_sum=0;
-            }
-            fk nintendo.why these r not packed.
-            */
         }
         //CHLCVR=200;
         CHLCVR=i32_clamp(tim3_irq_tmp_l,hd_rumble_cvr_min,hd_rumble_cvr_max);

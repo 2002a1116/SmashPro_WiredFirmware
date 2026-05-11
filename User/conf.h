@@ -56,8 +56,6 @@ typedef struct _joystick_calibration_data_left{
     uint16_t AnalogStickCalXNegative:12;
     uint16_t AnalogStickCalYNegative:12;
 }joystick_calibration_data_left;
-//why uint8 for x & uint16 for y???
-//ans:they r uint12
 typedef struct _joystick_calibration_data_right{
     uint16_t AnalogStickCalX0:12;
     uint16_t AnalogStickCalY0:12;
@@ -65,7 +63,7 @@ typedef struct _joystick_calibration_data_right{
     uint16_t AnalogStickCalYNegative:12;
     uint16_t AnalogStickCalXPositive:12;
     uint16_t AnalogStickCalYPositive:12;
-}joystick_calibration_data_right;//fk u nintendo.y u have to do this?
+}joystick_calibration_data_right;
 typedef struct _user_joystick_calibration_data{
     uint16_t AnalogStickLeftUserMagicNumber;
     joystick_calibration_data_left AnalogStickLeftUserCalibrationValue;
@@ -105,9 +103,7 @@ typedef struct _user_calibration_data{
         struct{
             uint8_t nonexist;
             uint16_t internal_center[4];
-            uint8_t tag;
-            uint8_t tag2;
-            uint8_t reserved[5];
+            uint8_t reserved[7];
         };
     };
     user_joystick_calibration_data UserJoystickCalibrationValue;
@@ -146,18 +142,6 @@ typedef struct _imu_model_data{
     uint16_t SixAxisHorizontalOffsetZ;
 }imu_model_data;
 typedef struct _joystick_model_value{
-    /*uint8_t AnalogStickModelNoise;
-    uint16_t AnalogStickModelTypicalStroke;
-    uint8_t AnalogStickModelCenterDeadZoneSize;
-    uint16_t AnalogStickModelCircuitDeadZoneScale;
-    uint8_t AnalogStickModelMinimumStrokeXPositive;
-    uint16_t AnalogStickModelMinimumStrokeYPositive;
-    uint8_t AnalogStickModelMinimumStrokeXNegative;
-    uint16_t AnalogStickModelMinimumStrokeYNegative;
-    uint8_t AnalogStickModelCenterRangeXPositive;
-    uint16_t AnalogStickModelCenterRangeYPositive;
-    uint8_t AnalogStickModelCenterRangeXNegative;
-    uint16_t AnalogStickModelCenterRangeYNegative;*/
     uint16_t AnalogStickModelNoise:12;
     uint16_t AnalogStickModelTypicalStroke:12;
     uint16_t AnalogStickModelCenterDeadZoneSize:12;
@@ -220,11 +204,6 @@ typedef struct _factory_configuration_flash_pack{
     device_design_data Design;
     model_data Model;
     joystick_model_value AnalogStickSubModelValue;
-    /*uint8_t AccelerometerAxisAssignment;
-    uint8_t GyroscopeAxisAssignment;
-    uint8_t AnalogStickMainAxisAssignment;
-    uint8_t AnalogStickSubAxisAssignment;
-    uint16_t BatteryVoltage;*/
 }factory_configuration_flash_pack;
 typedef struct _rgb_data_simple{
     uint8_t b:4;
@@ -236,7 +215,7 @@ typedef struct _user_config_data{
     //uint8_t usb_report_interval;
     //uint8_t joystick_correction[16];
     union{
-        uint8_t config_bitmap1;
+        uint8_t config_bitmap0;
         struct{
             uint8_t nonexist:1;
             uint8_t led_disabled:1;
@@ -249,14 +228,15 @@ typedef struct _user_config_data{
         };
     };
     union{
-        uint8_t config_bitmap2;
+        uint8_t config_bitmap1;
         struct{
             uint8_t reserved2:2;
             uint8_t joystick_range_normalization:1;
             uint8_t rumble_high_amp_drop:1;
             uint8_t rumble_low_amp_rise:1;
             uint8_t legacy_rumble:1;
-            uint8_t dead_zone_mode:2;
+            uint8_t allow_rgb_on_bat:1;
+            uint8_t disable_usb_auto_recovery:1;
         };
     };
     uint8_t in_interval;
@@ -278,10 +258,9 @@ typedef struct _user_config_data{
     uint8_t pro_fw_version;
     uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
     uint8_t dead_zone[4];
-    //uint8_t dead_zone_mode;
-    //uint8_t config_bitmap_reserved56[2];
-    //uint8_t config_bitmap_reserved6;
-    //uint8_t rgb_cnt;
+    uint8_t dead_zone_mode;
+    uint8_t rgb_slow_start_period;
+
 }user_config_data;
 //118 byte now
 /*
@@ -290,29 +269,34 @@ typedef struct _user_config_data{
  * 512~767 user_calibration
  * 768~1024 rgb
  */
-enum PCV_REV{
-    PCB_REV_200,
-    PCB_REV_213,
-    PCB_REV_300,
-    PCB_NGC_110,
-    //PCB_REV_213_HIGH_VOLTAGE,
+enum PCB_REV_PRO{
+    PRO_200,
+    PRO_213,
+    PRO_300,
 };
+enum PCB_REV_NGC{
+    NGC_110,
+};
+enum PCB_TYP{
+    PCB_TYP_PRO,
+    PCB_TYP_NGC
+};
+#define PRO_ATLEAST(x) (smashpro_factory_config.pcb_typ==PCB_TYP_PRO && smashpro_factory_config.pcb_rev >= (x))
+#define PRO_IS(x) (smashpro_factory_config.pcb_typ==PCB_TYP_PRO && smashpro_factory_config.pcb_rev == (x))
+#define NGC_ATLEAST(x) (smashpro_factory_config.pcb_typ==PCB_TYP_NGC && smashpro_factory_config.pcb_rev >= (x))
+#define NGC_IS(x) (smashpro_factory_config.pcb_typ==PCB_TYP_NGC && smashpro_factory_config.pcb_rev == (x))
 typedef struct _smashpro_factory_config_data{
     union{
         uint8_t config_bitmap0;
         struct{
             uint8_t nonexist:1;
-            uint8_t clk_force_hsi:1;
-            uint8_t disable_usb_auto_recovery:1;
-            uint8_t reserved0:5;
+            uint8_t reserved0:7;
         };
     };
+    uint8_t pcb_typ;
     uint8_t pcb_rev;
-    uint8_t reserved123456[6];
-    uint8_t led_typ;
-    uint8_t rgb_typ;
+    uint8_t indi_led_ofst;
     uint8_t rgb_cnt;
-    uint8_t rgb_slow_start_period;
     /*
      res reserved;
      */
@@ -327,6 +311,7 @@ typedef struct _smashpro_factory_config_data{
 #define FLASH_ADDR_USER_CALIBRATION (0x200)
 #define FLASH_ADDR_HARDWARE_INFO (0x300)
 #define FLASH_ADDR_RGB_DATA (0x400)
+
 
 extern const uint32_t FW_VERSION;
 extern const uint32_t FW_SUB_VERSION;

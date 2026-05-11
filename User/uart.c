@@ -108,6 +108,7 @@ void UART1_Init( void )
     USART_Init(USART1, &USART_InitStructure);
 
     USART_ClearFlag( USART1, USART_FLAG_TC );
+    UART1_Tx_Flag=0;
     //USART_ITConfig(USART1, USART_IT_TC, ENABLE);
     USART_Cmd(USART1, ENABLE);
 

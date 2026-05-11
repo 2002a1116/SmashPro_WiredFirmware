@@ -456,7 +456,8 @@ static void SetSysClockTo72_HSE(void)
          * If HSE fails to start-up, the application will have wrong clock
          * configuration. User can add here some code to deal with this error
          */
-        while(1);
+        //while(1);
+        NVIC_SystemReset();
     }
 }
 

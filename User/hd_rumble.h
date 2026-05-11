@@ -50,7 +50,7 @@ void set_rumble_status(hd_rumble_frame* rumble_data);
 */
 extern uint8_t rumble_state;
 void next_rumble_frame();
-void hd_rumble_init(uint8_t force_disable);
+void hd_rumble_init();
 void TIM3_DMA_Init(DMA_Channel_TypeDef *DMA_CHx, uint32_t ppadr, uint16_t memadr, uint16_t bufsize);
 #endif
 #endif /* USER_HD_RUMBLE_H_ */

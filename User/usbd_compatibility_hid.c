@@ -11,6 +11,7 @@
 #include "imu.h"
 #include "tick.h"
 #include "conf.h"
+#include "pwr.h"
 
 __attribute__ ((aligned(4))) uint8_t  HID_Report_Buffer[64];              // HID Report Buffer
 volatile uint8_t HID_Set_Report_Flag = SET_REPORT_DEAL_OVER;               // HID SetReport flag
@@ -42,7 +43,8 @@ uint8_t ns_hid_get_packet_timer(){
         return ns_hid_pkt_cnt++;
     case 0:
     default:
-        return Get_Systick_MS()/5;
+        //return Get_Systick_MS()/5;
+        return ((Get_Systick_MS()&0xFFFF)*13107U)>>16;
     }
 }
 void rpt_wrapper(std_report* rpt,std_report_data* data,uint16_t len){
@@ -62,7 +64,7 @@ void rpt_wrapper(std_report* rpt,std_report_data* data,uint16_t len){
         }
         //update_peripheral_data();
         rpt->input_data=global_input_data;
-        rpt->input_data.button_status &= button_active_mask;
+        //rpt->input_data.button_status &= button_active_mask;
         //rpt->timer=global_packet_timer;
         rpt->timer=ns_hid_get_packet_timer();
         rpt->battery_status=0x09;
@@ -88,17 +90,23 @@ void hid_init()
 void hid_tx_service( void )
 {
     static uint32_t tick=0;
-    if (!tick) {
-        tick=Get_Systick_MS();
-    }
     if(USBFS_Endp_Busy[DEF_UEP1]){//busy, so skip
         ////printf("busy %d\r\n",Get_Systick_MS());
-        if(Get_Systick_MS()-tick>1000){
-            usb_dev_reset();
+        //return;
+        if (!tick) {
+            tick=Get_Systick_MS();
+        }
+        else if(Get_Systick_MS()-tick>1000){
+            R8_UDEV_CTRL = 0;
+            Delay_Ms(2);
+            USBFS_RCC_Init();
+            USBFS_Device_Init( ENABLE , pwr_vdd_voltage());
+            tick=0;
         }
         return;
     }
-    tick=Get_Systick_MS();
+    tick=0;
+    //tick=Get_Systick_MS();
     ////printf("not busy\r\n");
     if(ns_usb_send_rb.size)//special packet to send
     {
@@ -134,10 +142,14 @@ void hid_tx_service( void )
     else{//std report or empty report
         rpt_wrapper(rpt,NULL,0);
         pkg_len=NS_STD_REPORT_BASIC_LENGTH;
-        if((!user_config.imu_disabled)&&imu_mode&&i2c_status){
+        if((!user_config.imu_disabled)/*&&imu_mode*/){
+#ifdef IMU_MODE_I2C
+            if(i2c_status)
+#endif
             if(imu_report_buffer_ptr){
                 memcpy(&rpt->data.imu_report,imu_report_buffer_ptr,sizeof(imu_report_pack));
                 pkg_len+=sizeof(imu_report_pack);
+                //while(1);
                 //rep=NULL;
             }
         }
@@ -159,11 +171,13 @@ void hid_rx_service(){
     uint8_t pkg_len=0;
     uint8_t* pbuf=usb_rx_buf;
     if(ns_usb_recv_rb.size){
+        //while(1);
         pkg_len=ns_usb_recv_rb.len[ns_usb_recv_rb.top];
         memcpy(pbuf,&ns_usb_recv_buf[ns_usb_recv_rb.top*NS_USB_RINGBUFFER_PKG_SIZE],pkg_len);
         ring_buffer_pop(&ns_usb_recv_rb);
         pkt.data=pbuf;
         pkt.len=pkg_len;
+        //printf("pkg len:%d header:%d\r\n",pkg_len,*(pkt.data));
         hid_dispatch(&pkt);
     }
 }

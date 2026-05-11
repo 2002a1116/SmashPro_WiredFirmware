@@ -8,8 +8,8 @@
 #ifndef USER_IMU_SPI_H_
 #define USER_IMU_SPI_H_
 
-#define SPI2_TX_TIMEOUT_US (200)
-#define SPI2_RX_TIMEOUT_US (500)
+#define SPI2_TX_TIMEOUT_US (50)
+#define SPI2_RX_TIMEOUT_US (50)
 
 void imu_spi_init();
 uint8_t spi2_check_flag(uint16_t flag);

@@ -43,7 +43,7 @@ void gpio_tb_init(){
     kb_scan[1]=GPIO_KB_SCAN_2;
     kb_scan[2]=GPIO_KB_SCAN_3;
     kb_scan[3]=GPIO_KB_SCAN_4;
-    if(smashpro_factory_config.pcb_rev<PCB_REV_300){
+    if(PRO_IS(PRO_200)||PRO_IS(PRO_213)){
         hid_num_to_gpio[NS_BUTTON_LS]=GPIO_BUTTON_LS_LEGACY;
         hid_num_to_gpio[NS_BUTTON_RS]=GPIO_BUTTON_RS_LEGACY;
         hid_num_to_gpio[NS_BUTTON_X]=GPIO_BUTTON_X;
@@ -64,11 +64,11 @@ void gpio_tb_init(){
         hid_num_to_gpio[NS_BUTTON_CAP]=GPIO_BUTTON_CAP;
         memset(kb_pull,0,sizeof(kb_pull));
         memset(kb_scan,0,sizeof(kb_scan));
-    }else if(smashpro_factory_config.pcb_rev==PCB_REV_300){
+    }else if(PRO_ATLEAST(PRO_300)){
         hid_num_to_gpio[NS_BUTTON_LS]=GPIO_BUTTON_LS;
         hid_num_to_gpio[NS_BUTTON_RS]=GPIO_BUTTON_RS;
         gpio_kb_scan_init();
-    }else if(smashpro_factory_config.pcb_rev==PCB_NGC_110){
+    }else if(NGC_ATLEAST(NGC_110)){
         hid_num_to_gpio[NS_BUTTON_LS]=GPIO_BUTTON_LS_NGC;
         hid_num_to_gpio[NS_BUTTON_RS]=GPIO_BUTTON_RS_NGC;
         hid_num_to_gpio[NS_BUTTON_ZL]=GPIO_BUTTON_ZL_NGC;
@@ -84,7 +84,6 @@ void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_50MHz;
     for(int i=0;i<n;++i){
         if(arr[i]&GPIOA_GROUP_MASK){//gpio group A
-            ////printf("set gpio a %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=arr[i];
         }
     }
@@ -92,7 +91,6 @@ void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
     GPIO_InitStructure.GPIO_Pin=0;
     for(int i=0;i<n;++i){
         if(arr[i]&GPIOB_GROUP_MASK){//gpio group B
-            ////printf("set gpio b %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=arr[i];
         }
     }
@@ -100,7 +98,6 @@ void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
     GPIO_InitStructure.GPIO_Pin=0;
     for(int i=0;i<n;++i){
         if(arr[i]&GPIOC_GROUP_MASK){//gpio group C
-            ////printf("set gpio c %d\r\n",(uint16_t)hid_num_to_gpio[i]);
             GPIO_InitStructure.GPIO_Pin|=arr[i];
         }
     }
@@ -108,9 +105,6 @@ void _gpio_init(uint32_t* arr,uint8_t n,GPIOMode_TypeDef mode){
 }
 void gpio_kb_scan_init()
 {
-    //uint32_t home_led_gpio=GPIO_BUTTON_HOME;
-    //_gpio_init(&home_led_gpio, 1, GPIO_Mode_Out_OD);
-    //GPIO_SET(GPIO_BUTTON_HOME,1);
     _gpio_init(kb_scan,4,GPIO_Mode_IPD);
     _gpio_init(kb_pull,4,GPIO_Mode_Out_PP);
     for(int i=0;i<4;++i){
@@ -136,7 +130,6 @@ uint32_t gpio_kb_scan(){
             res|=(GPIO_READ(kb_scan[j])<<kb_scan_to_hid[i][j]);
         }
         GPIO_SET(kb_pull[i],0);
-        //Delay_Us(KB_SCAN_SETUP_TIME);
     }
     return res;
 }
@@ -159,8 +152,6 @@ uint32_t gpio_read_all(void){
             ret=1;
             break;
         }
-        //if(!ret)
-        //    //printf("set %d\r\n",i);
         res|=((!ret)<<i);
     }
     sts_button_raw=res;
@@ -182,7 +173,6 @@ uint8_t gpio_read(uint32_t gpio_num)
 }
 void gpio_set(uint32_t x,uint8_t v){
     GPIO_SET(x,v);
-    //GPIO_SET_SAFE(x,v);
 }
 uint8_t button_read_raw(uint32_t num){
     return (sts_button_raw&(1<<num))!=0;

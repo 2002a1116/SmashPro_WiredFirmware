@@ -76,7 +76,7 @@ void start_connect(){
     static uint32_t tick=0;
     //if no button pressed or paired by usb
     //we ignore home as we use it in pairing.
-    if((!(sts_button&(1<<NS_BUTTON_HOME)))||connection_state.usb_paired)
+    if((!(sts_button&~(1<<NS_BUTTON_HOME)))||connection_state.usb_paired)
         return;
     if((Get_Systick_MS()-tick>START_CONNECTION_GAP)&&
             (connection_state.esp32_connected&&
@@ -88,7 +88,7 @@ void start_connect(){
 }
 void wake_esp32_init(){
     uint32_t t=GPIO_WAKE_BAND;
-    _gpio_init(&t, 1, GPIO_Mode_Out_OD);
+    _gpio_init(&t, 1, GPIO_Mode_Out_PP);
     gpio_set(GPIO_WAKE_BAND, 0);
 }
 void recv_esp32_connect_control()
@@ -114,15 +114,15 @@ void recv_esp32_connect_control()
     case 0xC:
         connection_state.esp32_paired=pkt.load[0];
         connection_state.esp32_indicate_led=pkt.load[1];
+        connection_state.usb_plugging=pkt.load[2];
         break;
     case 0xD:
         connection_state.con_addr_set=0;
         break;
     case 0xE:
-        connection_state.state=pkt.load[0];
+        //connection_state.state=pkt.load[0];
         break;
     case 0xF:
-        connection_state.esp32_bt_state=pkt.load[0];
         break;
     default:
         break;
@@ -150,7 +150,15 @@ void recv_pwr_control(){
     case 0x01:
         connection_state.esp32_sleep=1;
         break;
-    case 0x02://for wireless update,we use this to restart ch32 mcu.
+    case 0x02:
+        if(pkt.load[0]==0xff){
+            set_indicate_led_mode(0);
+            break;
+        }
+        bat_warn=pkt.load[0];
+        set_indicate_led_mode(2);
+        break;
+    case 0x0F://for wireless update,we use this to restart ch32 mcu.
         //flush_rgb(DISABLE);
         _force_rgb(DISABLE);
         Delay_Ms(10);
@@ -240,13 +248,10 @@ void connection_state_handler()//decide if we go stop
             send_input_with_uart();
         }
     }
-    if(!connection_state.usb_paired && connection_state.esp32_sleep)
+    if((!connection_state.usb_paired) && connection_state.esp32_sleep)
     {
         //while(1);
-        gpio_set(GPIO_WAKE_BAND, 0);
         uint8_t stop_flag=set_pwr_mode_stop();
-        connection_state.esp32_sleep=0;
-        gpio_set(GPIO_WAKE_BAND, 1);
         //fail safe,try to res6et everything
         //init_all();
         //set_peripherals_state(ENABLE);
@@ -258,7 +263,7 @@ void connection_state_handler()//decide if we go stop
         {
             pkt.typ=UART_PKG_CONNECT_CONTROL;
             pkt.id=3;
-            memset(pkt.data,0,11);
+            //memset(pkt.data,0,11);
             memcpy(pkt.load,con_addr,6);
             send_uart_pkt(&pkt);
         }
@@ -296,7 +301,7 @@ void connection_state_handler()//decide if we go stop
 }
 void uart_com_task()
 {
-    uint8_t max_uart_handled=50;
+    uint8_t max_uart_handled=16;
     while(uart_rx_rb.size&&max_uart_handled--)
     {
         connection_state.esp32_connected=0x01;//if revice uart pkt from esp32,means it exist

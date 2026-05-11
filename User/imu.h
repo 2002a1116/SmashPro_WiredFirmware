@@ -119,6 +119,7 @@ extern float imu_ratio_xf,imu_ratio_yf,imu_ratio_zf;
 extern uint32_t imu_read_cnt,imu_read_fail_cnt;
 extern uint8_t imu_error;
 uint8_t imu_set_reg(uint8_t reg,uint8_t rate,uint8_t mask);
+uint8_t imu_get_reg(uint8_t reg,uint8_t* res);
 void imu_upd();
 void set_imu_sleep();
 void set_imu_awake();

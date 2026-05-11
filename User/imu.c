@@ -43,6 +43,14 @@ uint8_t imu_set_reg(uint8_t reg,uint8_t value,uint8_t mask)
     return ret;
 #endif
 }
+uint8_t imu_get_reg(uint8_t reg,uint8_t* res){
+    uint8_t ans=0xff;
+#ifdef IMU_MODE_I2C
+    return i2c_read_byte(reg, res);
+#else
+    return spi_get_reg(reg, res);
+#endif
+}
 
 void imu_set_acc_bandwidth(uint8_t BW0XL, uint8_t ODR)
 {
@@ -87,7 +95,7 @@ uint8_t imu_read(){
 #ifdef IMU_MODE_I2C
         if(i2c_read_continuous(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
 #else
-        if(spi_get_multi_reg(LSM6DS3TRC_OUTX_L_G, imu_raw_buf, 12)){
+        if(spi_get_multi_reg(LSM6DS3TRC_OUTX_L_G, (uint8_t*)imu_raw_buf, 12)){
 #endif
             ++imu_read_fail_cnt;
             return 1;
@@ -172,12 +180,17 @@ uint16_t test_cnt=0;
 void imu_upd()
 {
     static uint32_t last_upd=0;
+    static uint8_t pre_sts=0;
     rep=&imu_pack_buf[imu_buf_pos];
     if(user_config.imu_disabled){
+        if(pre_sts)
+            return;
+        pre_sts=user_config.imu_disabled;
         memset(rep,0,IMU_GYO_SIZE*6);
         set_imu_available(rep);
         return;//disabled mask
     }
+    pre_sts=0;
     //if(!i2c_status)return;
     if(!imu_mode)return;
     if(!imu_upd_cnt)
@@ -221,7 +234,8 @@ void imu_upd()
         memcpy(&rep->acc1,&rep->acc2,IMU_ACC_SIZE);
         memcpy(&rep->acc2,imu_res+3,IMU_ACC_SIZE);
         //memcpy(&rep->acc0,imu_res+3,IMU_ACC_SIZE);
-        if(imu_mode==0x01){
+        //if(imu_mode==0x01){
+        if(imu_mode){
             for(int i=0;i<3;++i){
                 if(imu_res[i]>GYO_DATA_MAX)imu_res[i]=GYO_DATA_MAX;
                 if(imu_res[i]<GYO_DATA_MIN)imu_res[i]=GYO_DATA_MIN;
@@ -234,6 +248,7 @@ void imu_upd()
         }else{//it seems theres a mode 0x03,but we dont know whats it is. and i cant be bother to reverse engineer it
             ////printf("unknowed imu mode:%d\r\n",imu_mode);
         }
+        //set_imu_available(rep);
         if(!--imu_upd_cnt)
         {
             set_imu_available(rep);

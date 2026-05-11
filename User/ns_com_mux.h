@@ -34,7 +34,7 @@ struct __connection_state{
             uint8_t esp32_connected:1;
             uint8_t esp32_sleep:1;
             uint8_t esp32_paired:1;
-            uint8_t usb_enumed:1;
+            uint8_t usb_plugging:1;
             uint8_t usb_paired:1;
             uint8_t bd_addr_set:1;
             uint8_t con_addr_set:1;
@@ -45,10 +45,11 @@ struct __connection_state{
     uint8_t esp32_bt_state;
     uint8_t esp32_indicate_led;
     uint8_t usb_indicate_led;
+    uint8_t bat_lvl;
 };
 extern uint8_t con_addr[BD_ADDR_LEN];
 extern uint8_t bt_ltk[BT_LTK_LENGTH];
-extern struct __connection_state connection_state;
+extern volatile struct __connection_state connection_state;
 extern ring_buffer ns_usb_send_rb;
 extern void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
 extern uint32_t rts_cnt,rts_tcnt;

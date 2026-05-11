@@ -36,7 +36,6 @@ void SysTick_Init(void)//定时器2初始化函数
     if(inited)return;
     inited=1;
     _systick_init();
-
 }
 
 void TIM2_IRQHandler(void)//定时器2中断服务函数，硬件自动调用，不需要手动调用
@@ -140,6 +139,9 @@ void Delay_Us(uint32_t n)
     while(Get_Systick_US()-tp<=n);
 }
 void Delay_Us_Fast(uint16_t n){
+    Delay_Us(n);
+    return;
+
     uint32_t tp=*Systick_CLK;
     while(*Systick_CLK-tp<=n);
 }

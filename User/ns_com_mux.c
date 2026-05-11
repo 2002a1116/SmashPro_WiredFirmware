@@ -19,7 +19,7 @@
 #include "spi.h"
 #include "watchdog.h"
 
-struct __connection_state connection_state;
+volatile struct __connection_state connection_state;
 uint8_t con_addr[BD_ADDR_LEN];
 uint8_t bt_ltk[BT_LTK_LENGTH];
 void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
@@ -135,45 +135,12 @@ void fw_subcommand_read_setting(cmd_packet* pkt){
 #define FW_SUBC_ID_WRITE_SETTING (0x02)
 static uint8_t fw_red_cnt=0;
 void fw_subcommand_write_setting(cmd_packet* pkt){
-    //printf("fw write\r\n");
-    //fw_buf[0]=FW_SUBC_ID_WRITE_SETTING;
     conf_flush();
-    /*uint8_t offset=pkt->data[1];
-    if(offset==0xff){//confirm
-        if(fw_red_cnt==pkt->data[2])
-        {
-            //printf("fw write success");
-            if(pkt->data[3]==1)
-                custom_conf_write();
-            conf_flush();
-            fw_buf[0]=1;
-        }
-        else {
-            //printf("fw write fail,data incomplate");
-            fw_buf[0]=0;
-        }
-        fw_buf[1]=pkt->data[3];
-        fw_red_cnt=0;
-        fw_snd_pkt(FW_SUBC_ID_WRITE_SETTING,2);
-        //hid_send_full64byte_report(fw_buf,3);
-        //hid_send_full64byte_report(fw_buf,4);
-    }
-    else {//dataset
-        memcpy(((uint8_t*)&user_config)+offset*FW_MAX_PAYLOAD_LENGTH,pkt->data+2,
-                ((FW_MAX_PAYLOAD_LENGTH<=(sizeof(user_config)-offset*FW_MAX_PAYLOAD_LENGTH))?
-                FW_MAX_PAYLOAD_LENGTH:(sizeof(user_config)-offset*FW_MAX_PAYLOAD_LENGTH)));
-        ++fw_red_cnt;
-    }*/
-    //memcpy(&user_config,cmd->subcommand_data,sizeof(user_config));
 }
 #define FW_SUBC_ID_READ_EMULATE_ROM (0x03)
 void fw_subcommand_read_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
     uint8_t size=pkt->data[5];
-    /*memcpy(fw_buf,pkt->data+1,5);
-    conf_read(addr, fw_buf+5, pkt->data[5]);
-    //hid_send_full64byte_report(fw_buf, pkt->data[5]+2);
-    fw_snd_pkt(FW_SUBC_ID_READ_EMULATE_ROM, pkt->data[5]+5);*/
     while(size>57){
         conf_read(addr,fw_buf+5,57);
         memcpy(fw_buf,&addr,4);
@@ -273,18 +240,6 @@ void fw_subcommand_calibrate_js_center(cmd_packet* pkt){
 }
 #define FW_SUBC_ID_CALIBRATE_JS_OFFSET (0x07)
 void fw_subcommand_calibrate_js_offset(cmd_packet* pkt){
-    /*uint8_t id=pkt->data[1];
-    if(id>3){
-        fw_buf[0]=1;
-        fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_OFFSET, 1);
-        return;
-    }
-    user_config.joystick_offset[id].value=2048-(int32_t)adc_data[id];
-    fw_buf[1]=0;
-    fw_buf[2]=id;
-    fw_buf[3]=user_config.joystick_offset[id].value&0xff;
-    fw_buf[4]=user_config.joystick_offset[id].value>>8;
-    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_OFFSET, 1);*/
     for(int i=0;i<4;++i)
         user_calibration.internal_center[i]=adc_data[i];
     user_calibration.nonexist=0;
@@ -293,15 +248,18 @@ void fw_subcommand_calibrate_js_offset(cmd_packet* pkt){
 }
 #define FW_SUBC_ID_GET_STATUS (0xFD)
 void fw_subcommand_get_status(cmd_packet* pkt){
-    fw_buf[0]=i2c_read_byte(IMU_ID_REG,fw_buf+1);
+    //fw_buf[11]=SPI2->STATR;
+    fw_buf[0]=imu_get_reg(IMU_ID_REG,fw_buf+1);
+    fw_buf[11]=SPI2->STATR;
     if(!rts_tcnt)rts_tcnt=1;
     fw_buf[2]=rts_cnt/rts_tcnt;
     memcpy(fw_buf+3,&rts_tcnt,4);
     memcpy(fw_buf+7,&rts_cnt,4);
-    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 11);
+    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 12);
 }
 #define FW_SUBC_ID_REBOOT (0xFE)
 void fw_subcommand_reboot(cmd_packet* pkt){
+    led_pwr_ctrl(DISABLE);
     _force_rgb(DISABLE);
     Delay_Ms(10);
     NVIC_SystemReset();

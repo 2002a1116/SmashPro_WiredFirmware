@@ -29,6 +29,12 @@ void (*ns_cmd_subcommand_cb_tb[NS_SUBCOMMAND_ID_MAX_VLAUE])(cmd_subcommand*,uint
 static report_packet pkt;
 
 #define SUBC_REPORT_BASIC_LENGTH (2)
+void copy_bd_addr_reverse(uint8_t* src,uint8_t* dst){
+    for(int i=0;i<BD_ADDR_LEN;++i){
+        dst[i]=src[BD_ADDR_LEN-i-1];
+        //printf("0x%02x ",connection_state.bd_addr[BD_ADDR_LEN-i-1]);
+    }
+}
 void pkt_clr(){
     pkt.len=pkt.oob_len=0;
     pkt.oob_data=NULL;
@@ -61,7 +67,8 @@ void ns_subcommand_pair_by_wire(NS_SUBCOMMAND_CB_PARAM){
     //printf("pair by wire subc id:%d \t typ:%d\r\n",cmd->subcommand_id,typ);
     switch(typ){
     case 0x01://request bd addr
-        memcpy(con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
+        //memcpy(con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
+        copy_bd_addr_reverse(cmd->subcommand_data+1,con_addr);
         connection_state.con_addr_set=1;
         memcpy(pkt.data.subcommand_report.subcommand_data+1,user_config.bd_addr,BD_ADDR_LEN);
         memcpy(pkt.data.subcommand_report.subcommand_data+1+BD_ADDR_LEN,pro_controller_string,sizeof(pro_controller_string));
@@ -121,10 +128,7 @@ void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     _ns_subcommand_set_ack(cmd->subcommand_id,0x82);
     //uint8_t* addr = esp_bt_dev_get_address();
     //todo
-    for(int i=0;i<BD_ADDR_LEN;++i){
-        default_device_info.addr[i]=user_config.bd_addr[BD_ADDR_LEN-i-1];
-        //printf("0x%02x ",connection_state.bd_addr[BD_ADDR_LEN-i-1]);
-    }
+    copy_bd_addr_reverse(user_config.bd_addr, default_device_info.addr);
     //printf("\r\n");
     //memcpy(default_device_info.addr,bd_addr,BD_ADDR_LEN);
     //ESP_LOGW("MAC ","0x%02x  0x%02x  0x%02x",default_device_info.addr[5],bt_addr[5],addr[5]);
@@ -454,6 +458,7 @@ void ns_subcommand_set_imu_conf(NS_SUBCOMMAND_CB_PARAM){
     //printf("set imu mode to:%d\r\n",imu_mode);
     if(!imu_conf.state){
         imu_conf.state=0x01;
+        imu_mode=0x01;
         //imu_mode=0x01;
         /*printf("set imu mode2 %d\r\n",imu_mode);
         //todo : set imu conf to default
@@ -474,7 +479,8 @@ void ns_subcommand_set_imu_conf(NS_SUBCOMMAND_CB_PARAM){
 void ns_subcommand_set_imu_register(NS_SUBCOMMAND_CB_PARAM){
     uint8_t addr=cmd->subcommand_data[0];
     uint8_t value=cmd->subcommand_data[2];
-    imu_set_reg(addr,value,0xff);
+    //imu_set_reg(addr,value,0xff);
+    //todo
     //printf("imu set reg addr:%d value:%d\r\n",addr,value);
     //exit(0);
 }
@@ -493,7 +499,8 @@ void ns_subcommand_read_imu_register(NS_SUBCOMMAND_CB_PARAM){
     pkt.data.subcommand_report.subcommand_data[0]=addr;
     pkt.data.subcommand_report.subcommand_data[1]=cnt;
     //printf("imu read reg addr:%d cnt:%d\r\n",addr,cnt);
-    i2c_read_continuous(addr, pkt.data.subcommand_report.subcommand_data+2, cnt);
+    //i2c_read_continuous(addr, pkt.data.subcommand_report.subcommand_data+2, cnt);
+    //todo
     pkt.len=SUBC_REPORT_READ_IMU_REGISTER_BASIC_LENGTH+cnt;
     ns_send_report(&pkt);
 }
@@ -505,6 +512,7 @@ void ns_subcommand_set_rumble_state(NS_SUBCOMMAND_CB_PARAM){
     //hd_rumble_set_status(rumble_state);
     ////printf("set rumble state %d\r\n",rumble_state);
     //0x00 disable 0x01 enable
+    //pkt.data.subcommand_report.subcommand_data[0]=rumble_state;
     _ns_subcommand_set_ack(cmd->subcommand_id,DEFAULT_ACK);
     pkt.len=SUBC_REPORT_BASIC_LENGTH;
     ns_send_report(&pkt);

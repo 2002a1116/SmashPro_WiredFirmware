@@ -133,6 +133,7 @@ typedef struct
           __I uint32_t CMPHR;
       };
   };
+  __IO uint32_t SR;
 }SysTick_Type;
 
 

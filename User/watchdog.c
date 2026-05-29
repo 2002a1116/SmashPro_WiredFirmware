@@ -9,7 +9,7 @@
 #ifndef USER_WATCHDOG_C_
 #define USER_WATCHDOG_C_
 
-void TIM4_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void TIM4_IRQHandler(void) __attribute__((interrupt()));
 uint32_t last_feed_ms;
 uint8_t watchdog_pos;
 void sofw_watchdog_init()

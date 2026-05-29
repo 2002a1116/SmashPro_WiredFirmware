@@ -10,11 +10,12 @@
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 #include "ch32v10x_it.h"
+#include "def.h"
 #include "conf.h"
 #include "tick.h"
 
-void NMI_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void HardFault_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void NMI_Handler(void) __attribute__((portINTR));
+void HardFault_Handler(void) __attribute__((portINTR));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -44,24 +45,32 @@ void NMI_Handler(void)
  */
 uint32_t EXC_CAUSE;
 uint32_t EXC_PC;
+uint32_t tmp,a0;
 
 void HardFault_Handler(void)
 {
-    printf("HardFault_Handler\r\n");
-    NVIC_SystemReset();
+    //NVIC_SystemReset();
     //flush_rgb(DISABLE);
     //csrr a0, mstatus
-    /*__asm volatile ("csrr %0, mcause" : \
+    __asm volatile ("mv %0, a0" : \
+                    "=r"(a0): : "memory");
+    __asm volatile ("csrr %0, mcause" : \
                 "=r"(EXC_CAUSE): : "memory");
     __asm volatile ("csrr %0, mepc" : \
                     "=r"(EXC_PC): : "memory");
+    __asm volatile ("csrr %0, mtval" : \
+                    "=r"(tmp): : "memory");
+    printf("HardFault_Handler\r\n");
+
     user_calibration.mcause=EXC_CAUSE;
     user_calibration.mepc=EXC_PC;
+    printf("cause:%08x pc:%08x mtval:%08x a0:%08x %d\r\n",EXC_CAUSE,EXC_PC,tmp,a0,a0);
+    while(1);
     //flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
     //HighPrecisionTimerDelayUs(2000);
-    //Delay_Ms(2);
+    //Delay_MS(2);
     //conf_write(addr, buf, size)
-    if(!(EXC_CAUSE>>31)){//fault
+    /*if(!(EXC_CAUSE>>31)){//fault
         switch(EXC_CAUSE){
         case 0://instruction not aligned
             //fall through

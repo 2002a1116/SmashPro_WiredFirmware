@@ -15,10 +15,10 @@
         GPIO_Pin_9|GPIOA_GROUP_MASK,GPIO_Pin_10|GPIOA_GROUP_MASK};//uart1*/
 //well there will be no such thing as for one pin number,channel a/b/c can have only one related to its exti
 /*
-void EXTI0_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void EXTI3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));*/
+void EXTI0_IRQHandler(void) __attribute__((interrupt()));
+void EXTI1_IRQHandler(void) __attribute__((interrupt()));
+void EXTI2_IRQHandler(void) __attribute__((interrupt()));
+void EXTI3_IRQHandler(void) __attribute__((interrupt()));*/
 
 uint8_t force_esp32_active;
 volatile uint8_t Voltage_ThresFlag=0;
@@ -26,7 +26,7 @@ PWR_VDD pwr_vdd_voltage()
 {
     PWR_VDD tmp = PWR_VDD_SupplyVoltage();
     pwr_init();
-    //Delay_Ms(2);
+    //Delay_MS(2);
     //Voltage_ThresFlag = PWR_GetFlagStatus(PWR_FLAG_PVDO);
     return tmp;
 }
@@ -44,7 +44,7 @@ void pwr_init(){
 
     PWR_PVDLevelConfig(PWR_PVDLevel_MODE2); // VDD电压低于3.07V时触发中断,高于2.89V触发中断
     PWR_PVDCmd(ENABLE);
-    Delay_Ms(1);
+    Delay_MS(1);
     Voltage_ThresFlag = PWR_GetFlagStatus(PWR_FLAG_PVDO);
 }
 void setup_exti(uint8_t state){
@@ -62,10 +62,10 @@ void setup_exti(uint8_t state){
     }
     //for(int i=0;i<1e7;++i);//NO DELAY HERE,SYSTICK NOT INITED.
     /*if(state)
-        Delay_Ms(5);
+        Delay_MS(5);
     _gpio_init(&t,1,GPIO_Mode_IN_FLOATING);*/
     if(state)
-        Delay_Ms(5);
+        Delay_MS(5);
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource3);
     EXTI_InitStructure.EXTI_Line = EXTI_Line3;
     EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Event;
@@ -118,7 +118,7 @@ void top_init(){
 void set_pwr_mode_sleep(void){
     //sleepdeep set 1,
     _force_rgb(DISABLE);
-    Delay_Ms(10);
+    Delay_MS(10);
     if(((RCC->CFGR0 & RCC_SWS)==0x04)||((RCC->CFGR0 & RCC_PLLSRC) == RCC_PLLSRC))
         RCC_HSICmd(DISABLE);
     __WFE();
@@ -127,7 +127,7 @@ uint8_t set_pwr_mode_stop(void){
     led_pwr_ctrl(DISABLE);
     hd_rumble_set_status(DISABLE);
     _force_rgb(DISABLE);
-    Delay_Ms(10);
+    Delay_MS(10);
     printf("sleep\r\n");
     set_imu_sleep();
     setup_exti(ENABLE);

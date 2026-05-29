@@ -113,7 +113,7 @@ void set_imu_awake()
     do{
         ret = imu_set_reg(0x12,0x01,0xff);
     }while(ret&&retry--);
-    Delay_Ms(10);
+    Delay_MS(10);
     retry=5;
     do{
         ret = imu_set_reg(0x13, 0x80, 0xFF);//if we set DRDY_MASK,imu seems crash?
@@ -190,6 +190,7 @@ void imu_upd()
         set_imu_available(rep);
         return;//disabled mask
     }
+    if(!imu_mode)imu_mode=1;
     pre_sts=0;
     //if(!i2c_status)return;
     if(!imu_mode)return;

@@ -4,10 +4,11 @@
  *  Created on: 2025年2月27日
  *      Author: Reed
  */
+#include "def.h"
 #include "debug.h"
 #include "tick.h"
-//void SysTick_Handler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+//void SysTick_Handler(void) __attribute__((interrupt()));
+void TIM2_IRQHandler(void) __attribute__((portINTR));
 
 volatile static uint32_t Systick_MS=0;
 volatile static uint32_t Systick_US_High=0;
@@ -43,13 +44,13 @@ void TIM2_IRQHandler(void)//定时器2中断服务函数，硬件自动调用，不需要手动调用
     if(TIM_GetFlagStatus(TIM2,TIM_FLAG_Update)==1)//判断定时器2更新标志位是否产生
     {
         Systick_MS++;//计数值加1 T=1000/1MHZ
-        Systick_US_High+=1000;
+        //Systick_US_High+=1000;
         TIM_ClearITPendingBit(TIM2, TIM_FLAG_Update); //清除定时器2更新标志位
     }
 }
 inline uint32_t Get_Systick_US(){//chip is not fast enough to maintain a us tick,so just bare with it。
-    //return Systick_MS*1000+(*Systick_CLK);
-    return Systick_US_High+(*Systick_CLK);
+    return Systick_MS*1000+(*Systick_CLK);
+    //return Systick_US_High+(*Systick_CLK);
 }
 inline uint64_t Get_Systick_US64(){
     return Systick_MS*1000ull+(*Systick_CLK);
@@ -133,19 +134,19 @@ uint8_t execute_timeout_ms(uint8_t (*func)(void*),void* param,uint32_t n)
     }
     return 0;
 }
-void Delay_Us(uint32_t n)
+void Delay_US(uint32_t n)
 {
     uint32_t tp=Get_Systick_US();
     while(Get_Systick_US()-tp<=n);
 }
-void Delay_Us_Fast(uint16_t n){
-    Delay_Us(n);
+void Delay_US_Fast(uint16_t n){
+    Delay_US(n);
     return;
 
     uint32_t tp=*Systick_CLK;
     while(*Systick_CLK-tp<=n);
 }
-void Delay_Ms(uint32_t n)
+void Delay_MS(uint32_t n)
 {
     uint32_t tp=Systick_MS;
     while(Systick_MS-tp<=n);

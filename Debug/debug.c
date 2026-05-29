@@ -95,7 +95,7 @@ void SDI_printf_Enable(void)
 {
     *(DEBUG_DATA0_ADDRESS) = 0;
     //Delay_Init();
-    //Delay_Ms(1);
+    //Delay_MS(1);
 }
 
 /*********************************************************************
@@ -157,7 +157,13 @@ int _write(int fd, char *buf, int size)
         while(USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
         USART_SendData(USART2, *buf++);
 #elif(DEBUG == DEBUG_UART3)
-        while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
+        int cnt=0;
+        while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET){
+            ++cnt;
+            if(cnt>10000){
+                asm volatile("ebreak");
+            }
+        }
         USART_SendData(USART3, *buf++);
 #endif
     }

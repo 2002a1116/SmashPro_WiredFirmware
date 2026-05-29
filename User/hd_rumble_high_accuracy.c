@@ -1,6 +1,7 @@
 #include "hd_rumble_high_accuracy.h"
 #include "global_api.h"
-void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+#include "def.h"
+void TIM3_IRQHandler(void) __attribute__((portINTR));
 int16_t ccr_lookup_tb[]={
         0,3,6,9,12,15,18,21,25,28,31,34,37,40,43,
         47,50,53,56,59,62,65,69,72,75,78,81,84,87,90,
@@ -396,6 +397,30 @@ void TIM3_IRQHandler(void)
                 if(!right_low.amp||!right_low.step)
                     right_low.step=right_low_pos=right_low_sum=0;
             }
+            /*if(left_high_buf_rdy&&left_low_buf_rdy){
+                left_high_buf_rdy=0;
+                left_low_buf_rdy=0;
+                left_high=left_high_buf;
+                left_low=left_low_buf;
+                left_low_buf_stdby=1;
+                left_high_buf_stdby=1;
+                if(!left_high.amp||!left_high.step)
+                    left_high.step=left_high_pos=left_high_sum=0;
+                if(!left_low.amp||!left_low.step)
+                    left_low.step=left_low_pos=left_low_sum=0;
+            }
+            if(right_high_buf_rdy&&right_low_buf_rdy){
+                right_high_buf_rdy=0;
+                right_low_buf_rdy=0;
+                right_high=right_high_buf;
+                right_low=right_low_buf;
+                right_high_buf_stdby=1;
+                right_low_buf_stdby=1;
+                if(!right_high.amp||!right_high.step)
+                    right_high.step=right_high_pos=right_high_sum=0;
+                if(!right_low.amp||!right_low.step)
+                    right_low.step=right_low_pos=right_low_sum=0;
+            }*/
             step_forward(&left_high_pos,&left_high_sum,left_high.step);
             step_forward(&left_low_pos,&left_low_sum,left_low.step);
             step_forward(&right_high_pos,&right_high_sum,right_high.step);

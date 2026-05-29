@@ -237,7 +237,7 @@ PWR_VDD PWR_VDD_SupplyVoltage(void)
     //RCC_APB1PeriphClockCmd( RCC_APB1Periph_PWR, ENABLE);
     PWR_PVDLevelConfig(PWR_PVDLevel_MODE6);
     PWR_PVDCmd(ENABLE);
-    Delay_Us(10);
+    Delay_US(10);
     if( PWR_GetFlagStatus(PWR_FLAG_PVDO) == (uint32_t)RESET)
     {
         VDD_Voltage = PWR_VDD_5V;

@@ -8,7 +8,7 @@
 #ifndef USER_GPIO_DIGIT_H_
 #define USER_GPIO_DIGIT_H_
 
-#include "board_type.h"
+#include <def.h>
 
 #define GPIOA_GROUP_MASK (0x10000)
 #define GPIOB_GROUP_MASK (0x20000)

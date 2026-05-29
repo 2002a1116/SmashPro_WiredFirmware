@@ -7,7 +7,7 @@
 
 #include "ch32v10x.h"                 // Device header
 /*
-void TIM2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void TIM2_IRQHandler(void) __attribute__((interrupt()));
 
 static uint32_t global_tick = 0; //定义一个变量count
 

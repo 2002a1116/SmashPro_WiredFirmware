@@ -41,6 +41,9 @@ typedef struct _reliable_uart_packet{
 }reliable_uart_packet,*preliable_uart_packet;
 
 void uart_com_task();
+void start_connect();
+void connection_state_handler();
+void send_input_to_esp();
 void uart_conf_write(uint32_t addr,uint8_t* ptr,uint8_t size);
 void imu_buffer_reset_notifier();
 

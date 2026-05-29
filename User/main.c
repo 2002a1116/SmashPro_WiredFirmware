@@ -1,3 +1,4 @@
+#include "def.h"
 #include <stdlib.h>
 #include <math.h>
 #include "debug.h"
@@ -16,13 +17,13 @@
 #include "hd_rumble.h"
 #include "hd_rumble2.h"
 #include "hd_rumble_high_accuracy.h"
-#include "board_type.h"
 #include "i2c.h"
 #include "imu.h"
 #include "pwr.h"
 #include "spi.h"
+#include "advance_coroutine.h"
 #include "watchdog.h"
-
+//
 enum ADC_CHANNEL_ID{
     ADC_CHANNEL_LJOYS_HORI=0,
     ADC_CHANNEL_LJOYS_VERT,
@@ -316,7 +317,7 @@ void pwr_detector(){
         thres_cnt=0;
     }
 }
-void routine_service(void){
+void performance_monitor(){
     ++rts_cnt;
     if(!rts_cnt)
         rts_tcnt=Get_Systick_MS();
@@ -324,10 +325,13 @@ void routine_service(void){
         rts_tcnt+=Get_Systick_MS()-routine_tick;
         routine_tick=Get_Systick_MS();
     }
+}
+void routine_service(void){
+    performance_monitor();
     top_timer();
     push_waveform_into_buffer_task();
     func_switch_task();
-    rgb_task(connection_state.usb_paired);
+    rgb_task();
     start_connect();
     imu_upd();
     pwr_detector();
@@ -372,9 +376,11 @@ void init_all()
     //set_peripherals_state(ENABLE);
     HighPrecisionTimer_Init();
     SysTick_Init();
+    //printf("systick\r\n");
     pwr_init();
-    Delay_Ms(2);
+    Delay_MS(20);
     //reliable_uart_init();
+    //printf("conf\r\n");
     conf_init();
     /*RCC_ClocksTypeDef rcc_clock;
     RCC_GetClocksFreq(&rcc_clock);*/
@@ -401,13 +407,177 @@ void init_all()
     set_indicate_led_mode(0);
     connection_state.usb_plugging=1;
 }
+
+void test_delay()
+{
+    Delay_MS(5);
+}
+
+/*simple coroutine service*/
+#define COROUTINE_MAX_CNT (32)
+#define COROUTINE_MAX_TIMESLICE (200)
+void (*coroutine_list[COROUTINE_MAX_CNT])();
+static uint8_t coroutine_cnt;
+void coroutine_init(){
+#ifdef COMPILE_WL
+    coroutine_list[coroutine_cnt++]=UART1_Rx_Service;
+    coroutine_list[coroutine_cnt++]=uart_com_task;
+    //coroutine_list[coroutine_cnt++]=UART1_Tx_Service;
+    coroutine_list[coroutine_cnt++]=start_connect;
+    coroutine_list[coroutine_cnt++]=connection_state_handler;
+#endif
+    //coroutine_list[coroutine_cnt++]=performance_monitor;
+    coroutine_list[coroutine_cnt++]=top_timer;
+    coroutine_list[coroutine_cnt++]=push_waveform_into_buffer_task;
+    coroutine_list[coroutine_cnt++]=func_switch_task;
+    coroutine_list[coroutine_cnt++]=rgb_task;
+    coroutine_list[coroutine_cnt++]=imu_upd;
+
+    //coroutine_list[coroutine_cnt++]=test_delay;
+}
+void coroutine_scheduling(){
+    static uint32_t stage=0;
+    uint32_t start=Get_Systick_US();
+    while(stage<coroutine_cnt){
+        //printf("stage %d\r\n",stage);
+        if(coroutine_list[stage]){
+            coroutine_list[stage]();
+        }
+        ++stage;
+        if(Get_Systick_US()-start>=COROUTINE_MAX_TIMESLICE)
+            break;//stop here
+    }
+    if(stage>=coroutine_cnt)
+        stage=0;
+}
+void main_loop(){
+    pwr_detector();
+    performance_monitor();
+    //update input
+    joystick_debounce_task();
+    get_peripheral_data_handler(&global_input_data);
+
+    //hid task
+    if(USBFS_DevEnumStatus){//usb
+        connection_state.usb_plugging=1;
+        hid_rx_service();
+        hid_tx_service();
+    }else{
+        connection_state.usb_paired=0;
+    }
+    send_input_to_esp();
+    UART1_Tx_Service();
+
+    //other runs in simple coroutine
+    //printf("pre sche\r\n");
+    coroutine_scheduling();
+}
+void adv_cor_scheduler_init(){
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+
+    TIM_OCInitTypeDef       TIM_OCInitStructure = {0};
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure = {0};
+    TIM_TimeBaseInitStructure.TIM_Period = 14400;//72m/250
+    TIM_TimeBaseInitStructure.TIM_Prescaler = 0;//
+    TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+    TIM_TimeBaseInitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStructure);
+    TIM_SelectOnePulseMode(TIM4,TIM_OPMode_Single);
+    TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+    TIM_ClearITPendingBit(TIM4, TIM_FLAG_Update);
+
+    NVIC_InitTypeDef NVIC_InitStructure; //定义NVIC初始化结构体
+    NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn; //设置NVIC通道为定时器2中断
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1; //设置NVIC通道抢占优先级为0
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2; //设置NVIC通道子优先级为0
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //使能NVIC通道
+    NVIC_Init(&NVIC_InitStructure); //初始化NVIC
+    //NVIC_SetFastIRQ(TIM4_IRQHandler,TIM4_IRQn,3);
+
+    NVIC_ClearPendingIRQ(Software_IRQn);
+    NVIC_SetPriority(Software_IRQn, 0x80);
+    NVIC_EnableIRQ(Software_IRQn);
+}
+void adv_cor_scheduler_cmd(uint8_t state){
+    TIM_Cmd(TIM4, state);
+    TIM4->CNT=0;
+    TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+}
+void adv_cor_schedule()
+{
+    //printf("schedule start\r\n");
+    uint32_t stage=0;
+    while(stage<coroutine_cnt){
+        //printf("schedule %d addr:%08x\r\n",stage,adv_cor_addr);
+        if(coroutine_list[stage]){
+            coroutine_list[stage]();
+        }
+        ++stage;
+    }
+    //asm volatile("ecall");
+}
+void adv_cor_scheduling(){
+    adv_cor_scheduler_cmd(ENABLE);
+    if(adv_cor_intr_flag)
+    {
+        //printf("intred sp=%08x\r\n",adv_cor_intr_flag);
+        //uint32_t* ptr = (uint32_t*)(adv_cor_intr_flag);
+        //printf("jmp to %08x addr:%08x ra:%08x\r\n",*(ptr+1),adv_cor_addr,*(ptr+2));
+        //printf("dump :");
+        //for(int i=0;i<31;++i){
+          //  printf("%08x ",*(ptr+i));
+        //}
+        //printf("\r\n");
+        //Delay_MS(10);
+        //asm volatile("ebreak");
+        NVIC_SetPendingIRQ(Software_IRQn);
+    }else{
+        adv_cor_schedule();
+        adv_cor_scheduler_cmd(DISABLE);
+    }
+    //adv_cor_scheduler_cmd(DISABLE);
+    //printf("adv_cor_schedule end\r\n");
+}
+void adv_cor_main(){
+    while(1){
+        adv_cor_scheduler_cmd(DISABLE);
+        pwr_detector();
+        performance_monitor();
+        //update input
+        joystick_debounce_task();
+        get_peripheral_data_handler(&global_input_data);
+
+        //hid task
+        if(USBFS_DevEnumStatus){//usb
+            connection_state.usb_plugging=1;
+            hid_rx_service();
+            hid_tx_service();
+        }else{
+            connection_state.usb_paired=0;
+        }
+        send_input_to_esp();
+        UART1_Tx_Service();
+        adv_cor_scheduling();
+    }
+}
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
     init_all();
     printf("SystemClk:%d\r\n",SystemCoreClock);
     printf("%08x\r\n",RCC->RSTSCKR);
-#define COMPILE_WL
+#ifdef USE_COROUTINE
+    coroutine_init();
+    while(1){
+        main_loop();
+    }
+#elif defined(USE_ADV_COR)
+    printf("adv cor\r\n");
+    NVIC_HaltPushCfg(DISABLE);
+    coroutine_init();
+    adv_cor_scheduler_init();
+    adv_cor_main();
+#else
     while(1)
     {
 #ifdef COMPILE_WL
@@ -424,9 +594,12 @@ int main(void)
         }
 #ifdef COMPILE_WL
         uart_com_task();
+        send_input_to_esp();
+        connection_state_handler();
         UART1_Tx_Service();
 #endif
         routine_service();
     }
+#endif
 }
 

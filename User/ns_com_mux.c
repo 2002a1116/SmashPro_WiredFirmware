@@ -172,10 +172,10 @@ uint8_t _calibrate_imu_raw(uint32_t sample_cnt){
     memset(calibrate_imu_raw_buf,0,sizeof(calibrate_imu_raw_buf));
     for(int i=0;i<sample_cnt;++i){
         retry=CALIBRATE_MAX_RETRY;
-        Delay_Ms(75);
+        Delay_MS(75);
         do{
             res=imu_read();
-            Delay_Ms(50);
+            Delay_MS(50);
         }while(res&&retry--);
         if(res)
             break;
@@ -261,7 +261,7 @@ void fw_subcommand_get_status(cmd_packet* pkt){
 void fw_subcommand_reboot(cmd_packet* pkt){
     led_pwr_ctrl(DISABLE);
     _force_rgb(DISABLE);
-    Delay_Ms(10);
+    Delay_MS(10);
     NVIC_SystemReset();
 }
 #define FW_SUBC_ID_GET_VERSION (0xFF)

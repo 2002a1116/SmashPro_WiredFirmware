@@ -160,9 +160,9 @@ void ResetRootHubPort(void)
     R8_UHOST_CTRL &= ~RB_UH_PORT_EN;
     SetUsbSpeed(1);
     R8_UHOST_CTRL = (R8_UHOST_CTRL & ~RB_UH_LOW_SPEED) | RB_UH_BUS_RESET;
-    Delay_Ms(15);
+    Delay_MS(15);
     R8_UHOST_CTRL = R8_UHOST_CTRL & ~RB_UH_BUS_RESET;
-    Delay_Us(250);
+    Delay_US(250);
     R8_USB_INT_FG = RB_UIF_DETECT;
 }
 
@@ -277,7 +277,7 @@ UINT8 USBHostTransact(UINT8 endp_pid, UINT8 tog, UINT32 timeout)
                 return (ERR_USB_CONNECT);
 
 #endif
-            Delay_Us(200);
+            Delay_US(200);
         }
 
         if(R8_USB_INT_FG & RB_UIF_TRANSFER)
@@ -322,7 +322,7 @@ UINT8 USBHostTransact(UINT8 endp_pid, UINT8 tog, UINT32 timeout)
         {
             R8_USB_INT_FG = 0xFF;
         }
-        Delay_Us(15);
+        Delay_US(15);
     } while(++TransRetry < 3);
 
     return (ERR_USB_TRANSFER);
@@ -348,7 +348,7 @@ UINT8 HostCtrlTransfer(PUINT8 DataBuf, PUINT8 RetLen)
 
     pBuf = DataBuf;
     pLen = RetLen;
-    Delay_Us(200);
+    Delay_US(200);
     if(pLen)
         *pLen = 0;
 
@@ -366,7 +366,7 @@ UINT8 HostCtrlTransfer(PUINT8 DataBuf, PUINT8 RetLen)
         {
             while(RemLen)
             {
-                Delay_Us(200);
+                Delay_US(200);
                 s = USBHostTransact(USB_PID_IN << 4 | 0x00, R8_UH_RX_CTRL, 200000 / 20);
                 if(s != ERR_SUCCESS)
                     return (s);
@@ -389,7 +389,7 @@ UINT8 HostCtrlTransfer(PUINT8 DataBuf, PUINT8 RetLen)
         {
             while(RemLen)
             {
-                Delay_Us(200);
+                Delay_US(200);
                 R8_UH_TX_LEN = RemLen >= UsbDevEndp0Size ? UsbDevEndp0Size : RemLen;
 
                 for(TxCnt = 0; TxCnt != R8_UH_TX_LEN; TxCnt++){
@@ -407,7 +407,7 @@ UINT8 HostCtrlTransfer(PUINT8 DataBuf, PUINT8 RetLen)
         }
     }
 
-    Delay_Us(200);
+    Delay_US(200);
     s = USBHostTransact((R8_UH_TX_LEN ? USB_PID_IN << 4 | 0x00 : USB_PID_OUT << 4 | 0x00), RB_UH_R_TOG | RB_UH_T_TOG, 200000 / 20);
     if(s != ERR_SUCCESS)
         return (s);
@@ -517,7 +517,7 @@ UINT8 CtrlSetUsbAddress(UINT8 addr)
     if(s != ERR_SUCCESS)
         return (s);
     SetHostUsbAddr(addr);
-    Delay_Ms(10);
+    Delay_MS(10);
 
     return (ERR_SUCCESS);
 }
@@ -615,7 +615,7 @@ UINT8 InitRootDevice(PUINT8 DataBuf)
 
     for(i = 0, s = 0; i < 100; i++)
     {
-        Delay_Ms(1);
+        Delay_MS(1);
         if(EnableRootHubPort() == ERR_SUCCESS)
         {
             i = 0;

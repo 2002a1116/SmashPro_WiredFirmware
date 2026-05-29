@@ -31,6 +31,8 @@ void hd_rumble_init(){
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
+    //GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+    //GPIO_Init(GPIOA, &GPIO_InitStructure);
     TIM_TimeBaseInitStructure.TIM_Period = HD_RUMBLE_TIM_PERIOD;//72m/250
     TIM_TimeBaseInitStructure.TIM_Prescaler = HD_RUMBLE_TIM_PRESCALER-1;//
     TIM_TimeBaseInitStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -49,6 +51,8 @@ void hd_rumble_init(){
     TIM_OC3Init(TIM3, &TIM_OCInitStructure);
     TIM_OC4Init(TIM3, &TIM_OCInitStructure);
 
+    //TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+
     TIM_CtrlPWMOutputs(TIM3, ENABLE);
     TIM_OC3PreloadConfig(TIM3,TIM_OCPreload_Enable);
     TIM_OC4PreloadConfig(TIM3,TIM_OCPreload_Enable);
@@ -56,6 +60,8 @@ void hd_rumble_init(){
 
     TIM_SetCompare3(TIM3, HD_RUMBLE_TIM_PERIOD_MID);
     TIM_SetCompare4(TIM3, HD_RUMBLE_TIM_PERIOD_MID);
+
+    //TIM_SetCompare1(TIM3, HD_RUMBLE_TIM_PERIOD_MID);
 
     hd_rumble_high_accurary_init();
     NVIC_InitTypeDef NVIC_InitStructure; //定义NVIC初始化结构体

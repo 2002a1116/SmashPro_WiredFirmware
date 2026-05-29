@@ -7,10 +7,10 @@
 
 #ifndef USER_HD_RUMBLE_HIGH_ACCURACY_H_
 #define USER_HD_RUMBLE_HIGH_ACCURACY_H_
+#include <def.h>
 #include "ring_buffer.h"
 #include "hd_rumble.h"
 #include "conf.h"
-#include "board_type.h"
 
 typedef struct _hd_rumble_high_accurary_pack{
     uint32_t step;
@@ -23,7 +23,7 @@ extern int32_t hd_rumble_cvr_range;
 extern int32_t hd_rumble_cvr_max_offset;
 extern int32_t hd_rumble_cvr_max;
 extern int32_t hd_rumble_cvr_min;
-void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void TIM3_IRQHandler(void) __attribute__((interrupt()));
 void hd_rumble_high_accurary_init();
 void push_waveform_into_buffer_task();
 void push_waveform(uint8_t channel,hd_rumble_high_accurary_pack* ptr);

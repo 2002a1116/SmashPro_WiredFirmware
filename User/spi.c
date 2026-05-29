@@ -10,12 +10,12 @@
 #include "conf.h"
 #include "pwr.h"
 #include "spi.h"
-#include "board_type.h"
 #include "hd_rumble_high_accuracy.h"
 #include "imu.h"
 #include "gpio_digit.h"
+#include "def.h"
 
-void DMA1_Channel3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void DMA1_Channel3_IRQHandler(void) __attribute__((portINTR));
 
 /* Global define */
 
@@ -174,7 +174,7 @@ int rgb_init(void)
     //gpio_set(t, 1);
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
     SPI_FullDuplex_Init();
-    //Delay_Ms(2);
+    //Delay_MS(2);
     spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //flush_rgb();
@@ -281,10 +281,12 @@ void set_rgb(uint8_t use_factor,float fac){
         }
     }
 }
-void rgb_task(uint8_t is_on_usb){
+//void rgb_task(uint8_t is_on_usb){
+void rgb_task(){
     static uint32_t rgb_task_t=0;
     static uint8_t pre_led_disable=1;
     static uint8_t pre_is_pluged=1;
+
     uint32_t t=Get_Systick_MS();
     if(t-rgb_task_t<50)//50 ms gap
         return;
@@ -333,7 +335,7 @@ void rgb_task(uint8_t is_on_usb){
         }else if(rgb_reset){
             set_rgb(0,1.0f);
         }
-        set_indicate_led(is_on_usb);
+        set_indicate_led(connection_state.usb_paired);
         _flush_rgb();
     }
     rgb_reset=0;

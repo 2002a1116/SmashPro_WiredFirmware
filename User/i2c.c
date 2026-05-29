@@ -9,7 +9,8 @@
 #include "i2c.h"
 #include "conf.h"
 #include "watchdog.h"
-void I2C2_ER_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+#include "def.h"
+void I2C2_ER_IRQHandler(void) __attribute__((portINTR));
 /* I2C Mode Definition */
 uint8_t i2c_status;
 uint8_t i2c_error_code;
@@ -88,7 +89,7 @@ void i2c_hardware_init(u32 baudrate, u16 address, u8 allow_reset)
 
     I2C_Cmd(I2C2, ENABLE);
     //I2C_GenerateSTOP( I2C2, ENABLE );
-    //Delay_Us(10);
+    //Delay_US(10);
     //printf("i2c busy flag:%d\r\n",I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
     if(execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US)){
         //printf("i2c_init fail %d\r\n",allow_reset);
@@ -111,7 +112,7 @@ void i2c_hardware_init(u32 baudrate, u16 address, u8 allow_reset)
 #define SCL_LOW (GPIO_ResetBits(GPIOB, GPIO_Pin_10))
 #define SDA_HIGH (GPIO_SetBits(GPIOB, GPIO_Pin_11))
 #define SDA_LOW (GPIO_ResetBits(GPIOB, GPIO_Pin_11))
-#define I2C_DELAY (Delay_Us(1))
+#define I2C_DELAY (Delay_US(1))
 uint8_t i2c_hardware_recovery()
 {
     I2C2->CTLR1&=~0x1;
@@ -187,7 +188,7 @@ void i2c2_reset()
         //    I2C_SoftwareResetCmd(I2C2, ENABLE);
         i2c_hardware_init(IMU_I2C_FREQ, CH32V_I2C_ADDR,0);
         //printf("i2c reset busy flag:%d\r\n",I2C_GetFlagStatus(I2C2, I2C_FLAG_BUSY));
-        //Delay_Us(10);
+        //Delay_US(10);
         //printf("i2c sleep %d\r\n",execute_timeout_us(IMU_I2C_EXECUTE_FUNC(i2c2_check_flag),(void*)I2C_FLAG_BUSY,IMU_I2C_TIMEOUT_US));
     }else {
         //printf("i2c restart fail,disable i2c\r\n");

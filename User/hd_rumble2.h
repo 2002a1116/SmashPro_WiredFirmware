@@ -110,6 +110,7 @@ typedef struct _hd_rumble_pack
 #define MinFrequency      (192)
 #define MaxFrequency       (320)
 #define DefaultFrequency   (256)
+#define EXP2_INDEX_ORIG (256)
 #define CenterFreqHigh  (320)
 #define CenterFreqLow   (160)
 #define HD_RUMBLE_MIXER_SHIFT (7)

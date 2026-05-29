@@ -13,7 +13,7 @@
 #include <math.h>
 #include "hd_rumble.h"
 #ifndef HD_RUMBLE
-void TIM3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void TIM3_IRQHandler(void) __attribute__((interrupt()));
 
 #define RUMBLE_STEP (512)
 #define RUMBLE_MOVE_FACTOR (100000)

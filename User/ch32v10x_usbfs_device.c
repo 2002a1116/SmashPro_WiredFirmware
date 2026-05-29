@@ -10,6 +10,7 @@
 * microcontroller manufactured by Nanjing Qinheng Microelectronics.
 *******************************************************************************/
 
+#include "def.h"
 #include "ch32v10x_usbfs_device.h"
 #include "usbd_compatibility_hid.h"
 #include "ring_buffer.h"
@@ -56,7 +57,7 @@ uint8_t ns_usb_rb_len[2][NS_USB_RINGBUFFER_PKG_CAP];
 
 /******************************************************************************/
 /* Interrupt Service Routine Declaration*/
-void USBFS_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+void USBFS_IRQHandler(void) __attribute__((portINTR));
 
 /*********************************************************************
  * @fn      USBFS_RCC_Init
@@ -125,7 +126,7 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
     if( sta )
     {
 		R8_USB_CTRL = RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-		Delay_Us_Fast( 10 );
+		Delay_US_Fast( 10 );
         R8_USB_CTRL = 0x00;
         R8_USB_INT_EN = RB_UIE_SUSPEND | RB_UIE_BUS_RST | RB_UIE_TRANSFER;
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
@@ -135,14 +136,14 @@ void USBFS_Device_Init( FunctionalState sta , PWR_VDD VDD_Voltage)
         ring_buffer_init(&ns_usb_send_rb, ns_usb_send_buf, ns_usb_rb_len[0], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
         ring_buffer_init(&ns_usb_recv_rb, ns_usb_recv_buf, ns_usb_rb_len[1], NS_USB_RINGBUFFER_PKG_CAP, NS_USB_RINGBUFFER_PKG_SIZE);
         NVIC_SetFastIRQ((uint32_t)USBFS_IRQHandler, USBFS_IRQn, 0);
-        //NVIC_SetPriority(USBFS_IRQn,0x30);
+        //NVIC_SetPriority(USBFS_IRQn,0x80);
         NVIC_SetPriority(USBFS_IRQn,0x30);
         NVIC_EnableIRQ(USBFS_IRQn);
     }
     else
     {
         R8_USB_CTRL = RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-        Delay_Us_Fast( 10 );
+        Delay_US_Fast( 10 );
         R8_USB_CTRL = 0x00;
         NVIC_DisableIRQ(USBFS_IRQn);
     }
@@ -822,8 +823,8 @@ void USBFS_IRQHandler( void )
         //uint8_t uep2_ctrl = R8_UEP2_CTRL;
 
         R8_USB_CTRL |= RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-        //Delay_Us_Fast(10);
-        //Delay_Us_Fast(10);
+        //Delay_US_Fast(10);
+        //Delay_US_Fast(10);
         //R8_USB_CTRL &= ~(RB_UC_RESET_SIE|RB_UC_CLR_ALL);
         //R8_USB_CTRL = 0x00;
         R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
@@ -856,7 +857,7 @@ void USBFS_IRQHandler( void )
 void USBFS_Send_Resume(void)
 {
     R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
-    Delay_Ms(8);
+    Delay_MS(8);
     R8_UDEV_CTRL ^= RB_UD_LOW_SPEED;
 }
 void usb_dev_reset(){

@@ -16,7 +16,7 @@
 #include "spi.h"
 #include "conf.h"
 
-//void USART1_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
+//void USART1_IRQHandler(void) __attribute__((portINTR));
 __attribute__ ((aligned(4))) uint8_t UART1_RxBuffer[DEF_UART1_BUF_SIZE];  // UART2 Rx Buffer
 
 uint8_t uart_rx_rb_buf[UART_PKG_SIZE*UART_RINGBUFFER_PKG_CAP];

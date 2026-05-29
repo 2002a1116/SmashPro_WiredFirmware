@@ -125,7 +125,7 @@ uint32_t gpio_kb_scan(){
             continue;
         }
         GPIO_SET(kb_pull[i],1);
-        Delay_Us_Fast(KB_SCAN_SETUP_TIME);
+        Delay_US_Fast(KB_SCAN_SETUP_TIME);
         for(uint8_t j=0;j<4;++j){
             res|=(GPIO_READ(kb_scan[j])<<kb_scan_to_hid[i][j]);
         }

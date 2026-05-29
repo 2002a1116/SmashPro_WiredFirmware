@@ -161,7 +161,7 @@ void recv_pwr_control(){
     case 0x0F://for wireless update,we use this to restart ch32 mcu.
         //flush_rgb(DISABLE);
         _force_rgb(DISABLE);
-        Delay_Ms(10);
+        Delay_MS(10);
         NVIC_SystemReset();
         break;
     default:
@@ -237,10 +237,8 @@ void recv_esp32_pkg()
         break;
     }
 }
-void connection_state_handler()//decide if we go stop
-{
-    //printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
-    static uint32_t uart_report_tick=0,input_update_tick=0;
+void send_input_to_esp(){
+    static uint32_t input_update_tick=0;
     uint32_t tick=Get_Systick_US();
     if(connection_state.esp32_connected&&(!connection_state.esp32_sleep)&&(tick-input_update_tick>UART_INPUT_UPD_GAP)){
         if(!connection_state.usb_paired){
@@ -248,6 +246,11 @@ void connection_state_handler()//decide if we go stop
             send_input_with_uart();
         }
     }
+}
+void connection_state_handler()//decide if we go stop
+{
+    //printf("enter sleep %d %d\r\n",connection_state.usb_enumed,connection_state.esp32_sleep);
+    static uint32_t uart_report_tick=0;
     if((!connection_state.usb_paired) && connection_state.esp32_sleep)
     {
         //while(1);
@@ -301,7 +304,7 @@ void connection_state_handler()//decide if we go stop
 }
 void uart_com_task()
 {
-    uint8_t max_uart_handled=16;
+    uint8_t max_uart_handled=8;
     while(uart_rx_rb.size&&max_uart_handled--)
     {
         connection_state.esp32_connected=0x01;//if revice uart pkt from esp32,means it exist
@@ -309,7 +312,7 @@ void uart_com_task()
         ring_buffer_pop(&uart_rx_rb);
         recv_esp32_pkg();
     }
-    connection_state_handler();
+    //connection_state_handler();
 }
 void reliable_uart_init()
 {
@@ -338,7 +341,7 @@ void reliable_uart_send_acc(uart_packet* pkt){
     p.acc=1;
     send_uart_pkt(&p);
 }
-void reliable_uart_default_handler(uint8_t sts,void*){
+void reliable_uart_default_handler(uint8_t sts,void* p){
 
 }
 uint32_t reliable_uart_timeout_cnt,reliable_uart_handled_cnt;

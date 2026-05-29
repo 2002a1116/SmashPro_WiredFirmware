@@ -120,7 +120,7 @@ struct Switch5BitCommand CommandTable[] = {//offset*=32
         { .am_action = Switch5BitAction_Sum,        .fm_action = Switch5BitAction_Sum,        .am_offset = -4,   .fm_offset =  1 },
         { .am_action = Switch5BitAction_Sum,        .fm_action = Switch5BitAction_Ignore,     .am_offset = -4,   .fm_offset =  0 },
         { .am_action = Switch5BitAction_Sum,        .fm_action = Switch5BitAction_Sum,        .am_offset = -4,   .fm_offset = -1 }
-};//thk to mission control guys
+};//thk to mission control guy(s)
 uint8_t decoded_cnt=0;
 uint8_t global_sample_channel;
 //int32_t hliner=320;
@@ -135,17 +135,14 @@ rumble_data_linear linear_samples[3];
 int16_t ApplyCommand(uint8_t action, int16_t offset, int16_t current_val, int16_t default_val, int16_t min, int16_t max) {
     switch (action) {
         case Switch5BitAction_Ignore:     return current_val;
-        case Switch5BitAction_Substitute: //return offset;
-            /*/current_val = offset;
-            if(current_val<min)current_val=min;
-            else if(current_val>max)current_val=max;
-            return current_val;*/
-            return (int16_t)i32_clamp(offset, min, max);
+        case Switch5BitAction_Substitute:
+            //return offset
+            //return (int16_t)i32_clamp(offset, min, max);
+            return (int16_t)i32_clamp(offset+EXP2_INDEX_ORIG, min, max);
+            //fixed 26/5/14
+            //when substituting,we suppose use the orig offset.
+            //this is y u shouldnt program in 4 o'clock,u make silly mistakes.
         case Switch5BitAction_Sum:
-            /*current_val += offset;
-            if(current_val<min)current_val=min;
-            else if(current_val>max)current_val=max;
-            return current_val;*/
             return (int16_t)i32_clamp((int32_t)current_val+offset,min,max);
         default:                          return default_val;
     }
@@ -195,8 +192,6 @@ void decode_hd_rumble_format1long(VibrationAmFmPackFormatOne28bit* pkg)
     m_state.hi_amp_linear  = Am7BitLookup[pkg->ChannelAmplitudeHigh];
     m_state.hi_freq_linear = Fm7BitLookup[pkg->ChannelFrequencyHigh];*/
     m_state.lo_amp_linear  = amp_exp2_index_lookup_tb[pkg->ChannelAmplitudeLow];
-    //if(m_state.lo_amp_linear)
-    //    hliner=pkg->ChannelAmplitudeLow;
     m_state.lo_freq_linear = freq_exp2_index_lookup_tb[pkg->ChannelFrequencyLow];
     m_state.hi_amp_linear  = amp_exp2_index_lookup_tb[pkg->ChannelAmplitudeHigh];
     m_state.hi_freq_linear = freq_exp2_index_lookup_tb[pkg->ChannelFrequencyHigh];

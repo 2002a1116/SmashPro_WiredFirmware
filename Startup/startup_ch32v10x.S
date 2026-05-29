@@ -42,6 +42,7 @@ _vector_base:
     .word   0
     .word   0
     .word   0
+    //	j 	Ecall_User_Handler
     .word   0
     .word   0
     .word   0
@@ -99,6 +100,7 @@ _vector_base:
     .section    .text.vector_handler, "ax", @progbits
     .weak   NMI_Handler
     .weak   HardFault_Handler
+    .weak	Ecall_User_Handler
     .weak   SysTick_Handler
     .weak   SW_Handler
     .weak   WWDG_IRQHandler
@@ -144,6 +146,7 @@ _vector_base:
 
 NMI_Handler:
 HardFault_Handler:
+Ecall_User_Handler:
 SysTick_Handler:
 SW_Handler:
 WWDG_IRQHandler:
@@ -223,6 +226,7 @@ handle_reset:
 2:
 /* Enable global interrupt and configure privileged mode */
   	li t0, 0x88
+  	//li t0, 0x1800
   	csrw mstatus, t0
 /* Configure entry address mode */
 	la t0, _vector_base

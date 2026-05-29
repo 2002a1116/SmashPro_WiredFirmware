@@ -289,6 +289,7 @@ void conf_flush(){
     adc_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
+    hd_rumble_set_status(!user_config.rumble_disabled);
     button_active_mask=~user_config.button_disable_mask;
     rgb_slow_start_div=user_config.rgb_slow_start_period*50.0f;
     if(rgb_slow_start_div<=0)rgb_slow_start_div=1.0f;

@@ -98,7 +98,7 @@ void hid_tx_service( void )
         }
         else if(Get_Systick_MS()-tick>1000){
             R8_UDEV_CTRL = 0;
-            Delay_Ms(2);
+            Delay_MS(2);
             USBFS_RCC_Init();
             USBFS_Device_Init( ENABLE , pwr_vdd_voltage());
             tick=0;

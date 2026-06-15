@@ -8,7 +8,7 @@
 #ifndef USER_SPI_H_
 #define USER_SPI_H_
 
-#define INDICATE_LED_BRIGHTNESS (25)
+//#define INDICATE_LED_BRIGHTNESS (25)
 
 int rgb_init(void);
 void flush_rgb();

@@ -182,10 +182,10 @@ void imu_upd()
     static uint32_t last_upd=0;
     static uint8_t pre_sts=0;
     rep=&imu_pack_buf[imu_buf_pos];
-    if(user_config.imu_disabled){
+    if(!config.imu.enable){
         if(pre_sts)
             return;
-        pre_sts=user_config.imu_disabled;
+        pre_sts=!config.imu.enable;
         memset(rep,0,IMU_GYO_SIZE*6);
         set_imu_available(rep);
         return;//disabled mask
@@ -197,7 +197,7 @@ void imu_upd()
     if(!imu_upd_cnt)
         imu_upd_cnt=3;
     uint32_t tick=Get_Systick_US();
-    if(tick-last_imu_upd<user_config.imu_sample_gap)
+    if(tick-last_imu_upd<config.imu.sample_gap)
         return;
     if(imu_read())
     {

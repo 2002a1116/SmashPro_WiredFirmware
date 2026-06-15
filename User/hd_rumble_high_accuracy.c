@@ -246,7 +246,7 @@ static uint32_t left_high_tick,left_low_tick,right_high_tick,right_low_tick,tim3
 #define HD_RUMBLE_HIGH_ACC_TIMEOUT_CNT (50UL*HD_RUMBLE_FRAME_TIMEOUT_MS)
 uint8_t rumble_pattern_check(hd_rumble_high_accurary_pack* p,uint16_t* pos,uint32_t* sum,uint32_t tick)
 {
-    if(user_config.rumble_pattern){
+    if(config.rumble.hd.pattern){
         return (!p->amp)||(step_forward(pos, sum, p->step)&&(tim3_counter-tick)>=HD_RUMBLE_HIGH_ACC_LAST_ATLEAST_CNT);
     }
     else {
@@ -267,7 +267,7 @@ void TIM3_IRQHandler(void)
     if(TIM_GetITStatus(TIM3,TIM_IT_Update)==1){
         ++tim3_counter;
         //we unroll the loop manually incase the compiler didnt
-        if(user_config.legacy_rumble){
+        if(config.rumble.hd.legacy){
             if(rumble_pattern_check(&left_high,&left_high_pos,&left_high_sum,left_high_tick)){
                 if(left_high_buf_rdy){
                     /*

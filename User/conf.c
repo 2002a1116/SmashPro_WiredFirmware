@@ -14,15 +14,14 @@
 #include "gpio_digit.h"
 #include "hd_rumble2.h"
 #include "hd_rumble_high_accuracy.h"
+#include "affine.h"
 #include <string.h>
-const uint32_t FW_VERSION=(0x00010400);
-const uint32_t FW_SUB_VERSION=0x2;//SmashProFw_V1.2.0.0.hex
+const uint32_t FW_VERSION=(0x00020000);
+const uint32_t FW_SUB_VERSION=0x0;//SmashProFw_V1.2.0.0.hex
 //#pragma pack(push,4)
 factory_configuration_data factory_configuration;
 user_calibration_data user_calibration;
-user_config_data user_config;
-rgb_data_complete rgb_data[RGB_MAX_CNT];
-smashpro_factory_config_data smashpro_factory_config;
+user_config_data config;
 //#pragma pack(pop)
 uint32_t joystick_snapback_deadzone_sq[2];
 uint32_t button_active_mask;
@@ -43,24 +42,6 @@ void set_hd_rumble_range(){
 void conf_init()
 {
     memset(&factory_configuration,-1,sizeof(factory_configuration));
-    memset(&smashpro_factory_config,-1,sizeof(smashpro_factory_config));
-    memset(&rgb_data,-1,sizeof(rgb_data));
-    read_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,sizeof(smashpro_factory_config));
-    read_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,sizeof(rgb_data));
-    if(smashpro_factory_config.nonexist)
-    {
-        memset(&smashpro_factory_config,-1,sizeof(smashpro_factory_config));
-        smashpro_factory_config.nonexist=1;//now we use this for auto recover from cloud;
-        smashpro_factory_config.pcb_typ=PCB_TYP_PRO;
-        smashpro_factory_config.pcb_rev=PRO_300;
-        smashpro_factory_config.rgb_cnt=31;
-        smashpro_factory_config.indi_led_ofst=4;
-        uint8_t res = write_flash(FLASH_ADDR_HARDWARE_INFO,(uint8_t*)&smashpro_factory_config,
-                sizeof(smashpro_factory_config));
-        res = write_flash(FLASH_ADDR_RGB_DATA,(uint8_t*)rgb_data,
-                sizeof(rgb_data));
-    }
-    //fac=get_raw_flash_buf();
     fac_conf_read();
     if(factory_configuration.nonexist){
         factory_configuration.IdentificationCode[0]=0x80;//no sn
@@ -143,49 +124,66 @@ void conf_init()
 
     //flash_read(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
     read_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)&user_calibration, sizeof(user_calibration));
-    if(user_calibration.nonexist){
-        for(int i=0;i<4;++i)
-            user_calibration.internal_center[i]=2048;
-    }
     //xenoblade?
-    memset(&user_config,-1,sizeof(user_config));
-    custom_conf_read();
-    if(user_config.nonexist)
-    {
-        memset(&user_config,0,sizeof(user_config));
-        user_config.nonexist=1;
-        user_config.in_interval=8;
-        user_config.out_interval=8;
+    memset(&config,0,sizeof(config));
+    memset(&(config.rgb.data),-1,sizeof(config.rgb.data));
+    //custom_conf_read();
+    uint8_t magic = 0;
+    read_flash(FLASH_ADDR_USER_CONFIG,&magic,1);
+    //conf_read(0xF000, &magic, 1);
+    if(!CONFIG_EXIST(magic)){
+        //config.magic=CONFIG_MAGIC;
+
+        config.hw.pcb_typ=PCB_TYP_PRO;
+        config.hw.pcb_rev=PRO_300;
+        config.hw.rgb_cnt=25;
+        config.hw.indi_led_ofst=4;
+
+        config.basic.ns_pkt_timer_mode=0;
+        config.basic.pro_fw_version=2;
+
+        config.usb.in_interval=8;
+        config.usb.out_interval=8;
+        config.usb.auto_recovery=1;
         for(int i=0;i<4;++i){
-            user_config.joystick_ratio[i]=(i<2?32:32);
-            user_config.hd_rumble_amp_ratio[i]=128;
-            //user_config.hd_rumble_amp_ratio[i]=(i<2?128:128);
-            user_config.dead_zone[i]=64;
+            config.js.ratio[i]=(i<2?32:32);
+            config.rumble.hd.amp_ratio[i]=128;
+            config.js.dz[i]=96;
+            config.js.center[i]=2048;
         }
         //user_config.hd_rumble_mixer_ratio=64;//total amp = hi_amp + (-1/2)lo_amp
-        user_config.joystick_snapback_deadzone[0]=1400;
-        user_config.joystick_snapback_deadzone[1]=1400;
-        user_config.dead_zone_mode=3;
-        //user_config.rgb_cnt=31;
-        user_config.imu_sample_gap=1750;
-        for(int i=0;i<smashpro_factory_config.rgb_cnt;++i){
-            rgb_data[i].load=0xffffff;
+        config.snpbk.dz[0]=1200;
+        config.snpbk.dz[1]=1200;
+        config.js.dz_mode=3;
+        config.js.l_mode=0;
+        config.js.r_mode=0;
+
+        config.imu.sample_gap=1750;
+        for(int i=0;i<config.hw.rgb_cnt;++i){
+            config.rgb.data[i].load=0xffffff;
         }
-        user_config.imu_ratio_x=127;
-        user_config.imu_ratio_y=127;
-        user_config.imu_ratio_z=127;
-        user_config.pro_fw_version=2;
-        user_config.joystick_snapback_filter_max_delay=13500;
-        user_config.rumble_pattern=0;
-        user_config.legacy_rumble=0;
-        user_config.imu_disabled=1;//we disabled this in default as many people dont need this
-        user_config.rgb_slow_start_period=100;
-        //custom_conf_write();
+        config.imu.ratio_x=127;
+        config.imu.ratio_y=127;
+        config.imu.ratio_z=127;
+
+        config.snpbk.filter_window=15000;
+        config.rumble.hd.pattern=0;
+        config.rumble.hd.legacy=0;
+
+        config.imu.enable=0;//we disabled this in default as many people dont need this
+        config.rumble.enable=1;
+        config.rgb.enable=1;
+
+        config.rgb.slow_start_period=100;
+        config.rgb.indi_led_brightness=15;
+
+    }else{
+        custom_conf_read();
     }
     conf_flush();
 }
 void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
-    switch(addr & 0xffff00)
+    switch(addr & 0xfff000)
     {
     case 0x5000:
         break;
@@ -196,14 +194,7 @@ void conf_read(uint32_t addr,uint8_t* buf,uint8_t size){
         memcpy(buf,((uint8_t*)&user_calibration)+(addr&0xff),size);
         break;
     case 0xF000://user config
-        memcpy(buf,((uint8_t*)&user_config)+(addr&0xff),size);
-        break;
-    case 0x0000:
-        memcpy(buf,((uint8_t*)&smashpro_factory_config)+(addr&0xff),size);
-        //memcpy(buf,((uint8_t*)FLASH_ADDR_USEROPTION_PERSISTENT_BYTE)+(addr&0xff),size);
-        break;
-    case 0x9000:
-        memcpy(buf,((uint8_t*)rgb_data)+(addr&0xff),size);
+        memcpy(buf,((uint8_t*)&config)+(addr&0xfff),size);
         break;
     default:
         break;
@@ -219,37 +210,20 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
         memcpy(((uint8_t*)&factory_configuration)+(addr&0xff),(uint8_t*)buf,size);
         if(save)
             flash_res=fac_conf_write();
-        //flash_res=write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)buf, size);
         uart_conf_write(addr, ((uint8_t*)&factory_configuration)+(addr&0xff), size);
         break;
     case 0x8000:
         memcpy(((uint8_t*)&user_calibration)+(addr&0xff),(uint8_t*)buf,size);
-        //flash_res=flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));
-        //flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION, (uint8_t*)buf, size);
         if(save)
             flash_res=write_flash(FLASH_ADDR_USER_CALIBRATION,(uint8_t*)&user_calibration,sizeof(user_calibration));
         uart_conf_write(addr, ((uint8_t*)&user_calibration)+(addr&0xff), size);
         break;
     case 0xF000:
-        memcpy(((uint8_t*)&user_config)+(addr&0xfff),(uint8_t*)buf,size);
+        memcpy(((uint8_t*)&config)+(addr&0xfff),(uint8_t*)buf,size);
         if(save)
-            flash_res=custom_conf_write();
-        uart_conf_write(addr, ((uint8_t*)&user_config)+(addr&0xff), size);
+            flash_res=custom_conf_write(addr&0xfff,size);
+        uart_conf_write(addr, ((uint8_t*)&config)+(addr&0xfFf), size);
         conf_flush();
-        break;
-    case 0x0000:
-        memcpy(((uint8_t*)&smashpro_factory_config)+(addr&0xff),(uint8_t*)buf,size);
-        if(save)
-            flash_res=write_flash(FLASH_ADDR_HARDWARE_INFO, (uint8_t*)buf, size);
-        uart_conf_write(addr, buf, size);
-        conf_flush();
-        break;
-    case 0x9000:
-        memcpy(((uint8_t*)rgb_data)+(addr&0xff),(uint8_t*)buf,size);
-        if(save)
-            flash_res=write_flash(FLASH_ADDR_RGB_DATA, rgb_data, sizeof(rgb_data));
-        uart_conf_write(addr, buf, size);
-        flush_rgb();
         break;
     default:
         break;
@@ -259,41 +233,49 @@ uint8_t conf_write(uint32_t addr,uint8_t* buf,uint8_t size,uint8_t save){
 }
 void custom_conf_read()
 {
-    read_flash(FLASH_ADDR_USER_CONFIG, (uint8_t*)&user_config, sizeof(user_config));
+    read_flash(FLASH_ADDR_USER_CONFIG, (uint8_t*)&config, sizeof(config));
     //flash_read(1, (uint8_t*)&user_config, sizeof(user_config));
 }
-uint8_t custom_conf_write()
+uint8_t custom_conf_write(uint32_t addr,uint32_t size)
 {
-    return write_flash(FLASH_ADDR_USER_CONFIG,(uint8_t*)&user_config, sizeof(user_config));
+    return write_flash(FLASH_ADDR_USER_CONFIG+addr,((uint8_t*)&config)+addr, size);
     //return flash_write(1, (uint8_t*)&user_config, sizeof(user_config));
 }
 void fac_conf_read(){
-    //flash_read(2, fac, sizeof(factory_configuration_flash_pack));
-    //unpack_fac_conf(fac);
     read_flash(FLASH_ADDR_FACTORY_CONFIG,(uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 uint8_t fac_conf_write(){
-    //pack_fac_conf(fac);
-    //return raw_flash_write(2);
-    //flash_write(2, (uint8_t*)&factory_configuration_flash, sizeof(factory_configuration_flash));
     return write_flash(FLASH_ADDR_FACTORY_CONFIG, (uint8_t*)&factory_configuration,sizeof(factory_configuration_data));
 }
 void conf_flush(){
-    MyCfgDescr[33]=user_config.out_interval;
-    MyCfgDescr[40]=user_config.in_interval;
-    imu_ratio_xf=user_config.imu_ratio_x/127.0f;
-    imu_ratio_yf=user_config.imu_ratio_y/127.0f;
-    imu_ratio_zf=user_config.imu_ratio_z/127.0f;
-    joystick_snapback_deadzone_sq[0]=((uint32_t)user_config.joystick_snapback_deadzone[0])*user_config.joystick_snapback_deadzone[0];
-    joystick_snapback_deadzone_sq[1]=((uint32_t)user_config.joystick_snapback_deadzone[1])*user_config.joystick_snapback_deadzone[1];
+    MyCfgDescr[33]=config.usb.out_interval;
+    MyCfgDescr[40]=config.usb.in_interval;
+    imu_ratio_xf=config.imu.ratio_x/127.0f;
+    imu_ratio_yf=config.imu.ratio_y/127.0f;
+    imu_ratio_zf=config.imu.ratio_z/127.0f;
+    joystick_snapback_deadzone_sq[0]=((uint32_t)config.snpbk.dz[0])*config.snpbk.dz[0];
+    joystick_snapback_deadzone_sq[1]=((uint32_t)config.snpbk.dz[1])*config.snpbk.dz[1];
     adc_init();
     gpio_init();
     hd_rumble_lookup_tb_init();
-    hd_rumble_set_status(!user_config.rumble_disabled);
-    button_active_mask=~user_config.button_disable_mask;
-    rgb_slow_start_div=user_config.rgb_slow_start_period*50.0f;
+    hd_rumble_set_status(config.rumble.enable);
+    button_active_mask=~config.btn.disable_mask;
+    rgb_slow_start_div=config.rgb.slow_start_period*50.0f;
     if(rgb_slow_start_div<=0)rgb_slow_start_div=1.0f;
     set_hd_rumble_range();
+    for(int j=0;j<2;++j){
+        for(int i=0;i<config.affine[j].cnt;++i){
+            affine_map[j][i].notch.x=config.affine[j].map[i].notch.ix;
+            affine_map[j][i].notch.y=config.affine[j].map[i].notch.iy;
+            affine_map[j][i].angle.x=config.affine[j].map[i].angle.ix;
+            affine_map[j][i].angle.y=config.affine[j].map[i].angle.iy;
+            affine_max[j].x=i32_max(affine_max[j].x, affine_map[j][i].angle.x);
+            affine_max[j].y=i32_max(affine_max[j].y, affine_map[j][i].angle.y);
+            affine_min[j].x=i32_min(affine_min[j].x, affine_map[j][i].angle.x);
+            affine_min[j].y=i32_min(affine_min[j].y, affine_map[j][i].angle.y);
+        }
+    }
+    affine_init();
     flush_rgb();
     //gpio_tb_init();
     //uart_update_config();

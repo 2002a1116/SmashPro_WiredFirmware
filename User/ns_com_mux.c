@@ -18,6 +18,7 @@
 #include "global_api.h"
 #include "spi.h"
 #include "watchdog.h"
+#include "joystick.h"
 
 volatile struct __connection_state connection_state;
 uint8_t con_addr[BD_ADDR_LEN];
@@ -26,7 +27,7 @@ void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
 uint8_t is_esp32_enabled=0;
 uint8_t bd_addr_default[BD_ADDR_LEN]={0x57, 0x30 ,0xea, 0x8a, 0xbb, 0x7c};
 //hd_rumble_frame data;
-uint32_t rts_cnt=0,rts_tcnt=1;
+uint32_t rts_cnt=0,last_pm_start=0;
 void ns_rumble_handler(cmd_packet* pkt){
     decode_hd_rumble_multiformat_high_acc(&pkt->cmd->rumble_data_left,&pkt->cmd->rumble_data_right);
 }
@@ -58,7 +59,7 @@ void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
     switch(typ){
     case 0x01:
         memcpy(usb_handshake_buf,usb_hs01,4);
-        memcpy(usb_handshake_buf+4,user_config.bd_addr,BD_ADDR_LEN);
+        memcpy(usb_handshake_buf+4,config.basic.bd_addr,BD_ADDR_LEN);
         ring_buffer_push_with_hdr(&ns_usb_send_rb, usb_handshake_buf, 10, 0x01);
         ////printf("rb pushed size:%d\r\n",ns_usb_send_rb.size);
         break;
@@ -97,6 +98,7 @@ void ns_mux_usb_handshake_handler(cmd_packet* pkt){//0x80
 }
 static uint8_t fw_buf_raw[RING_BUFFER_MAX_PKG_SIZE];
 static uint8_t* fw_buf=fw_buf_raw+2;
+#define FW_READ_ROM_LENGTH (58)
 //todo:custom subcommand to config controller profile ,start with 0xf
 
 #define FW_MAX_PAYLOAD_LENGTH (61)
@@ -107,40 +109,12 @@ uint8_t fw_snd_pkt(uint8_t id,uint8_t len){
     return ring_buffer_push_with_hdr(&ns_usb_send_rb, fw_buf_raw, len+2 ,0x01);
     //return hid_send_full64byte_report(fw_buf_raw,len+2);
 }
-#define FW_SUBC_ID_READ_SETTING (0x01)
-void fw_subcommand_read_setting(cmd_packet* pkt){
-    //printf("fw read %d\r\n",pkt->data[0]);
-    //fw_buf[0]=FW_SUBC_ID_READ_SETTING;
-    uint8_t i=0;
-    for(;FW_MAX_PAYLOAD_LENGTH*(i+1)<sizeof(user_config);i++){
-        fw_buf[0]=i;//offset
-        memcpy(fw_buf+1,((uint8_t*)&user_config)+i*FW_MAX_PAYLOAD_LENGTH,FW_MAX_PAYLOAD_LENGTH);//payload
-        //hid_send_full64byte_report(fw_buf, FW_PKG_SIZE);
-        fw_snd_pkt(FW_SUBC_ID_READ_SETTING,FW_PKG_SIZE);
-    }
-    if(FW_MAX_PAYLOAD_LENGTH*i<sizeof(user_config)){
-        memset(fw_buf+1,0,FW_MAX_PAYLOAD_LENGTH);
-        fw_buf[0]=i;//offset
-        memcpy(fw_buf+1,((uint8_t*)&user_config)+i*FW_MAX_PAYLOAD_LENGTH,sizeof(user_config)-FW_MAX_PAYLOAD_LENGTH*i);
-        //hid_send_full64byte_report(fw_buf, sizeof(user_config)-FW_MAX_PAYLOAD_LENGTH*i+2);
-        fw_snd_pkt(FW_SUBC_ID_READ_SETTING,sizeof(user_config)-FW_MAX_PAYLOAD_LENGTH*i+1);
-        ++i;
-    }
-    fw_buf[0]=0xff;
-    fw_buf[1]=i;
-    fw_snd_pkt(FW_SUBC_ID_READ_SETTING,2);
-    //hid_send_full64byte_report(fw_buf, 3);
-}
-
-#define FW_SUBC_ID_WRITE_SETTING (0x02)
-static uint8_t fw_red_cnt=0;
-void fw_subcommand_write_setting(cmd_packet* pkt){
-    conf_flush();
-}
 #define FW_SUBC_ID_READ_EMULATE_ROM (0x03)
 void fw_subcommand_read_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
     uint8_t size=pkt->data[5];
+    //uint16_t addr=fetch_uint16(pkt->data+1);
+    //uint16_t size=fetch_uint16(pkt->data+3);
     while(size>57){
         conf_read(addr,fw_buf+5,57);
         memcpy(fw_buf,&addr,4);
@@ -159,10 +133,16 @@ void fw_subcommand_read_emulate_rom(cmd_packet* pkt){
 #define FW_SUBC_ID_WRITE_EMULATE_ROM (0x04)
 void fw_subcommand_write_emulate_rom(cmd_packet* pkt){
     uint32_t addr=fetch_uint32(&pkt->data[1]);
-    fw_buf[0]=pkt->data[6];
-    fw_buf[1]=conf_write(addr, &pkt->data[7], pkt->data[5], pkt->data[6]);
+    //fw_buf[0]=pkt->data[6];
+    //fw_buf[1]=conf_write(addr, &pkt->data[7], pkt->data[5], pkt->data[6]);
+
+    memcpy(fw_buf,&addr,4);
+    fw_buf[4]=pkt->data[5];
+    fw_buf[5]=pkt->data[6];
+    fw_buf[6]=conf_write(addr, &pkt->data[7], pkt->data[5], pkt->data[6]);
+
     //hid_send_full64byte_report(fw_buf, 2);
-    fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 2);
+    fw_snd_pkt(FW_SUBC_ID_WRITE_EMULATE_ROM, 7);
 }
 #define CALIBRATE_MAX_RETRY (5)
 #define CALIBRATE_SAMPLE_CNT (50)
@@ -218,44 +198,50 @@ void fw_subcommand_calibrate_imu(cmd_packet* pkt)
     //hid_send_full64byte_report(fw_buf,2);
 }
 
-#define FW_SUBC_ID_CALIBRATE_JS_CENTER (0x06)
-//abandon
-void fw_subcommand_calibrate_js_center(cmd_packet* pkt){
-    /*uint8_t id=pkt->data[1];
-    if(id>=2){
-        fw_buf[0]=1;
-        fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_CENTER, 1);
-        return;
-    }
-    if(id){
-        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalX0=adc_data[2];
-        factory_configuration.JoystickCalibrationValue.AnalogStickRightFactoryCalibrationValue.AnalogStickCalY0=adc_data[3];
-    }else{
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalX0=adc_data[0];
-        factory_configuration.JoystickCalibrationValue.AnalogStickLeftFactoryCalibrationValue.AnalogStickCalY0=adc_data[1];
-    }
-    //fac_conf_write();
-    fw_buf[0]=0;
-    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_CENTER, 1);*/
+#define FW_SUBC_ID_GET_RAW_JS (0x06)
+//todo
+void fw_subcommand_get_raw_js(cmd_packet* pkt){
+    coord_compact c;
+    c.y = i32_clamp(sts_joy_raw[0].y,JOYSTICK_NRANGE,JOYSTICK_PRANGE);
+    c.x = i32_clamp(sts_joy_raw[0].x,JOYSTICK_NRANGE,JOYSTICK_PRANGE);
+    memcpy(fw_buf,&c,sizeof(coord_compact));
+    c.y = i32_clamp(sts_joy_raw[1].y,JOYSTICK_NRANGE,JOYSTICK_PRANGE);
+    c.x = i32_clamp(sts_joy_raw[1].x,JOYSTICK_NRANGE,JOYSTICK_PRANGE);
+    memcpy(fw_buf+sizeof(coord),&c,sizeof(coord));
+    memcpy(fw_buf+6,(uint8_t*)adc_data,8);
+    fw_snd_pkt(FW_SUBC_ID_GET_RAW_JS,6+8);
 }
-#define FW_SUBC_ID_CALIBRATE_JS_OFFSET (0x07)
-void fw_subcommand_calibrate_js_offset(cmd_packet* pkt){
-    for(int i=0;i<4;++i)
-        user_calibration.internal_center[i]=adc_data[i];
-    user_calibration.nonexist=0;
-    fw_buf[0]=conf_write(0x8000, 0, 0, ENABLE);
-    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS_OFFSET, 1);
+#define FW_SUBC_ID_CALIBRATE_JS (0x07)
+void fw_subcommand_calibrate_js(cmd_packet* pkt){
+    uint8_t res=0;
+    //if(!pkt->data[0]){//center
+        for(int i=0;i<4;++i)
+            config.js.center[i]=adc_data[i];
+        /*if(CONFIG_EXIST(config.magic))
+            res = custom_conf_write(((uint8_t*)config.js.center)-(uint8_t*)&config, 8);
+        else{
+            config.magic=CONFIG_MAGIC;
+            res = custom_conf_write(0,sizeof(config));//just being lazy
+        }*/
+        config.magic=CONFIG_MAGIC;
+        res = custom_conf_write(0,sizeof(config));
+        //just being lazy,dont want to fix flash operation.
+        //chip cost only 3buck
+    //}
+    fw_buf[0]=res;
+    fw_snd_pkt(FW_SUBC_ID_CALIBRATE_JS, 1);
 }
+
 #define FW_SUBC_ID_GET_STATUS (0xFD)
 void fw_subcommand_get_status(cmd_packet* pkt){
     //fw_buf[11]=SPI2->STATR;
     fw_buf[0]=imu_get_reg(IMU_ID_REG,fw_buf+1);
-    fw_buf[11]=SPI2->STATR;
-    if(!rts_tcnt)rts_tcnt=1;
-    fw_buf[2]=rts_cnt/rts_tcnt;
-    memcpy(fw_buf+3,&rts_tcnt,4);
-    memcpy(fw_buf+7,&rts_cnt,4);
-    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 12);
+    //fw_buf[11]=SPI2->STATR;
+    //fw_buf[2]=rts_cnt/rts_tcnt;
+    uint32_t tmp = Get_Systick_MS()-last_pm_start;
+    memcpy(fw_buf+2,&tmp,4);
+    memcpy(fw_buf+6,&rts_cnt,4);
+    fw_snd_pkt(FW_SUBC_ID_GET_STATUS, 10);
 }
 #define FW_SUBC_ID_REBOOT (0xFE)
 void fw_subcommand_reboot(cmd_packet* pkt){
@@ -280,38 +266,32 @@ void fw_subcommand_dispatcher(cmd_packet* pkt){
     //hid header already dropped
     switch(pkt->data[0])
     {
-    case FW_SUBC_ID_READ_SETTING:
-        fw_subcommand_read_setting(pkt);
-        break;
-    case FW_SUBC_ID_WRITE_SETTING:
-        fw_subcommand_write_setting(pkt);
-        break;
-    case FW_SUBC_ID_READ_EMULATE_ROM:
-        fw_subcommand_read_emulate_rom(pkt);
-        break;
-    case FW_SUBC_ID_WRITE_EMULATE_ROM:
-        fw_subcommand_write_emulate_rom(pkt);
-        break;
-    case FW_SUBC_ID_CALIBRATE_IMU:
-        fw_subcommand_calibrate_imu(pkt);
-        break;
-    case FW_SUBC_ID_GET_VERSION:
-        fw_subcommand_get_version(pkt);
-        break;
-    case FW_SUBC_ID_CALIBRATE_JS_CENTER:
-        fw_subcommand_calibrate_js_center(pkt);
-        break;
-    case FW_SUBC_ID_REBOOT:
-        fw_subcommand_reboot(pkt);
-        break;
-    case FW_SUBC_ID_GET_STATUS:
-        fw_subcommand_get_status(pkt);
-        break;
-    case FW_SUBC_ID_CALIBRATE_JS_OFFSET:
-        fw_subcommand_calibrate_js_offset(pkt);
-        break;
-    default:
-        break;
+        case FW_SUBC_ID_READ_EMULATE_ROM:
+            fw_subcommand_read_emulate_rom(pkt);
+            break;
+        case FW_SUBC_ID_WRITE_EMULATE_ROM:
+            fw_subcommand_write_emulate_rom(pkt);
+            break;
+        case FW_SUBC_ID_CALIBRATE_IMU:
+            fw_subcommand_calibrate_imu(pkt);
+            break;
+        case FW_SUBC_ID_GET_VERSION:
+            fw_subcommand_get_version(pkt);
+            break;
+        case FW_SUBC_ID_CALIBRATE_JS:
+            fw_subcommand_calibrate_js(pkt);
+            break;
+        case FW_SUBC_ID_REBOOT:
+            fw_subcommand_reboot(pkt);
+            break;
+        case FW_SUBC_ID_GET_STATUS:
+            fw_subcommand_get_status(pkt);
+            break;
+        case FW_SUBC_ID_GET_RAW_JS:
+            fw_subcommand_get_raw_js(pkt);
+            break;
+        default:
+            break;
     }
 }
 void ns_mux_init(){

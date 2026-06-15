@@ -97,8 +97,20 @@ typedef struct{
 }std_report_data;
 typedef struct{
     uint32_t button_status:24;
-    uint32_t ljoy_status:24;
-    uint32_t rjoy_status:24;
+    union{
+        uint32_t ljoy_status:24;
+        struct{
+            uint16_t x:12;
+            uint16_t y:12;
+        }l;
+    };
+    union{
+        uint32_t rjoy_status:24;
+        struct{
+            uint16_t x:12;
+            uint16_t y:12;
+        }r;
+    };
 }peripheral_data;
 typedef struct{
     uint8_t typ;

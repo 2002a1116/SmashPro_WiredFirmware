@@ -52,7 +52,7 @@ extern uint8_t bt_ltk[BT_LTK_LENGTH];
 extern volatile struct __connection_state connection_state;
 extern ring_buffer ns_usb_send_rb;
 extern void (*ns_hid_packet_dispatch_tb[NS_PACKET_TYPE_MAX_VALUE])(cmd_packet*);
-extern uint32_t rts_cnt,rts_tcnt;
+extern uint32_t rts_cnt,last_pm_start;
 void ns_hid_register_packet_dispatch(int typ,void (*handler)(cmd_packet*));
 void ns_mux_init();
 uint8_t ns_send_report(report_packet* rpt);

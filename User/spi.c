@@ -115,21 +115,21 @@ void flush_spi_tx_seq(uint8_t status,uint8_t use_factor,float factor)
     if(factor>1.0f)
         factor=1.0f;
     if(!status){
-        for(int i=0;i<smashpro_factory_config.rgb_cnt;++i){
+        for(int i=0;i<config.hw.rgb_cnt;++i){
             set_led_rgb(i, 0, 0, 0);
         }
         return;
     }
-    for(int i=0,j=0;j<smashpro_factory_config.rgb_cnt;++i){
-        if(i>=smashpro_factory_config.indi_led_ofst && i<smashpro_factory_config.indi_led_ofst+4)
+    for(int i=0,j=0;j<config.hw.rgb_cnt;++i){
+        if(i>=config.hw.indi_led_ofst && i<config.hw.indi_led_ofst+4)
             continue;//skip indicate
-        if(user_config.led_disabled)
+        if(!config.rgb.enable)
             set_led_rgb(i, 0, 0, 0),++j;
         else{
             if(use_factor)
-                set_led_rgb(i, rgb_data[j].r*factor, rgb_data[j].g*factor, rgb_data[j].b*factor);
+                set_led_rgb(i, config.rgb.data[j].r*factor, config.rgb.data[j].g*factor, config.rgb.data[j].b*factor);
             else
-                set_led_rgb(i, rgb_data[j].r, rgb_data[j].g, rgb_data[j].b);
+                set_led_rgb(i, config.rgb.data[j].r, config.rgb.data[j].g, config.rgb.data[j].b);
             ++j;
         }
     }
@@ -143,7 +143,7 @@ void _flush_rgb()
     SPI_Cmd(SPI1, DISABLE);
     DMA_Cmd(DMA1_Channel3, DISABLE);
     DMA1_Channel3->MADDR = (uint32_t)spi_tx_buf;
-    DMA1_Channel3->CNTR = (uint32_t)(smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg);
+    DMA1_Channel3->CNTR = (uint32_t)(config.hw.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg);
     DMA_Cmd(DMA1_Channel3, ENABLE);
     SPI_Cmd(SPI1, ENABLE);
 }
@@ -175,40 +175,36 @@ int rgb_init(void)
     memset(spi_tx_buf,0,sizeof(spi_tx_buf));
     SPI_FullDuplex_Init();
     //Delay_MS(2);
-    spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (smashpro_factory_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
+    spi_DMA_Tx_Init(DMA1_Channel3, (u32)&SPI1->DATAR, (u32)(uint8_t*)spi_tx_buf, (config.hw.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //printf("SPI INIT:%d size:%d\r\n",sizeof(rgb_spi_pkg),(user_config.rgb_cnt*3+SPI_RESET_OFFSET*2)*sizeof(rgb_spi_pkg));
     //flush_rgb();
     flush_rgb_slow();
     return 0;
 }
 void set_indicate_led_function(){
-    uint8_t ofst=smashpro_factory_config.indi_led_ofst;
-    set_led_rgb(ofst+0, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS, connection_state.esp32_paired*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(ofst+1, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.imu_disabled)*INDICATE_LED_BRIGHTNESS);
-    //set_led_rgb(ofst+2, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS, (!user_config.rumble_disabled)*INDICATE_LED_BRIGHTNESS);
-    set_led_rgb(ofst+3, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS, (force_esp32_active)*INDICATE_LED_BRIGHTNESS);
-    if((!user_config.imu_disabled)&&(imu_error||!i2c_status))
-        set_led_rgb(ofst+1, INDICATE_LED_BRIGHTNESS, 0, 0);
-    if(user_config.rumble_disabled){
+    uint8_t ofst=config.hw.indi_led_ofst;//indi_led_brightness
+    set_led_rgb(ofst+0, connection_state.esp32_paired*config.rgb.indi_led_brightness, connection_state.esp32_paired*config.rgb.indi_led_brightness, connection_state.esp32_paired*config.rgb.indi_led_brightness);
+    set_led_rgb(ofst+1, (config.imu.enable)*config.rgb.indi_led_brightness, (config.imu.enable)*config.rgb.indi_led_brightness, (config.imu.enable)*config.rgb.indi_led_brightness);
+    //set_led_rgb(ofst+2, (!user_config.rumble_disabled)*config.rgb.indi_led_brightness, (!user_config.rumble_disabled)*config.rgb.indi_led_brightness, (!user_config.rumble_disabled)*config.rgb.indi_led_brightness);
+    set_led_rgb(ofst+3, (force_esp32_active)*config.rgb.indi_led_brightness, (force_esp32_active)*config.rgb.indi_led_brightness, (force_esp32_active)*config.rgb.indi_led_brightness);
+    if(!config.rumble.enable){
         set_led_rgb(ofst+2,0,0,0);
     }else{
-        if(user_config.legacy_rumble)
-            set_led_rgb(ofst+2,0,0,INDICATE_LED_BRIGHTNESS);
+        if(config.rumble.hd.legacy)
+            set_led_rgb(ofst+2,0,0,config.rgb.indi_led_brightness);
         else
-            set_led_rgb(ofst+2,0,INDICATE_LED_BRIGHTNESS,0);
+            set_led_rgb(ofst+2,0,config.rgb.indi_led_brightness,0);
     }
-    if(rumble_rb_overflow)
-        set_led_rgb(ofst+2,INDICATE_LED_BRIGHTNESS,0,0);
 }
 uint8_t bat_warn;
 void set_indicate_led_bat_warn()
 {
-    uint8_t ofst=smashpro_factory_config.indi_led_ofst;
+    uint8_t ofst=config.hw.indi_led_ofst;
     if(bat_warn){
-        set_led_rgb(ofst+0, INDICATE_LED_BRIGHTNESS, 0, 0);
-        set_led_rgb(ofst+1, INDICATE_LED_BRIGHTNESS, 0, 0);
-        set_led_rgb(ofst+2, INDICATE_LED_BRIGHTNESS, 0, 0);
-        set_led_rgb(ofst+3, INDICATE_LED_BRIGHTNESS, 0, 0);
+        set_led_rgb(ofst+0, config.rgb.indi_led_brightness, 0, 0);
+        set_led_rgb(ofst+1, config.rgb.indi_led_brightness, 0, 0);
+        set_led_rgb(ofst+2, config.rgb.indi_led_brightness, 0, 0);
+        set_led_rgb(ofst+3, config.rgb.indi_led_brightness, 0, 0);
     }else{
         set_led_rgb(ofst+0, 0, 0, 0);
         set_led_rgb(ofst+1, 0, 0, 0);
@@ -217,23 +213,23 @@ void set_indicate_led_bat_warn()
     }
 }
 void set_indicate_led_player(uint8_t is_on_usb){
-    uint8_t ofst=smashpro_factory_config.indi_led_ofst;
+    uint8_t ofst=config.hw.indi_led_ofst;
     uint8_t res=indi_status;
     if(is_on_usb)
         res=res|(res>>4);
     if(res&0xf){
         for(int i=0;i<4;++i){
             if((1<<i)&res){
-                set_led_rgb(ofst+i,INDICATE_LED_BRIGHTNESS,0,0);
+                set_led_rgb(ofst+i,config.rgb.indi_led_brightness,0,0);
             }else {
                 set_led_rgb(ofst+i,0,0,0);
             }
         }
     }else {
-        set_led_rgb(ofst+0,INDICATE_LED_BRIGHTNESS,0,0);
-        set_led_rgb(ofst+1,INDICATE_LED_BRIGHTNESS,0,0);
-        set_led_rgb(ofst+2,INDICATE_LED_BRIGHTNESS,0,0);
-        set_led_rgb(ofst+3,INDICATE_LED_BRIGHTNESS,0,0);
+        set_led_rgb(ofst+0,config.rgb.indi_led_brightness,0,0);
+        set_led_rgb(ofst+1,config.rgb.indi_led_brightness,0,0);
+        set_led_rgb(ofst+2,config.rgb.indi_led_brightness,0,0);
+        set_led_rgb(ofst+3,config.rgb.indi_led_brightness,0,0);
     }
 }
 void set_indicate_led_status(uint8_t status)
@@ -268,16 +264,16 @@ void set_indicate_led(uint8_t is_on_usb){
     }
 }
 void set_rgb(uint8_t use_factor,float fac){
-    uint8_t ofst=smashpro_factory_config.indi_led_ofst;
+    uint8_t ofst=config.hw.indi_led_ofst;
     if(connection_state.usb_plugging)
         flush_spi_tx_seq(ENABLE,use_factor,fac);
-    else if(user_config.allow_rgb_on_bat)
+    else if(config.rgb.allow_rgb_on_bat)
         flush_spi_tx_seq(ENABLE,use_factor,fac);
     else{
         flush_spi_tx_seq(ENABLE,1,0);
-        if(smashpro_factory_config.pcb_typ==PCB_TYP_PRO && smashpro_factory_config.pcb_rev>=PRO_300){
-            set_led_rgb(ofst+8, rgb_data[8].r*fac, rgb_data[8].g*fac, rgb_data[8].b*fac);
-            set_led_rgb(ofst+9, rgb_data[9].r*fac, rgb_data[9].g*fac, rgb_data[9].b*fac);
+        if(config.hw.pcb_typ==PCB_TYP_PRO && config.hw.pcb_rev>=PRO_300){
+            set_led_rgb(ofst+8, config.rgb.data[8].r*fac, config.rgb.data[8].g*fac, config.rgb.data[8].b*fac);
+            set_led_rgb(ofst+9, config.rgb.data[9].r*fac, config.rgb.data[9].g*fac, config.rgb.data[9].b*fac);
         }
     }
 }
@@ -306,12 +302,12 @@ void rgb_task(){
         pre_is_pluged=connection_state.usb_plugging;
         rgb_reset_slow=1;
     }
-    if(user_config.led_disabled!=pre_led_disable){
-        pre_led_disable=user_config.led_disabled;
+    if(config.rgb.enable!=pre_led_disable){
+        pre_led_disable=config.rgb.enable;
         rgb_reset_slow=1;
     }
     if(rgb_reset_slow){
-        if(user_config.rgb_slow_start_period){
+        if(config.rgb.slow_start_period){
             rgb_in_slow_start=1;
             rgb_slow_start_timestamp_ms=t;
         }else{

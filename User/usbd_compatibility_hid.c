@@ -35,7 +35,7 @@ void update_peripheral_data(){
 }
 static uint8_t ns_hid_pkt_cnt;
 uint8_t ns_hid_get_packet_timer(){
-    switch(user_config.ns_pkt_timer_mode)
+    switch(config.basic.ns_pkt_timer_mode)
     {
     case 1:
         return Get_Systick_MS();
@@ -142,7 +142,7 @@ void hid_tx_service( void )
     else{//std report or empty report
         rpt_wrapper(rpt,NULL,0);
         pkg_len=NS_STD_REPORT_BASIC_LENGTH;
-        if((!user_config.imu_disabled)/*&&imu_mode*/){
+        if(config.imu.enable/*&&imu_mode*/){
 #ifdef IMU_MODE_I2C
             if(i2c_status)
 #endif

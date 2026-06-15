@@ -62,8 +62,6 @@ void HardFault_Handler(void)
                     "=r"(tmp): : "memory");
     printf("HardFault_Handler\r\n");
 
-    user_calibration.mcause=EXC_CAUSE;
-    user_calibration.mepc=EXC_PC;
     printf("cause:%08x pc:%08x mtval:%08x a0:%08x %d\r\n",EXC_CAUSE,EXC_PC,tmp,a0,a0);
     while(1);
     //flash_write(0, (uint8_t*)&user_calibration, sizeof(user_calibration));

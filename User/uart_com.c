@@ -41,9 +41,9 @@ void uart_update_config()
 {
     pkt.typ=UART_PKG_CH32_FLASH_WRITE;
     pkt.id=0xF;
-    for(int i=0;i<sizeof(user_config);i+=8){
+    for(int i=0;i<sizeof(config);i+=8){
         pkt.load[0]=i;
-        memcpy(pkt.load+1,((uint8_t*)&user_config)+i*8,8);
+        memcpy(pkt.load+1,((uint8_t*)&config)+i*8,8);
         send_uart_pkt(&pkt);
         //send_uart_pkt(&pkt);
     }
@@ -60,7 +60,7 @@ void send_input_with_uart(void)
     pkt.id=1;//button status
     memcpy(pkt.load,&global_input_data,9);
     send_uart_pkt(&pkt);
-    if((!user_config.imu_disabled)&&imu_report_buffer_ptr_reset_flag){
+    if(config.imu.enable&&imu_report_buffer_ptr_reset_flag){
         send_uart_large_pkt(imu_report_buffer_ptr,sizeof(imu_report_pack),UART_PKG_IMU_REPORT_DATA);
         imu_report_buffer_ptr_reset_flag=0;
     }
@@ -96,7 +96,7 @@ void recv_esp32_connect_control()
     //printf("id %d\r\n",pkt.id);
     switch(pkt.id){
     case 0:
-        memcpy(user_config.bd_addr,pkt.load,BD_ADDR_LEN);
+        memcpy(config.basic.bd_addr,pkt.load,BD_ADDR_LEN);
         connection_state.bd_addr_set=1;
         //we reset this every time we start
         break;
@@ -189,7 +189,7 @@ void recv_flash_operation(){
         //pkt.typ=UART_PKG_CH32_FLASH_WRITE;
         switch(pkt.id_short){
             case 0xF://user config
-                conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(user_config)-pkt.load[0]),pkt.flag);
+                conf_write(0xF000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(config)-pkt.load[0]),pkt.flag);
                 break;
             case 0x6:
                 conf_write(0x6000|(pkt.load[0]),pkt.load+1,i32_min(8,sizeof(factory_configuration)-pkt.load[0]),pkt.flag);

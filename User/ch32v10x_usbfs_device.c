@@ -813,32 +813,30 @@ void USBFS_IRQHandler( void )
     else if( intflag & RB_UIF_SUSPEND )
     {
         R8_USB_INT_FG |= RB_UIF_SUSPEND;
-        if(user_config.disable_usb_auto_recovery)
-            return;
+        if(config.usb.auto_recovery){
+            uint8_t usb_int_en = R8_USB_INT_EN;
+            uint8_t usb_dev_ad = R8_USB_DEV_AD;
+            uint8_t udev_ctrl = R8_UDEV_CTRL;
+            uint8_t uep1_ctrl = R8_UEP1_CTRL;
+            //uint8_t uep2_ctrl = R8_UEP2_CTRL;
 
-        uint8_t usb_int_en = R8_USB_INT_EN;
-        uint8_t usb_dev_ad = R8_USB_DEV_AD;
-        uint8_t udev_ctrl = R8_UDEV_CTRL;
-        uint8_t uep1_ctrl = R8_UEP1_CTRL;
-        //uint8_t uep2_ctrl = R8_UEP2_CTRL;
+            R8_USB_CTRL |= RB_UC_RESET_SIE | RB_UC_CLR_ALL;
+            //Delay_US_Fast(10);
+            //Delay_US_Fast(10);
+            //R8_USB_CTRL &= ~(RB_UC_RESET_SIE|RB_UC_CLR_ALL);
+            //R8_USB_CTRL = 0x00;
+            R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
 
-        R8_USB_CTRL |= RB_UC_RESET_SIE | RB_UC_CLR_ALL;
-        //Delay_US_Fast(10);
-        //Delay_US_Fast(10);
-        //R8_USB_CTRL &= ~(RB_UC_RESET_SIE|RB_UC_CLR_ALL);
-        //R8_USB_CTRL = 0x00;
-        R8_USB_CTRL = RB_UC_DEV_PU_EN | RB_UC_INT_BUSY | RB_UC_DMA_EN;
+            R8_USB_INT_EN = usb_int_en;
+            R8_USB_DEV_AD = usb_dev_ad;
+            R8_UDEV_CTRL = udev_ctrl;
+            R8_UEP1_CTRL = uep1_ctrl;
+            //R8_UEP2_CTRL = uep2_ctrl;
 
-        R8_USB_INT_EN = usb_int_en;
-        R8_USB_DEV_AD = usb_dev_ad;
-        R8_UDEV_CTRL = udev_ctrl;
-        R8_UEP1_CTRL = uep1_ctrl;
-        //R8_UEP2_CTRL = uep2_ctrl;
-
-        /*R8_UEP1_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;
-        USBFS_Endp_Busy[DEF_UEP1]=0;*/
-
-        //recover from sie reset;
+            /*R8_UEP1_CTRL = UEP_R_RES_ACK | UEP_T_RES_NAK;
+            USBFS_Endp_Busy[DEF_UEP1]=0;*/
+            //recover from sie reset;
+        }
     }
     else
     {

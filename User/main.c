@@ -23,22 +23,17 @@
 #include "spi.h"
 #include "advance_coroutine.h"
 #include "watchdog.h"
+#include "joystick.h"
 //
-enum ADC_CHANNEL_ID{
-    ADC_CHANNEL_LJOYS_HORI=0,
-    ADC_CHANNEL_LJOYS_VERT,
-    ADC_CHANNEL_RJOYS_HORI,
-    ADC_CHANNEL_RJOYS_VERT
-};
 static uint8_t top_trigger=0;
 void button_upd_all(){
     uint32_t tp=gpio_read_all();
     tp &= button_active_mask;//ignore disabled input.
     if(!top_trigger){
-        if(user_config.a_b_swap && ((tp&(1<<NS_BUTTON_A))^(tp&(1<<NS_BUTTON_B)))){
+        if(config.btn.a_b_swap && ((tp&(1<<NS_BUTTON_A))^(tp&(1<<NS_BUTTON_B)))){
             tp ^= (1<<NS_BUTTON_A)|(1<<NS_BUTTON_B);
         }
-        if(user_config.x_y_swap && ((tp&(1<<NS_BUTTON_X))^(tp&(1<<NS_BUTTON_Y)))){
+        if(config.btn.x_y_swap && ((tp&(1<<NS_BUTTON_X))^(tp&(1<<NS_BUTTON_Y)))){
             tp ^= (1<<NS_BUTTON_X)|(1<<NS_BUTTON_Y);
         }
         sts_button=tp;
@@ -74,108 +69,8 @@ uint8_t button_read(uint32_t num)
 {
     return (sts_button&(1<<num))!=0;
 }
-int32_t adc_debounce[4];
-typedef struct{
-    uint32_t sample_timestamp;
-    int32_t x;
-    int32_t y;
-    int32_t len_sq;
-}js_sample;
-js_sample js_snapback_samples[2];
 //dif=0.8
-uint32_t joystick_snapback_filter(int32_t x,int32_t y,uint8_t id){
-    static uint8_t set=0;
-    //deadzone is fixed
-    switch(user_config.dead_zone_mode)
-    {
-    case 1:
-        if((abs(x)<user_config.dead_zone[id<<1])&&(abs(y)<user_config.dead_zone[1+(id<<1)]))
-            x=y=0;
-        break;
-    case 2:
-        if(abs(x)<user_config.dead_zone[id<<1]) x=0;
-        if(abs(y)<user_config.dead_zone[1+(id<<1)]) y=0;
-        break;
-    case 3:
-        if(abs(x)<user_config.dead_zone[id<<1]) x=0;
-        else x+=(x>0?-1:1)*user_config.dead_zone[id<<1];
-        if(abs(y)<user_config.dead_zone[1+(id<<1)]) y=0;
-        else y+=(y>0?-1:1)*user_config.dead_zone[1+(id<<1)];
-        break;
-    default:
-        break;
-    }
-    //snapback deadzone is influenced by joystick ratio,as its value is set by output x & y
-    x=(x*user_config.joystick_ratio[id<<1])>>5;
-    y=(y*user_config.joystick_ratio[(id<<1)+1])>>5;
-    if(user_config.joystick_snapback_filter_max_delay){
-        set=0;
-        int32_t len_sq=x*x+y*y;
-        if(len_sq>=joystick_snapback_deadzone_sq[id])
-            set=1;
-        uint32_t timestamp=Get_Systick_US();
-        if(!timestamp)timestamp=1;
-        do{
-            if(!js_snapback_samples[id].sample_timestamp)//no valid sample,skip
-                break;
-            if(timestamp-js_snapback_samples[id].sample_timestamp>=user_config.joystick_snapback_filter_max_delay){
-                js_snapback_samples[id].sample_timestamp=0;//invalid sample
-                break;
-            }
-            int64_t dp_sq=js_snapback_samples[id].x*x+js_snapback_samples[id].y*y;
-            if(dp_sq>=0)
-                break;
-            if((dp_sq*dp_sq)<((((uint64_t)len_sq)*js_snapback_samples[id].len_sq)>>2))
-                break;
-            //prob snapback
-            //force center
-            //if prob snapback,dont upd sample as it was removed
-            set=0;
-            x=y=0;
-        }while(0);
-        //reset sample
-        if(set){
-            js_snapback_samples[id].x=x;
-            js_snapback_samples[id].y=y;
-            js_snapback_samples[id].len_sq=len_sq;
-            js_snapback_samples[id].sample_timestamp=timestamp;
-        }
-    }
-    x+=2048;
-    y+=2048;
-    //x=i32_clamp(x, 0, 4095);
-    //y=i32_clamp(y, 0, 4095);
-    if(user_config.joystick_range_normalization){//todo:this is broken
-        int32_t nx=0,ny=0,px=4095,py=4095;
-        nx=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXNegative;
-        px=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalXPositive;
-        ny=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYNegative;
-        py=factory_configuration.JoystickCalibrationValue.AnalogStickFactoryCalibrationValue[id].AnalogStickCalYPositive;
-        px=nx=i32_min(nx, px);
-        py=ny=i32_min(ny, py);
-        x=i32_clamp(x, 2048-nx, 2048+px);
-        y=i32_clamp(y, 2048-ny, 2048+py);
-    }
-    x=i32_clamp(x, 0, 4095);
-    y=i32_clamp(y, 0, 4095);
-    return (y<<12)+x;
-}
-static uint32_t sts_ljoy,sts_rjoy;
-void joystick_debounce_task(){
-    for(int i=0;i<4;++i){
-        adc_debounce[i]=adc_data[i];
-    }
-    int32_t tmp1=(adc_debounce[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1]);
-    int32_t tmp2=(adc_debounce[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0]);
-    sts_ljoy=joystick_snapback_filter(tmp2, tmp1, 0);
-    tmp1=(adc_debounce[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3]);
-    tmp2=(adc_debounce[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2]);
-    sts_rjoy=joystick_snapback_filter(tmp2, tmp1, 1);
-    /*sts_ljoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_LJOYS_HORI]-user_calibration.internal_center[0],
-            adc_data[ADC_CHANNEL_LJOYS_VERT]-user_calibration.internal_center[1], 0);
-    sts_rjoy=joystick_snapback_filter(adc_data[ADC_CHANNEL_RJOYS_HORI]-user_calibration.internal_center[2],
-            adc_data[ADC_CHANNEL_RJOYS_VERT]-user_calibration.internal_center[3], 1);*/
-}
+
 #define DPAD_MASK ((1<<NS_BUTTON_LEFT)|(1<<NS_BUTTON_RIGHT)|(1<<NS_BUTTON_UP)|(1<<NS_BUTTON_DOWN))
 #define DEFAULT_JOYSTICK_RANGE (1800);
 uint32_t get_ljs_range_on_axis(uint8_t num){
@@ -185,7 +80,10 @@ void get_peripheral_data_handler(peripheral_data* data){
     if(!data)return;
     //ananlog_read(adc_data,sizeof(adc_data)); //adc r now set with dma
     button_upd_all();
-    if(user_config.dpad_mapping_joystick&&(sts_button&DPAD_MASK)){
+    joystick_upd();
+    uint32_t sts_ljoy=sts_joy[0].data;//js_get_value(0);
+    uint32_t sts_rjoy=sts_joy[1].data;//js_get_value(1);
+    if(config.btn.dpad_mapping_js&&(sts_button&DPAD_MASK)){
         sts_ljoy=(2048<<12)+2048;
         if(sts_button&(1<<NS_BUTTON_LEFT)){
             sts_ljoy-=get_ljs_range_on_axis(0);
@@ -202,13 +100,14 @@ void get_peripheral_data_handler(peripheral_data* data){
         sts_button&=~DPAD_MASK;
     }
     data->button_status=sts_button;
-    data->ljoy_status=sts_ljoy;
-    data->rjoy_status=sts_rjoy;
+    data->ljoy_status = sts_ljoy;
+    data->rjoy_status = sts_rjoy;
+    /*data->ljoy_status=sts_ljoy;
+    data->rjoy_status=sts_rjoy;*/
 }
 static uart_packet pkt;
 static uint32_t top_tick=0;
 static uart_packet test_uart_pkt;
-static uint32_t routine_tick,routine_cnt=0;
 void func_switch_task(){
     static uint8_t f1=0,f2=0,f3=0,f4=0,f5=0,f6=0,fhf=0;
     static uint8_t save=0,upd=0;
@@ -221,22 +120,22 @@ void func_switch_task(){
     }else   fhf=1;
     if(top_trigger&&button_read_raw(NS_BUTTON_MINUS)){//imu switch
         if(f1){
-            user_config.imu_disabled=!user_config.imu_disabled;
+            config.imu.enable = !config.imu.enable;
             upd=save=1;
             f1=0;
         }
     }else   f1=1;
     if(top_trigger&&button_read_raw(NS_BUTTON_PLUS)){
         if(f2){
-            user_config.rumble_disabled=!user_config.rumble_disabled;
-            hd_rumble_set_status(!user_config.rumble_disabled);
+            config.rumble.enable = !config.rumble.enable;
+            hd_rumble_set_status(!config.rumble.enable);
             upd=save=1;
             f2=0;
         }
     }else   f2=1;
     if(top_trigger&&button_read_raw(NS_BUTTON_CAP)){
         if(f3){
-            user_config.led_disabled=!user_config.led_disabled;
+            config.rgb.enable = !config.rgb.enable;
             save=1;
             f3=0;
         }
@@ -276,7 +175,7 @@ void func_switch_task(){
         flush_rgb();*/
     if(save)//we save to flash
     {
-        user_config.nonexist=0;
+        config.magic = CONFIG_MAGIC;
         custom_conf_write();
     }
 }
@@ -289,6 +188,15 @@ void top_timer(void){
             if(Get_Systick_MS()-top_tick>100){
                 if(!top_trigger){
                     printf("top pressed\r\n");
+                    for(int i=0;i<2;++i){
+                        for(int j=0;j<config.affine[i].cnt;++j){
+                            printf("notch: %d %d\r\n",config.affine[i].map[j].notch.x,config.affine[i].map[j].notch.y);
+                            printf("angle: %d %d\r\n",config.affine[i].map[j].angle.x,config.affine[i].map[j].angle.y);
+                            /*printf("%d %d\r\n%d %d\r\n",ceil(affine_trans[i][j].a*1000000),
+                                    ceil(affine_trans[i][j].b*1000000),ceil(affine_trans[i][j].c*1000000),
+                                    ceil(affine_trans[i][j].d*1000000));*/
+                        }
+                    }
                 }
                 top_trigger=1;
                 set_indicate_led_mode(1);
@@ -318,12 +226,12 @@ void pwr_detector(){
     }
 }
 void performance_monitor(){
-    ++rts_cnt;
     if(!rts_cnt)
-        rts_tcnt=Get_Systick_MS();
-    if(routine_tick!=Get_Systick_MS()){
-        rts_tcnt+=Get_Systick_MS()-routine_tick;
-        routine_tick=Get_Systick_MS();
+        last_pm_start=Get_Systick_MS();
+    ++rts_cnt;
+    if(Get_Systick_MS()<last_pm_start){
+        last_pm_start=Get_Systick_MS();
+        rts_cnt=1;
     }
 }
 void routine_service(void){
@@ -361,8 +269,8 @@ void init_all()
     //RCC->CFGR0 &= ~RCC_PPRE2;
     //RCC->CFGR0 &= ~RCC_PPRE1;
     USART_printf_Init(115200);
-    memset(&connection_state,0,sizeof(connection_state));
     printf("\r\n\r\nPROCON PROJECT\r\n");
+    memset(&connection_state,0,sizeof(connection_state));
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOC, ENABLE);
@@ -403,7 +311,7 @@ void init_all()
     ns_set_peripheral_data_getter(get_peripheral_data_handler);
     hid_init();
     hd_rumble_init();
-    hd_rumble_set_status(!user_config.rumble_disabled);
+    //hd_rumble_set_status(!user_config.rumble_disabled);
     set_indicate_led_mode(0);
     connection_state.usb_plugging=1;
 }
@@ -454,7 +362,7 @@ void main_loop(){
     pwr_detector();
     performance_monitor();
     //update input
-    joystick_debounce_task();
+    //joystick_debounce_task();
     get_peripheral_data_handler(&global_input_data);
 
     //hid task
@@ -505,38 +413,21 @@ void adv_cor_scheduler_cmd(uint8_t state){
 }
 void adv_cor_schedule()
 {
-    //printf("schedule start\r\n");
     uint32_t stage=0;
     while(stage<coroutine_cnt){
-        //printf("schedule %d addr:%08x\r\n",stage,adv_cor_addr);
-        if(coroutine_list[stage]){
+        if(coroutine_list[stage])
             coroutine_list[stage]();
-        }
         ++stage;
     }
-    //asm volatile("ecall");
 }
 void adv_cor_scheduling(){
     adv_cor_scheduler_cmd(ENABLE);
-    if(adv_cor_intr_flag)
-    {
-        //printf("intred sp=%08x\r\n",adv_cor_intr_flag);
-        //uint32_t* ptr = (uint32_t*)(adv_cor_intr_flag);
-        //printf("jmp to %08x addr:%08x ra:%08x\r\n",*(ptr+1),adv_cor_addr,*(ptr+2));
-        //printf("dump :");
-        //for(int i=0;i<31;++i){
-          //  printf("%08x ",*(ptr+i));
-        //}
-        //printf("\r\n");
-        //Delay_MS(10);
-        //asm volatile("ebreak");
+    if(adv_cor_intr_flag){
         NVIC_SetPendingIRQ(Software_IRQn);
     }else{
         adv_cor_schedule();
         adv_cor_scheduler_cmd(DISABLE);
     }
-    //adv_cor_scheduler_cmd(DISABLE);
-    //printf("adv_cor_schedule end\r\n");
 }
 void adv_cor_main(){
     while(1){
@@ -544,7 +435,6 @@ void adv_cor_main(){
         pwr_detector();
         performance_monitor();
         //update input
-        joystick_debounce_task();
         get_peripheral_data_handler(&global_input_data);
 
         //hid task
@@ -583,7 +473,6 @@ int main(void)
 #ifdef COMPILE_WL
         UART1_Rx_Service();//check if uart recive anything
 #endif
-        joystick_debounce_task();
         get_peripheral_data_handler(&global_input_data);
         if(USBFS_DevEnumStatus){//usb
             connection_state.usb_plugging=1;

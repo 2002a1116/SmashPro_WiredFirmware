@@ -42,7 +42,7 @@
 #include "debug.h"
 
 /* Global Variable */
-extern uint16_t adc_data[4];
+extern int16_t adc_data[4];
 extern s16 Calibrattion_Val;
 void ADC_Function_Init(void);
 u16 Get_ADC_Val(u8 ch);

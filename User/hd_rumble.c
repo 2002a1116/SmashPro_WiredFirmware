@@ -72,7 +72,7 @@ void hd_rumble_init(){
     NVIC_Init(&NVIC_InitStructure); //≥ı ºªØNVIC
     NVIC_SetFastIRQ(TIM3_IRQHandler,TIM3_IRQn,2);
 
-    hd_rumble_set_status(!user_config.rumble_disabled);
+    hd_rumble_set_status(config.rumble.enable);
 }
 void hd_rumble_set_status(uint8_t status)
 {

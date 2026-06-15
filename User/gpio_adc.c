@@ -11,7 +11,7 @@
 #include "gpio_adc.h"
 #include "conf.h"
 
-uint16_t adc_data[4];
+int16_t adc_data[4];
 s16 Calibrattion_Val = 0;
 
 void ADC_Function_Init(void)

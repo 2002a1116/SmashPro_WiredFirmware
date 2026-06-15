@@ -70,7 +70,7 @@ void ns_subcommand_pair_by_wire(NS_SUBCOMMAND_CB_PARAM){
         //memcpy(con_addr,cmd->subcommand_data+1,BD_ADDR_LEN);
         copy_bd_addr_reverse(cmd->subcommand_data+1,con_addr);
         connection_state.con_addr_set=1;
-        memcpy(pkt.data.subcommand_report.subcommand_data+1,user_config.bd_addr,BD_ADDR_LEN);
+        memcpy(pkt.data.subcommand_report.subcommand_data+1,config.basic.bd_addr,BD_ADDR_LEN);
         memcpy(pkt.data.subcommand_report.subcommand_data+1+BD_ADDR_LEN,pro_controller_string,sizeof(pro_controller_string));
         pkt.len=SUBC_REPORT_BASIC_LENGTH + sizeof(pro_controller_string)+BD_ADDR_LEN+1;
         break;
@@ -107,7 +107,7 @@ device_info default_device_info={0x04,0x33,0x03,0x02,{},0x04,0x02};
 //device_info default_device_info={0x03,0x48,0x03,0x02,{},0x00,0x02};
 void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     pkt_clr();
-    switch(user_config.pro_fw_version){
+    switch(config.basic.pro_fw_version){
     case 0:
         default_device_info.fw_version_major=0x03;
         default_device_info.fw_version_minor=0x48;
@@ -128,7 +128,7 @@ void ns_subcommand_get_device_info(NS_SUBCOMMAND_CB_PARAM){
     _ns_subcommand_set_ack(cmd->subcommand_id,0x82);
     //uint8_t* addr = esp_bt_dev_get_address();
     //todo
-    copy_bd_addr_reverse(user_config.bd_addr, default_device_info.addr);
+    copy_bd_addr_reverse(config.basic.bd_addr, default_device_info.addr);
     //printf("\r\n");
     //memcpy(default_device_info.addr,bd_addr,BD_ADDR_LEN);
     //ESP_LOGW("MAC ","0x%02x  0x%02x  0x%02x",default_device_info.addr[5],bt_addr[5],addr[5]);

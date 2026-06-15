@@ -23,6 +23,12 @@ uint16_t fetch_uint16(uint8_t* src){
     memcpy(&res,src,2);
     return res;
 }
+void put_uint16(uint8_t* dst,uint16_t v){
+    memcpy(dst,&v,2);
+}
+void put_uint32(uint8_t* dst,uint32_t v){
+    memcpy(dst,&v,4);
+}
 int32_t i32_clamp(int32_t v,int32_t min,int32_t max){
     if(v<min)return min;
     if(v>max)return max;

@@ -100,7 +100,7 @@ enum UART_PACKET_TYP{
 #define UART_BAUD_RATE (3000000)
 //#define UART_BAUD_RATE (921600)
 #define UART_PKG_SIZE (13)
-#define UART_RINGBUFFER_PKG_CAP (64)
+#define UART_RINGBUFFER_PKG_CAP (48)
 #define DEF_UART1_BUF_SIZE (384)
 //#define DEF_UART1_BUF_SIZE (192)
 extern void UART1_Tx_Service( void );

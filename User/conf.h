@@ -8,7 +8,11 @@
 #ifndef USER_CONF_H_
 #define USER_CONF_H_
 #include <stdint.h>
+#include "affine.h"
 #include "ns_com_mux.h"
+
+#define CONFIG_MAGIC (0x55)
+#define CONFIG_EXIST(x) ((x)==CONFIG_MAGIC)
 
 #define R32_ESIG_UNIID1 (0x1FFFF7E8)
 #define R32_ESIG_UNIID2 (0x1FFFF7EC)
@@ -98,23 +102,10 @@ typedef struct _user_imu_calibration_data{
     imu_calibration_data SixAxisSensorCalibrationValue;
 }user_imu_calibration_data;
 typedef struct _user_calibration_data{
-    union{
-        uint8_t Reserved1[16];
-        struct{
-            uint8_t nonexist;
-            uint16_t internal_center[4];
-            uint8_t reserved[7];
-        };
-    };
+    uint8_t Reserved1[16];
     user_joystick_calibration_data UserJoystickCalibrationValue;
     user_imu_calibration_data UserSixAxisSensorCalibrationValue;
-    union{
-        uint8_t Reserved2[8];
-        struct{
-            uint32_t mcause;
-            uint32_t mepc;
-        };
-    };
+    uint8_t Reserved2[16];
 }user_calibration_data;
 typedef struct _rgb_data_complete{
     union{
@@ -211,64 +202,151 @@ typedef struct _rgb_data_simple{
     uint8_t r:4;
 }rgb_data_simple;
 //used for wired model to save space
+typedef struct{
+    union{
+        uint8_t affine_bitmap0;
+        struct{
+            uint8_t cnt:4;
+            uint8_t x_rev:1;
+            uint8_t y_rev:1;
+            uint8_t:2;
+        };
+    };
+    struct{
+        coord notch;
+        coord angle;
+    }map[16];
+}affine_pack;
 typedef struct _user_config_data{
-    //uint8_t usb_report_interval;
-    //uint8_t joystick_correction[16];
-    union{
-        uint8_t config_bitmap0;
-        struct{
-            uint8_t nonexist:1;
-            uint8_t led_disabled:1;
-            uint8_t dpad_mapping_joystick:1;
-            uint8_t x_y_swap:1;
-            uint8_t a_b_swap:1;
-            uint8_t rumble_disabled:1;
-            uint8_t rumble_pattern:1;
-            uint8_t imu_disabled:1;
+    uint8_t magic;
+    struct{
+        uint8_t pcb_typ;
+        uint8_t pcb_rev;
+        uint8_t indi_led_ofst;
+        uint8_t rgb_cnt;
+    }hw;
+    struct{
+        uint8_t bd_addr[BD_ADDR_LEN];
+        uint8_t pro_fw_version;
+        uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
+    }basic;
+    struct{
+        union{
+            uint8_t usb_bitmap0;
+            struct{
+                uint8_t auto_recovery:1;
+                uint8_t:7;//padding
+            };
         };
-    };
-    union{
-        uint8_t config_bitmap1;
-        struct{
-            uint8_t reserved2:2;
-            uint8_t joystick_range_normalization:1;
-            uint8_t rumble_high_amp_drop:1;
-            uint8_t rumble_low_amp_rise:1;
-            uint8_t legacy_rumble:1;
-            uint8_t allow_rgb_on_bat:1;
-            uint8_t disable_usb_auto_recovery:1;
+        uint8_t in_interval;
+        uint8_t out_interval;
+    }usb;
+    struct{
+        union{
+            uint8_t btn_bitmap0;
+            struct{
+                uint8_t x_y_swap:1;
+                uint8_t a_b_swap:1;
+                uint8_t dpad_mapping_js:1;
+                uint8_t:5;
+            };
         };
-    };
-    uint8_t in_interval;
-    uint8_t out_interval;
-    uint32_t button_disable_mask:24;
-    uint8_t hd_rumble_amp_ratio[4];
-    int8_t joystick_ratio[4];
-    uint16_t imu_sample_gap;
-    uint16_t joystick_snapback_deadzone[2];
+        uint32_t disable_mask:24;
+    }btn;
+    struct{
+        union{
+            uint8_t rumble_bitmap0;
+            union{
+                uint8_t enable:1;
+                uint8_t mode:3;
+                uint8_t:4;
+            };
+        };
+        struct{
+            union{
+                uint8_t hd_bitmap0;
+                struct{
+                    uint8_t pattern:1;
+                    uint8_t high_amp_drop:1;
+                    uint8_t low_amp_rise:1;
+                    uint8_t legacy:1;
+                    uint8_t:4;
+                };
+            };
+            uint8_t amp_ratio[4];
+        }hd;
+        struct{
 
-    //raw center+offset=2048
-    //offset=2048-raw_center
-    uint16_t joystick_snapback_filter_max_delay;
-    //0:no filter 1:liner filter 2:power filter 3:force center when across
-    uint8_t bd_addr[BD_ADDR_LEN];
-    uint8_t imu_ratio_x;//div 127
-    uint8_t imu_ratio_y;//div 127
-    uint8_t imu_ratio_z;//div 127
-    uint8_t pro_fw_version;
-    uint8_t ns_pkt_timer_mode;//0:stock(timestamp_div_5) 1:timestamp 2:pkt cnt
-    uint8_t dead_zone[4];
-    uint8_t dead_zone_mode;
-    uint8_t rgb_slow_start_period;
-
+        }erm;//todo?really someone will like this?
+    }rumble;
+    struct{
+        union{
+            uint8_t js_bitmap0;
+            struct{
+                uint8_t normalization:1;
+                uint8_t l_mode:2;//0:ratio 1:affine
+                uint8_t r_mode:2;
+                //when sat affine will auto active after pairing and can be turned off by driver through cmd
+                uint8_t:3;
+            };
+        };
+        uint16_t center[4];
+        int8_t ratio[4];
+        uint8_t dz[4];
+        uint8_t dz_mode;
+    }js;
+    struct{
+        union{
+            uint8_t snpbk_bitmap0;
+            struct{
+                uint8_t only_depress_x:1;
+                uint8_t:7;
+            };
+        };
+        uint16_t dz[2];
+        uint16_t filter_window;
+    }snpbk;
+    struct{
+        union{
+            uint8_t imu_bitmap0;
+            struct{
+                uint8_t enable:1;
+                uint8_t:7;
+            };
+        };
+        uint16_t sample_gap;
+        uint8_t ratio_x;//div 127
+        uint8_t ratio_y;//div 127
+        uint8_t ratio_z;//div 127
+    }imu;
+    struct{
+        union{
+            uint8_t affine_bitmap0;
+            struct{
+                uint8_t cnt:4;
+                uint8_t x_rev:1;
+                uint8_t y_rev:1;
+                uint8_t:2;
+            };
+        };
+        struct{
+            coord_compact notch;
+            coord_compact angle;
+        }map[16];
+    }affine[2];
+    struct{
+        union{
+            uint8_t rgb_bitmap0;
+            struct{
+                uint8_t enable:1;
+                uint8_t allow_rgb_on_bat:1;
+            };
+        };
+        uint8_t slow_start_period;
+        uint8_t indi_led_brightness;
+        rgb_data_complete data[RGB_MAX_CNT];
+    }rgb;
 }user_config_data;
-//118 byte now
-/*
- * 0~255 user_config
- * 256~511 factory_config
- * 512~767 user_calibration
- * 768~1024 rgb
- */
 enum PCB_REV_PRO{
     PRO_200,
     PRO_213,
@@ -281,46 +359,37 @@ enum PCB_TYP{
     PCB_TYP_PRO,
     PCB_TYP_NGC
 };
-#define PRO_ATLEAST(x) (smashpro_factory_config.pcb_typ==PCB_TYP_PRO && smashpro_factory_config.pcb_rev >= (x))
-#define PRO_IS(x) (smashpro_factory_config.pcb_typ==PCB_TYP_PRO && smashpro_factory_config.pcb_rev == (x))
-#define NGC_ATLEAST(x) (smashpro_factory_config.pcb_typ==PCB_TYP_NGC && smashpro_factory_config.pcb_rev >= (x))
-#define NGC_IS(x) (smashpro_factory_config.pcb_typ==PCB_TYP_NGC && smashpro_factory_config.pcb_rev == (x))
-typedef struct _smashpro_factory_config_data{
-    union{
-        uint8_t config_bitmap0;
-        struct{
-            uint8_t nonexist:1;
-            uint8_t reserved0:7;
-        };
-    };
-    uint8_t pcb_typ;
-    uint8_t pcb_rev;
-    uint8_t indi_led_ofst;
-    uint8_t rgb_cnt;
-    /*
-     res reserved;
-     */
-}smashpro_factory_config_data;
+#define PRO_ATLEAST(x) (config.hw.pcb_typ==PCB_TYP_PRO && config.hw.pcb_rev >= (x))
+#define PRO_IS(x) (config.hw.pcb_typ==PCB_TYP_PRO && config.hw.pcb_rev == (x))
+#define NGC_ATLEAST(x) (config.hw.pcb_typ==PCB_TYP_NGC && config.hw.pcb_rev >= (x))
+#define NGC_IS(x) (config.hw.pcb_typ==PCB_TYP_NGC && config.hw.pcb_rev == (x))
+
+typedef struct _affine_notch_data{
+    uint8_t cnt;
+    coord notch[16];
+    coord target[16];
+}affine_notch_data;//49 byte
+typedef struct _calibrate_data{
+    uint8_t magic;
+    uint16_t center[4];
+    affine_notch_data affine[2];
+}calibrate_data;
+
 #pragma pack(pop)
 
 #define JOYSITCK_FITTING_PARAM_RATIO (255)
 #define JOYSITCK_FITTING_PARAM_RATIO_SHIFT (8)
 
-#define FLASH_ADDR_USER_CONFIG (0x0)
+#define FLASH_ADDR_USER_CALIBRATION (0x0)
 #define FLASH_ADDR_FACTORY_CONFIG (0x100)
-#define FLASH_ADDR_USER_CALIBRATION (0x200)
-#define FLASH_ADDR_HARDWARE_INFO (0x300)
-#define FLASH_ADDR_RGB_DATA (0x400)
-
+#define FLASH_ADDR_USER_CONFIG (0x200)
 
 extern const uint32_t FW_VERSION;
 extern const uint32_t FW_SUB_VERSION;
 
 extern factory_configuration_data factory_configuration;
 extern user_calibration_data user_calibration;
-extern user_config_data user_config;
-extern rgb_data_complete rgb_data[RGB_MAX_CNT];
-extern smashpro_factory_config_data smashpro_factory_config;
+extern user_config_data config;
 extern uint32_t joystick_snapback_deadzone_sq[2];
 extern uint32_t button_active_mask;
 

@@ -17,6 +17,8 @@ uint32_t u32_min(uint32_t a,uint32_t b);
 
 uint32_t fetch_uint32(uint8_t* src);
 uint16_t fetch_uint16(uint8_t* src);
+void put_uint16(uint8_t* dst,uint16_t v);
+void put_uint32(uint8_t* dst,uint32_t v);
 int32_t i32_clamp(int32_t v,int32_t min,int32_t max);
 void trigger_hardfault();
 //workarounds for alignment issue.
